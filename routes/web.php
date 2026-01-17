@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -22,8 +23,10 @@ Route::get('/roles/{id}/status', [RoleController::class, 'showStatus'])->name('r
 Route::resource('permissions', PermissionController::class);
 Route::get('/permissions/{id}/status', [PermissionController::class, 'showStatus'])->name('permissions.status');
 
+Route::resource('users', UserController::class);
+Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
+
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/login');
 })->name('logout');
-

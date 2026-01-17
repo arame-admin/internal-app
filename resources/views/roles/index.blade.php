@@ -5,18 +5,7 @@
 @section('content')
 <!-- Header -->
 <div class="mb-8">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Roles Management</h1>
-            <p class="text-gray-500 mt-1">Manage user roles and permissions</p>
-        </div>
-        <a href="{{ route('roles.create') }}" class="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors shadow-lg shadow-blue-500/30">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            <span class="font-medium">Add Role</span>
-        </a>
-    </div>
+    <h1 class="text-2xl font-bold text-gray-800">Roles Management</h1>
 </div>
 
 <!-- Filters & Search -->
@@ -324,5 +313,12 @@
     gap: 0.25rem;
 }
 </style>
+
+<!-- Floating Add Button -->
+<a href="{{ route('roles.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Role">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+</a>
 @endsection
 

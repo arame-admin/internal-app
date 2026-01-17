@@ -3,22 +3,7 @@
 @section('title', 'Add New Permission')
 
 @section('content')
-<!-- Header -->
-<div class="mb-8">
-    <div class="flex items-center space-x-4">
-        <a href="{{ route('permissions.index') }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Add New Permission</h1>
-            <p class="text-gray-500 mt-1">Create a new system permission</p>
-        </div>
-    </div>
-</div>
-
-<div class="max-w-3xl">
+<div class="max-w-3xl mx-auto">
     <form action="#" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         @csrf
         

@@ -1,22 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Change Permission Status')
+@section('title', 'Change User Status')
 
 @section('content')
 <!-- Status Toggle Card -->
 <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Permission Info Header -->
-        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6">
+        <!-- User Info Header -->
+        <div class="bg-gradient-to-r from-green-500 to-teal-600 p-6">
             <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                    </svg>
+                <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                    <span class="text-white text-2xl font-bold">JD</span>
                 </div>
                 <div class="text-white">
-                    <h2 class="text-xl font-bold">View Dashboard</h2>
-                    <code class="text-purple-100 text-sm bg-white/10 px-2 py-0.5 rounded">dashboard.view</code>
+                    <h2 class="text-xl font-bold">John Doe</h2>
+                    <p class="text-green-100 text-sm">john@example.com</p>
                 </div>
             </div>
         </div>
@@ -34,8 +32,8 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <p class="text-sm text-gray-500 mb-1">Group</p>
-                    <p class="text-lg font-semibold text-gray-800">Dashboard</p>
+                    <p class="text-sm text-gray-500 mb-1">Department</p>
+                    <p class="text-lg font-semibold text-gray-800">IT</p>
                 </div>
             </div>
         </div>
@@ -65,7 +63,7 @@
                                 </div>
                             </div>
                             <p class="font-semibold text-gray-800">Active</p>
-                            <p class="text-sm text-gray-500 mt-1">Permission will be functional and assignable to roles</p>
+                            <p class="text-sm text-gray-500 mt-1">User will have full access to the system</p>
                         </div>
                     </label>
                     
@@ -86,7 +84,7 @@
                                 </div>
                             </div>
                             <p class="font-semibold text-gray-800">Inactive</p>
-                            <p class="text-sm text-gray-500 mt-1">Permission will be disabled and not usable</p>
+                            <p class="text-sm text-gray-500 mt-1">User will lose system access</p>
                         </div>
                     </label>
                 </div>
@@ -106,14 +104,14 @@
                     </svg>
                     <div>
                         <p class="text-sm font-medium text-yellow-800">Warning</p>
-                        <p class="text-sm text-yellow-700 mt-1">If you set this permission to inactive, all roles with this permission will lose access to the associated functionality.</p>
+                        <p class="text-sm text-yellow-700 mt-1">If you set this user to inactive, they will not be able to log in to the system until reactivated.</p>
                     </div>
                 </div>
             </div>
             
             <!-- Form Actions -->
             <div class="flex items-center justify-end space-x-4">
-                <a href="{{ route('permissions.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                <a href="{{ route('users.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Cancel
                 </a>
                 <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors font-medium shadow-lg shadow-blue-500/30">

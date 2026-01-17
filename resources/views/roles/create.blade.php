@@ -3,22 +3,8 @@
 @section('title', 'Add New Role')
 
 @section('content')
-<!-- Header -->
-<div class="mb-8">
-    <div class="flex items-center space-x-4">
-        <a href="{{ route('roles.index') }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800">Add New Role</h1>
-            <p class="text-gray-500 mt-1">Create a new role with permissions</p>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Role Form -->
     <div class="lg:col-span-2">
         <form action="#" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -194,6 +180,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </div>
 

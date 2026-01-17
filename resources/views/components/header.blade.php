@@ -37,6 +37,11 @@
                 Team
             </a>
             
+            <!-- User -->
+            <a href="{{ route('users.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
+                User
+            </a>
+            
             <!-- Master Dropdown -->
             <div class="dropdown relative" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
                 <button class="group flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
@@ -62,23 +67,47 @@
             </div>
         </div>
 
-        <!-- User Profile -->
-        <div class="flex items-center space-x-4">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="group flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors" title="Logout">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                </button>
-            </form>
-            <div class="flex items-center space-x-3 pl-4 border-l border-gray-200">
+        <!-- User Profile Dropdown -->
+        <div class="dropdown relative">
+            <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 cursor-pointer" onmouseenter="this.parentElement.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.parentElement.querySelector('.dropdown-menu').style.display='none'">
                 <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
                     <span class="text-white text-sm font-bold">{{ substr(auth()->user()?->name ?? 'JD', 0, 2) }}</span>
                 </div>
-                <div class="hidden lg:block">
+                <div class="hidden lg:block text-left">
                     <p class="text-sm font-semibold text-gray-800">{{ auth()->user()?->name ?? 'John Doe' }}</p>
                     <p class="text-xs text-gray-500">{{ auth()->user()?->email ?? 'Software Engineer' }}</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 hidden lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden" style="display: none;">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <p class="text-sm font-semibold text-gray-800">{{ auth()->user()?->name ?? 'John Doe' }}</p>
+                    <p class="text-xs text-gray-500">{{ auth()->user()?->email ?? 'john@example.com' }}</p>
+                </div>
+                <a href="#" class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    <span>Change Password</span>
+                </a>
+                <div class="border-t border-gray-100 mt-2 pt-2">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="flex items-center space-x-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            <span>Logout</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
