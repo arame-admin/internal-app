@@ -3,8 +3,20 @@
 @section('title', 'Add New User')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
-    <form action="#" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm text-gray-600">
+                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><span class="text-gray-400">/</span></li>
+                <li><a href="{{ route('users.index') }}" class="hover:text-blue-600">Users</a></li>
+                <li><span class="text-gray-400">/</span></li>
+                <li class="text-gray-900 font-medium">Add User</li>
+            </ol>
+        </nav>
+
+        <form action="#" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         @csrf
         
         <div class="space-y-6">
@@ -76,8 +88,38 @@
                     </label>
                 </div>
             </div>
+
+            <!-- Payroll Information -->
+            <div class="border-t border-gray-100 pt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Payroll Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Basic Salary -->
+                    <div>
+                        <label for="basic_salary" class="block text-sm font-medium text-gray-700 mb-2">Basic Salary</label>
+                        <input type="number" id="basic_salary" name="basic_salary" placeholder="Enter basic salary" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" step="0.01">
+                    </div>
+
+                    <!-- HRA -->
+                    <div>
+                        <label for="hra" class="block text-sm font-medium text-gray-700 mb-2">HRA</label>
+                        <input type="number" id="hra" name="hra" placeholder="Enter HRA" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" step="0.01">
+                    </div>
+
+                    <!-- Conveyance -->
+                    <div>
+                        <label for="conveyance" class="block text-sm font-medium text-gray-700 mb-2">Conveyance Allowance</label>
+                        <input type="number" id="conveyance" name="conveyance" placeholder="Enter conveyance allowance" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" step="0.01">
+                    </div>
+
+                    <!-- Medical Allowance -->
+                    <div>
+                        <label for="medical" class="block text-sm font-medium text-gray-700 mb-2">Medical Allowance</label>
+                        <input type="number" id="medical" name="medical" placeholder="Enter medical allowance" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" step="0.01">
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
             <a href="{{ route('users.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
@@ -88,6 +130,7 @@
             </button>
         </div>
     </form>
+    </div>
 </div>
 @endsection
 

@@ -3,8 +3,20 @@
 @section('title', 'Edit User')
 
 @section('content')
-<div class="max-w-3xl">
-    <form action="#" method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm text-gray-600">
+                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><span class="text-gray-400">/</span></li>
+                <li><a href="{{ route('users.index') }}" class="hover:text-blue-600">Users</a></li>
+                <li><span class="text-gray-400">/</span></li>
+                <li class="text-gray-900 font-medium">Edit User</li>
+            </ol>
+        </nav>
+
+        <form action="#" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         @csrf
         @method('PUT')
         
@@ -77,6 +89,7 @@
             </button>
         </div>
     </form>
+    </div>
 </div>
 @endsection
 

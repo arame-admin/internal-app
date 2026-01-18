@@ -118,6 +118,10 @@ class UserController extends Controller
             'department' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'status' => 'required|in:active,inactive',
+            'basic_salary' => 'nullable|numeric|min:0',
+            'hra' => 'nullable|numeric|min:0',
+            'conveyance' => 'nullable|numeric|min:0',
+            'medical' => 'nullable|numeric|min:0',
         ]);
 
         // TODO: Save to database
@@ -192,6 +196,76 @@ class UserController extends Controller
         // User::where('id', $id)->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Show the form for editing user payroll.
+     */
+    public function editPayroll($id)
+    {
+        // Sample user data - replace with actual database query
+        $user = [
+            'id' => $id,
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'payroll' => [
+                'basic_salary' => 50000,
+                'hra' => 10000,
+                'conveyance' => 19200,
+                'medical' => 5000,
+            ]
+        ];
+
+        // Sample payroll history - replace with actual database query
+        $payrollHistory = [
+            [
+                'date' => '2024-01-01',
+                'basic_salary' => 45000,
+                'hra' => 9000,
+                'conveyance' => 19200,
+                'medical' => 5000,
+                'total' => 78200,
+                'updated_by' => 'Admin User'
+            ],
+            [
+                'date' => '2023-07-01',
+                'basic_salary' => 40000,
+                'hra' => 8000,
+                'conveyance' => 19200,
+                'medical' => 5000,
+                'total' => 72200,
+                'updated_by' => 'HR Manager'
+            ],
+            [
+                'date' => '2023-01-01',
+                'basic_salary' => 35000,
+                'hra' => 7000,
+                'conveyance' => 19200,
+                'medical' => 5000,
+                'total' => 66200,
+                'updated_by' => 'Admin User'
+            ]
+        ];
+
+        return view('users.payroll', compact('user', 'payrollHistory'));
+    }
+
+    /**
+     * Update the payroll information for the specified user.
+     */
+    public function updatePayroll(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'basic_salary' => 'nullable|numeric|min:0',
+            'hra' => 'nullable|numeric|min:0',
+            'conveyance' => 'nullable|numeric|min:0',
+            'medical' => 'nullable|numeric|min:0',
+        ]);
+
+        // TODO: Update payroll in database
+        // User::where('id', $id)->update(['payroll' => $validated]);
+
+        return redirect()->route('users.index')->with('success', 'Payroll updated successfully.');
     }
 }
 

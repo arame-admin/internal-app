@@ -3,10 +3,6 @@
 @section('title', 'Roles Management')
 
 @section('content')
-<!-- Header -->
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-800">Roles Management</h1>
-</div>
 
 <!-- Filters & Search -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
