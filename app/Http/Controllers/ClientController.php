@@ -128,7 +128,7 @@ class ClientController extends Controller
             'status' => 'active'
         ];
 
-        return view('clients.edit', compact('client'));
+        return view('clients.edit', compact('client', 'id'));
     }
 
     /**

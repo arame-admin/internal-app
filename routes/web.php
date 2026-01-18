@@ -8,6 +8,8 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\MeetingController;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -36,6 +38,21 @@ Route::put('/users/{id}/payroll', [UserController::class, 'updatePayroll'])->nam
 
 Route::resource('clients', ClientController::class);
 Route::get('/clients/{id}/status', [ClientController::class, 'showStatus'])->name('clients.status');
+
+Route::resource('projects', ProjectController::class);
+Route::get('/projects/{id}/status', [ProjectController::class, 'showStatus'])->name('projects.status');
+
+Route::prefix('projects/{projectId}')->name('projects.')->group(function () {
+    Route::get('meetings', [MeetingController::class, 'index'])->name('meetings.index');
+    Route::get('meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
+    Route::post('meetings', [MeetingController::class, 'store'])->name('meetings.store');
+    Route::get('meetings/{meetingId}', [MeetingController::class, 'show'])->name('meetings.show');
+    Route::get('meetings/{meetingId}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
+    Route::put('meetings/{meetingId}', [MeetingController::class, 'update'])->name('meetings.update');
+    Route::delete('meetings/{meetingId}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+    Route::get('meetings/{meetingId}/download', [MeetingController::class, 'download'])->name('meetings.download');
+    Route::post('meetings/{meetingId}/send', [MeetingController::class, 'send'])->name('meetings.send');
+});
 
 Route::resource('leaves', LeaveController::class)->except(['show']);
 Route::get('/leaves/{id}/status', [LeaveController::class, 'showStatus'])->name('leaves.status');
