@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LeaveController;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -31,6 +32,10 @@ Route::resource('users', UserController::class);
 Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
 Route::get('/users/{id}/payroll', [UserController::class, 'editPayroll'])->name('users.payroll');
 Route::put('/users/{id}/payroll', [UserController::class, 'updatePayroll'])->name('users.payroll.update');
+
+Route::get('/leaves', [LeaveController::class, 'leaves'])->name('leaves.index');
+Route::resource('company-holidays', LeaveController::class)->parameters(['company-holidays' => 'holiday']);
+Route::get('/company-holidays/{holiday}/status', [LeaveController::class, 'showStatus'])->name('company-holidays.status');
 
 Route::post('/logout', function () {
     Auth::logout();
