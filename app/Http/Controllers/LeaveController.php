@@ -7,17 +7,240 @@ use Illuminate\Http\Request;
 class LeaveController extends Controller
 {
     /**
-     * Display the leaves management page.
+     * Display the leaves list page.
+     */
+    public function index(Request $request)
+    {
+        // Mock leave data
+        $leaves = [
+            [
+                'id' => 1,
+                'year' => 2024,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2023-01-01'
+            ],
+            [
+                'id' => 2,
+                'year' => 2025,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2024-01-01'
+            ],
+            [
+                'id' => 3,
+                'year' => 2026,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'inactive',
+                'created_at' => '2025-01-01'
+            ],
+        ];
+
+        // Filter by year if provided
+        if ($request->filled('year')) {
+            $leaves = array_filter($leaves, function($leave) use ($request) {
+                return $leave['year'] == $request->year;
+            });
+        }
+
+        // Filter by status if provided
+        if ($request->filled('status')) {
+            $leaves = array_filter($leaves, function($leave) use ($request) {
+                return $leave['status'] == $request->status;
+            });
+        }
+
+        // Sort by year if requested
+        if ($request->filled('sort') && $request->sort == 'year') {
+            usort($leaves, function($a, $b) {
+                return $b['year'] <=> $a['year'];
+            });
+        }
+
+        return view('leaves.index', compact('leaves'));
+    }
+
+    /**
+     * Show the form for creating a new leave configuration.
+     */
+    public function create()
+    {
+        return view('leaves.create');
+    }
+
+    /**
+     * Store a newly created leave configuration.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'year' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 5),
+            'sick_leaves' => 'required|integer|min:0',
+            'casual_leaves' => 'required|integer|min:0',
+            'earned_leaves' => 'required|integer|min:0',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        // In a real app, save to database
+        // For now, redirect with success message
+        return redirect()->route('leaves.index')->with('success', 'Leave configuration created successfully.');
+    }
+
+    /**
+     * Show the form for editing the specified leave configuration.
+     */
+    public function edit($id)
+    {
+        // Mock finding the leave
+        $leaves = [
+            [
+                'id' => 1,
+                'year' => 2024,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2023-01-01'
+            ],
+            [
+                'id' => 2,
+                'year' => 2025,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2024-01-01'
+            ],
+            [
+                'id' => 3,
+                'year' => 2026,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'inactive',
+                'created_at' => '2025-01-01'
+            ],
+        ];
+
+        $leave = collect($leaves)->firstWhere('id', $id);
+
+        if (!$leave) {
+            abort(404);
+        }
+
+        return view('leaves.edit', compact('leave'));
+    }
+
+    /**
+     * Update the specified leave configuration.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'year' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 5),
+            'sick_leaves' => 'required|integer|min:0',
+            'casual_leaves' => 'required|integer|min:0',
+            'earned_leaves' => 'required|integer|min:0',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        // In a real app, update in database
+        // For now, redirect with success message
+        return redirect()->route('leaves.index')->with('success', 'Leave configuration updated successfully.');
+    }
+
+    /**
+     * Remove the specified leave configuration.
+     */
+    public function destroy($id)
+    {
+        // In a real app, delete from database
+        // For now, redirect with success message
+        return redirect()->route('leaves.index')->with('success', 'Leave configuration deleted successfully.');
+    }
+
+    /**
+     * Show status change page for leave configuration.
+     */
+    public function showStatus($id)
+    {
+        // Mock finding the leave
+        $leaves = [
+            [
+                'id' => 1,
+                'year' => 2024,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2023-01-01'
+            ],
+            [
+                'id' => 2,
+                'year' => 2025,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'active',
+                'created_at' => '2024-01-01'
+            ],
+            [
+                'id' => 3,
+                'year' => 2026,
+                'sick_leaves' => 10,
+                'casual_leaves' => 12,
+                'earned_leaves' => 15,
+                'status' => 'inactive',
+                'created_at' => '2025-01-01'
+            ],
+        ];
+
+        $leave = collect($leaves)->firstWhere('id', $id);
+
+        if (!$leave) {
+            abort(404);
+        }
+
+        return view('leaves.status', compact('leave'));
+    }
+
+    /**
+     * Display the leaves calendar page.
      */
     public function leaves()
     {
-        return view('leaves.index');
+        $currentYear = date('Y');
+        $currentMonth = date('n');
+
+        // Mock employee birthday data
+        $employees = [
+            ['name' => 'John Doe', 'birth_date' => '1990-01-15'],
+            ['name' => 'Jane Smith', 'birth_date' => '1985-02-20'],
+            ['name' => 'Bob Johnson', 'birth_date' => '1992-03-10'],
+            ['name' => 'Alice Brown', 'birth_date' => '1988-04-05'],
+            ['name' => 'Charlie Wilson', 'birth_date' => '1995-05-25'],
+            ['name' => 'Diana Davis', 'birth_date' => '1980-06-12'],
+            ['name' => 'Eve Miller', 'birth_date' => '1993-07-08'],
+            ['name' => 'Frank Garcia', 'birth_date' => '1987-08-30'],
+            ['name' => 'Grace Lee', 'birth_date' => '1991-09-14'],
+            ['name' => 'Henry Taylor', 'birth_date' => '1984-10-22'],
+            ['name' => 'Ivy Anderson', 'birth_date' => '1996-11-03'],
+            ['name' => 'Jack Thomas', 'birth_date' => '1982-12-18'],
+        ];
+
+        return view('leaves.calendar', compact('currentYear', 'currentMonth', 'employees'));
     }
 
     /**
      * Display the company holidays management page.
      */
-    public function index(Request $request)
+    public function holidayIndex(Request $request)
     {
         // Sample data - replace with actual database query
         $companyHolidays = [
@@ -84,7 +307,7 @@ class LeaveController extends Controller
     /**
      * Show the form for creating a new company holiday.
      */
-    public function create()
+    public function holidayCreate()
     {
         return view('company-holidays.create');
     }
@@ -92,7 +315,7 @@ class LeaveController extends Controller
     /**
      * Store a newly created company holiday.
      */
-    public function store(Request $request)
+    public function holidayStore(Request $request)
     {
         $request->validate([
             'year' => 'required|integer|min:2020|max:2030|unique:company_holidays,year',
@@ -112,7 +335,7 @@ class LeaveController extends Controller
     /**
      * Display the specified company holiday.
      */
-    public function show($id)
+    public function holidayShow($id)
     {
         // Sample data - replace with actual database query
         $holiday = [
@@ -131,7 +354,7 @@ class LeaveController extends Controller
     /**
      * Show the form for editing the specified company holiday.
      */
-    public function edit($id)
+    public function holidayEdit($id)
     {
         // Sample data - replace with actual database query
         $holidays = [
@@ -209,7 +432,7 @@ class LeaveController extends Controller
     /**
      * Update the specified company holiday.
      */
-    public function update(Request $request, $id)
+    public function holidayUpdate(Request $request, $id)
     {
         // Check if this is a status update or full update
         if ($request->has('status')) {
@@ -240,7 +463,7 @@ class LeaveController extends Controller
     /**
      * Remove the specified company holiday.
      */
-    public function destroy($id)
+    public function holidayDestroy($id)
     {
         // In a real application, this would delete from the database
         // For now, we'll just redirect back with success message
@@ -250,7 +473,7 @@ class LeaveController extends Controller
     /**
      * Show status change form for the specified company holiday.
      */
-    public function showStatus($id)
+    public function holidayShowStatus($id)
     {
         // Sample data - replace with actual database query
         $holidays = [
