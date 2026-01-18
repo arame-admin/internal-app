@@ -7,6 +7,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\ClientController;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -32,6 +33,9 @@ Route::resource('users', UserController::class);
 Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
 Route::get('/users/{id}/payroll', [UserController::class, 'editPayroll'])->name('users.payroll');
 Route::put('/users/{id}/payroll', [UserController::class, 'updatePayroll'])->name('users.payroll.update');
+
+Route::resource('clients', ClientController::class);
+Route::get('/clients/{id}/status', [ClientController::class, 'showStatus'])->name('clients.status');
 
 Route::resource('leaves', LeaveController::class)->except(['show']);
 Route::get('/leaves/{id}/status', [LeaveController::class, 'showStatus'])->name('leaves.status');
