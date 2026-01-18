@@ -78,36 +78,6 @@ class LeaveController extends Controller
             ],
         ];
 
-        // Search filter
-        if ($request->has('search') && !empty($request->search)) {
-            $search = strtolower($request->search);
-            $companyHolidays = array_filter($companyHolidays, function($holiday) use ($search) {
-                return str_contains(strtolower($holiday['year']), $search) ||
-                       (isset($holiday['mandatory_holidays']) && is_array($holiday['mandatory_holidays']) &&
-                        collect($holiday['mandatory_holidays'])->some(function($h) use ($search) {
-                            return str_contains(strtolower($h['name']), $search);
-                        }));
-            });
-            $companyHolidays = array_values($companyHolidays);
-        }
-
-        // Status filter
-        if ($request->has('status') && !empty($request->status)) {
-            $companyHolidays = array_filter($companyHolidays, function($holiday) use ($request) {
-                return $holiday['status'] === $request->status;
-            });
-            $companyHolidays = array_values($companyHolidays);
-        }
-
-        // Sort
-        if ($request->has('sort') && !empty($request->sort)) {
-            switch ($request->sort) {
-                case 'year':
-                    usort($companyHolidays, fn($a, $b) => $b['year'] <=> $a['year']); // Descending
-                    break;
-            }
-        }
-
         return view('company-holidays.index', compact('companyHolidays'));
     }
 
@@ -200,6 +170,7 @@ class LeaveController extends Controller
                 'optional_holidays' => [
                     ['date' => '2025-02-14', 'name' => 'Valentine\'s Day'],
                     ['date' => '2025-03-08', 'name' => 'Women\'s Day'],
+                    ['date' => '2025-11-11', 'name' => 'Diwali'],
                 ],
                 'status' => 'active',
                 'created_at' => '2024-12-01'
@@ -216,7 +187,11 @@ class LeaveController extends Controller
                     ['date' => '2026-10-02', 'name' => 'Gandhi Jayanti'],
                     ['date' => '2026-12-25', 'name' => 'Christmas Day'],
                 ],
-                'optional_holidays' => [],
+                'optional_holidays' => [
+                    ['date' => '2026-02-14', 'name' => 'Valentine\'s Day'],
+                    ['date' => '2026-03-08', 'name' => 'Women\'s Day'],
+                    ['date' => '2026-10-31', 'name' => 'Halloween'],
+                ],
                 'status' => 'inactive',
                 'created_at' => '2025-12-01'
             ],

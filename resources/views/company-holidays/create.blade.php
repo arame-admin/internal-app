@@ -33,9 +33,19 @@
                     <!-- Year -->
                     <div>
                         <label for="year" class="block text-sm font-semibold text-gray-700 mb-2">Year <span class="text-red-500">*</span></label>
-                        <input type="number" id="year" name="year" value="{{ old('year', date('Y') + 1) }}" min="2020" max="2030"
-                               class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('year') border-red-300 @enderror"
-                               placeholder="Select year">
+                        <select id="year" name="year"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white @error('year') border-red-300 @enderror">
+                            @php
+                                $currentYear = date('Y');
+                                $startYear = $currentYear - 2;
+                                $endYear = $currentYear + 10;
+                            @endphp
+                            @for($year = $startYear; $year <= $endYear; $year++)
+                                <option value="{{ $year }}" {{ old('year', request('year', $currentYear + 1)) == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endfor
+                        </select>
                         @error('year')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
