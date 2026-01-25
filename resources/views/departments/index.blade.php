@@ -62,17 +62,60 @@
                             <th class="px-6 py-4 text-left">
                                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">S.No</span>
                             </th>
+                            @php
+                                $currentSort = request('sort');
+                                $currentDirection = request('direction', 'asc');
+                            @endphp
                             <th class="px-6 py-4 text-left">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</span>
+                                @php
+                                    $column = 'name';
+                                    $newDirection = ($currentSort == $column && $currentDirection == 'asc') ? 'desc' : 'asc';
+                                @endphp
+                                <a href="{{ route('admin.departments.index', ['sort' => $column, 'direction' => $newDirection] + request()->except(['sort', 'direction'])) }}" class="text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center space-x-1">
+                                    <span>Name</span>
+                                    @if($currentSort == $column)
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $currentDirection == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path>
+                                        </svg>
+                                    @endif
+                                </a>
                             </th>
                             <th class="px-6 py-4 text-left">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</span>
+                                @php
+                                    $column = 'code';
+                                    $newDirection = ($currentSort == $column && $currentDirection == 'asc') ? 'desc' : 'asc';
+                                @endphp
+                                <a href="{{ route('admin.departments.index', ['sort' => $column, 'direction' => $newDirection] + request()->except(['sort', 'direction'])) }}" class="text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center space-x-1">
+                                    <span>Code</span>
+                                    @if($currentSort == $column)
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $currentDirection == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path>
+                                        </svg>
+                                    @endif
+                                </a>
                             </th>
                             <th class="px-6 py-4 text-left">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</span>
+                                @php
+                                    $column = 'description';
+                                    $newDirection = ($currentSort == $column && $currentDirection == 'asc') ? 'desc' : 'asc';
+                                @endphp
+                                <a href="{{ route('admin.departments.index', ['sort' => $column, 'direction' => $newDirection] + request()->except(['sort', 'direction'])) }}" class="text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 flex items-center space-x-1">
+                                    <span>Description</span>
+                                    @if($currentSort == $column)
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $currentDirection == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path>
+                                        </svg>
+                                    @endif
+                                </a>
                             </th>
                             <th class="px-6 py-4 text-center">
                                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</span>
+                            </th>
+                            <th class="px-6 py-4 text-left">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Created At</span>
+                            </th>
+                            <th class="px-6 py-4 text-left">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Updated At</span>
                             </th>
                             <th class="px-6 py-4 text-right">
                                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</span>
@@ -107,6 +150,12 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $department->created_at->format('d M Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $department->updated_at->format('d M Y H:i') }}
+                            </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
                                     <button onclick="toggleStatus('{{ Crypt::encrypt($department->id) }}', '{{ $department->status }}', this)" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
@@ -130,7 +179,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="8" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>

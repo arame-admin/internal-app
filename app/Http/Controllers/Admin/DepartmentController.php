@@ -31,23 +31,14 @@ class DepartmentController extends Controller
         }
 
         // Sort
-        if ($request->has('sort') && !empty($request->sort)) {
-            switch ($request->sort) {
-                case 'name':
-                    $query->orderBy('name');
-                    break;
-                case 'code':
-                    $query->orderBy('code');
-                    break;
-                case 'date':
-                    $query->orderBy('created_at', 'desc');
-                    break;
-                default:
-                    $query->orderBy('created_at', 'desc');
-            }
-        } else {
-            $query->orderBy('created_at', 'desc');
+        $sort = $request->get('sort', 'created_at');
+        $direction = $request->get('direction', 'desc');
+
+        if ($sort == 'date') {
+            $sort = 'created_at';
         }
+
+        $query->orderBy($sort, $direction);
 
         // Paginate
         $departments = $query->paginate(10);
