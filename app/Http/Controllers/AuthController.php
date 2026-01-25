@@ -15,11 +15,18 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Skip authentication for UI development - always redirect to dashboard
-        // Remove this line when implementing real authentication
-        // Auth::loginUsingId(1); // Uncomment to test with a specific user
-        
-        return redirect()->intended('/dashboard');
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($request->only('email', 'password'))) {
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 }
 

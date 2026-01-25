@@ -15,24 +15,27 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
+                'id' => 1,
                 'name' => 'Admin',
                 'description' => 'Full system access with all permissions',
-                'status' => true
+                'is_active' => true
             ],
             [
+                'id' => 2,
                 'name' => 'Manager',
                 'description' => 'Team management and reporting access',
-                'status' => true
+                'is_active' => true
             ],
             [
+                'id' => 3,
                 'name' => 'Employee',
                 'description' => 'Standard employee access',
-                'status' => true
+                'is_active' => true
             ],
         ];
 
         foreach ($roles as $role) {
-            Role::create($role);
+            Role::updateOrCreate(['id' => $role['id']], $role);
         }
     }
 }

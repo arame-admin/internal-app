@@ -20,9 +20,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::resource('roles', RoleController::class);
     Route::get('/roles/{id}/status', [RoleController::class, 'showStatus'])->name('roles.status');
     Route::put('/roles/{id}/status', [RoleController::class, 'updateStatus'])->name('roles.status.update');
