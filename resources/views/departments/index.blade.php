@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Departments Management')
+@section('title', 'Departments')
 
 @section('content')
 <div class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen py-8">
@@ -16,7 +16,6 @@
             </ol>
         </nav>
 
-
         <!-- Floating Add Button -->
         <a href="{{ route('admin.departments.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Department">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,19 +23,30 @@
             </svg>
         </a>
 
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <p class="text-gray-700">Searching...</p>
+            </div>
+        </div>
+
         <!-- Filters & Search -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div class="p-4 border-b border-gray-100">
-                <form action="{{ route('admin.departments.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <form action="{{ route('admin.departments.index') }}" method="GET" id="search-form" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <!-- Search -->
                     <div class="relative flex-1 max-w-md">
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search departments..." class="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" onkeydown="if(event.key === 'Enter') this.form.submit();">
-                        <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search departments..." class="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" id="search-input">
+                        <button type="button" id="search-button" class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-4 h-4 search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <svg class="w-4 h-4 clear-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
@@ -103,11 +113,17 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('admin.departments.status', Crypt::encrypt($department->id)) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                        </svg>
-                                    </a>
+                                    <button onclick="toggleStatus('{{ Crypt::encrypt($department->id) }}', '{{ $department->status }}', this)" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                                        @if($department->status == 'active')
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        @endif
+                                    </button>
                                     <a href="{{ route('admin.departments.edit', Crypt::encrypt($department->id)) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -196,6 +212,109 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    var searchTimeout;
+
+    function toggleIcons() {
+        var searchValue = $('#search-input').val();
+        if (searchValue.length > 0) {
+            $('.search-icon').addClass('hidden');
+            $('.clear-icon').removeClass('hidden');
+        } else {
+            $('.search-icon').removeClass('hidden');
+            $('.clear-icon').addClass('hidden');
+        }
+    }
+
+    $('#search-input').on('keyup', function() {
+        toggleIcons();
+        clearTimeout(searchTimeout);
+        var searchValue = $(this).val();
+        searchTimeout = setTimeout(function() {
+            // Show loading
+            $('#loading-overlay').removeClass('hidden');
+            // Submit the form
+            $('#search-form').submit();
+        }, 500); // 500ms delay
+    });
+
+    $('#search-button').on('click', function() {
+        var searchValue = $('#search-input').val();
+        if (searchValue.length > 0) {
+            // Clear the input
+            $('#search-input').val('');
+            toggleIcons();
+            // Submit the form to clear search
+            $('#loading-overlay').removeClass('hidden');
+            $('#search-form').submit();
+        } else {
+            // Focus the input
+            $('#search-input').focus();
+        }
+    });
+
+    // Initial toggle
+    toggleIcons();
+
+    function showFlashMessage(message, type) {
+        var colorClass = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+        var html = '<div class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in"><div class="' + colorClass + ' text-white px-6 py-4 rounded-lg shadow-lg border max-w-md"><p class="font-medium">' + message + '</p></div></div>';
+        $('body').append(html);
+        setTimeout(function() {
+            $('.animate-fade-in').remove();
+        }, 3000);
+    }
+
+    // Toggle status function
+    window.toggleStatus = function(encryptedId, currentStatus, button) {
+        var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+        $.ajax({
+            url: '/admin/departments/' + encryptedId + '/status',
+            type: 'PUT',
+            data: {
+                status: newStatus,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Update the icon
+                var iconHtml = newStatus === 'active' ?
+                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                $(button).html(iconHtml);
+
+                // Update the status badge in the row
+                var row = $(button).closest('tr');
+                var statusBadge = row.find('.inline-flex');
+                if (newStatus === 'active') {
+                    statusBadge.removeClass('bg-gray-100 text-gray-800').addClass('bg-green-100 text-green-800').html('Active');
+                } else {
+                    statusBadge.removeClass('bg-green-100 text-green-800').addClass('bg-gray-100 text-gray-800').html('Inactive');
+                }
+
+                // Show success message
+                showFlashMessage('Status updated successfully.', 'success');
+            },
+            error: function() {
+                showFlashMessage('Failed to update status.', 'error');
+            }
+        });
+    };
+
+    // Hide loading on page load and refocus search input
+    $(window).on('load', function() {
+        $('#loading-overlay').addClass('hidden');
+        var searchInput = $('#search-input');
+        searchInput.focus();
+        // Set cursor to the end
+        var len = searchInput.val().length;
+        searchInput[0].setSelectionRange(len, len);
+        // Toggle icons
+        toggleIcons();
+    });
+});
+</script>
 
 <style>
 /* Old Style Pagination */

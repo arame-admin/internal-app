@@ -137,6 +137,14 @@ class DepartmentController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Department {$statusMessage} successfully.",
+                'status' => $validated['status']
+            ]);
+        }
+
         return redirect()->route('admin.departments.index')->with('success', "Department {$statusMessage} successfully.");
     }
 

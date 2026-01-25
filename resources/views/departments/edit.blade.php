@@ -35,6 +35,13 @@
                 <p class="text-xs text-gray-500 mt-1">Unique code identifier (cannot be changed)</p>
             </div>
 
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="Optional description of the department..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">{{ $department->description }}</textarea>
+                <p class="text-xs text-gray-500 mt-1">Optional description (max 500 characters)</p>
+            </div>
+
         </div>
 
         <!-- Form Actions -->

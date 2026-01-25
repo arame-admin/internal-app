@@ -33,6 +33,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     Route::resource('departments', DepartmentController::class);
     Route::get('/departments/{id}/status', [DepartmentController::class, 'showStatus'])->name('departments.status');
+    Route::put('/departments/{id}/status', [DepartmentController::class, 'updateStatus'])->name('departments.status.update');
 
     Route::resource('users', UserController::class);
     Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
