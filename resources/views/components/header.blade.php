@@ -13,7 +13,7 @@
 
         <!-- Main Menu -->
         <div class="flex items-center space-x-1">
-            <a href="{{ route('dashboard') }}" class="relative px-4 py-2 text-sm font-semibold text-blue-600 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500">
+            <a href="{{ route('admin.dashboard') }}" class="relative px-4 py-2 text-sm font-semibold text-blue-600 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500">
                 Dashboard
             </a>
             

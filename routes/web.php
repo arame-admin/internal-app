@@ -19,11 +19,10 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
-
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
     Route::resource('roles', RoleController::class);
     Route::get('/roles/{id}/status', [RoleController::class, 'showStatus'])->name('roles.status');
     Route::put('/roles/{id}/status', [RoleController::class, 'updateStatus'])->name('roles.status.update');
