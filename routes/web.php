@@ -19,6 +19,7 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Admin Routes
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -68,7 +69,18 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/company-holidays/{holiday}/status', [LeaveController::class, 'showStatus'])->name('company-holidays.status');
 });
 
-Route::post('/logout', function () {
-    Auth::logout();
-    return redirect('/login');
-})->name('logout');
+// Manager Routes
+Route::prefix('manager')->middleware('auth')->name('manager.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('manager.dashboard');
+    })->name('dashboard');
+    // Add manager-specific routes here as needed
+});
+
+// Employee Routes
+Route::prefix('employee')->middleware('auth')->name('employee.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('employee.dashboard');
+    })->name('dashboard');
+    // Add employee-specific routes here as needed
+});
