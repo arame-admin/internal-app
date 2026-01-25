@@ -86,17 +86,7 @@
                                 {{ $departments->firstItem() + $loop->index }}
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-800">{{ $department->name }}</p>
-                                        <p class="text-xs text-gray-500">{{ $department->code }}</p>
-                                    </div>
-                                </div>
+                                <p class="font-semibold text-gray-800">{{ $department->name }}</p>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -482,7 +472,7 @@ $(document).ready(function() {
     border-radius: 0.375rem;
     border: 1px solid #d1d5db;
     background-color: #fff;
-    color: #374151;
+    color: #000000;
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
@@ -491,13 +481,13 @@ $(document).ready(function() {
 }
 
 .pagination .page-link:hover:not(:disabled) {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
-    color: #1f2937;
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #000000;
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(to right, #0d9488, #0891b2);
+    background: linear-gradient(to right, #3b82f6, #6366f1);
     border-color: transparent;
     color: #fff;
 }
