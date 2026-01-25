@@ -90,7 +90,7 @@ class LeaveController extends Controller
 
         // In a real app, save to database
         // For now, redirect with success message
-        return redirect()->route('leaves.index')->with('success', 'Leave configuration created successfully.');
+        return redirect()->route('admin.leaves.index')->with('success', 'Leave configuration created successfully.');
     }
 
     /**
@@ -153,7 +153,7 @@ class LeaveController extends Controller
 
         // In a real app, update in database
         // For now, redirect with success message
-        return redirect()->route('leaves.index')->with('success', 'Leave configuration updated successfully.');
+        return redirect()->route('admin.leaves.index')->with('success', 'Leave configuration updated successfully.');
     }
 
     /**
@@ -163,7 +163,7 @@ class LeaveController extends Controller
     {
         // In a real app, delete from database
         // For now, redirect with success message
-        return redirect()->route('leaves.index')->with('success', 'Leave configuration deleted successfully.');
+        return redirect()->route('admin.leaves.index')->with('success', 'Leave configuration deleted successfully.');
     }
 
     /**

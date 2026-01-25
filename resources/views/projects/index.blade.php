@@ -7,7 +7,7 @@
 <!-- Filters & Search -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
     <div class="p-4 border-b border-gray-100">
-        <form action="{{ route('projects.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <form action="{{ route('admin.projects.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <!-- Search -->
             <div class="relative flex-1 max-w-md">
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@
                 </button>
 
                 @if(request()->anyFilled(['search', 'status', 'client', 'sort']))
-                    <a href="{{ route('projects.index') }}" class="px-4 py-2 text-sm text-red-600 hover:text-red-700">
+                    <a href="{{ route('admin.projects.index') }}" class="px-4 py-2 text-sm text-red-600 hover:text-red-700">
                         Clear
                     </a>
                 @endif
@@ -69,7 +69,7 @@
                     <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
                 </th>
                 <th class="px-6 py-4 text-left">
-                    <a href="{{ route('projects.index', ['sort' => 'name', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <a href="{{ route('admin.projects.index', ['sort' => 'name', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
                         <span>Project Name</span>
                         @if(request('sort') == 'name')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
                     </a>
                 </th>
                 <th class="px-6 py-4 text-left">
-                    <a href="{{ route('projects.index', ['sort' => 'client', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <a href="{{ route('admin.projects.index', ['sort' => 'client', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
                         <span>Client</span>
                         @if(request('sort') == 'client')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
                     <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</span>
                 </th>
                 <th class="px-6 py-4 text-center">
-                    <a href="{{ route('projects.index', ['sort' => 'progress', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center justify-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <a href="{{ route('admin.projects.index', ['sort' => 'progress', 'search' => request('search'), 'status' => request('status'), 'client' => request('client')]) }}" class="flex items-center justify-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
                         <span>Progress</span>
                         @if(request('sort') == 'progress')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,17 +185,17 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                        <a href="{{ route('projects.meetings.index', $project['id']) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Meetings">
+                        <a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Meetings">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('projects.status', $project['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                        <a href="{{ route('admin.projects.status', $project['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('projects.edit', $project['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <a href="{{ route('admin.projects.edit', $project['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
@@ -359,7 +359,7 @@
 </style>
 
 <!-- Floating Add Button -->
-<a href="{{ route('projects.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full p-4 shadow-lg hover:from-purple-600 hover:to-purple-700 transition-colors z-50" title="Add New Project">
+<a href="{{ route('admin.projects.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full p-4 shadow-lg hover:from-purple-600 hover:to-purple-700 transition-colors z-50" title="Add New Project">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
     </svg>

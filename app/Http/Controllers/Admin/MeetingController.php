@@ -131,7 +131,7 @@ class MeetingController extends Controller
         // TODO: Save to database
         // Meeting::create($validated);
 
-        return redirect()->route('projects.meetings.index', $projectId)->with('success', 'Meeting created successfully.');
+        return redirect()->route('admin.projects.meetings.index', $projectId)->with('success', 'Meeting created successfully.');
     }
 
     /**
@@ -244,7 +244,7 @@ class MeetingController extends Controller
         // TODO: Update in database
         // Meeting::where('id', $meetingId)->update($validated);
 
-        return redirect()->route('projects.meetings.index', $projectId)->with('success', 'Meeting updated successfully.');
+        return redirect()->route('admin.projects.meetings.index', $projectId)->with('success', 'Meeting updated successfully.');
     }
 
     /**
@@ -255,7 +255,7 @@ class MeetingController extends Controller
         // TODO: Delete from database
         // Meeting::where('id', $meetingId)->delete();
 
-        return redirect()->route('projects.meetings.index', $projectId)->with('success', 'Meeting deleted successfully.');
+        return redirect()->route('admin.projects.meetings.index', $projectId)->with('success', 'Meeting deleted successfully.');
     }
 
     /**
@@ -351,7 +351,7 @@ class MeetingController extends Controller
 
         // For demo, just return success message with details
         $recipientCount = count($recipients);
-        return redirect()->route('projects.meetings.index', $projectId)
+        return redirect()->route('admin.projects.meetings.index', $projectId)
                         ->with('success', "MOM has been sent to {$recipientCount} recipient(s) successfully with subject: '{$subject}'");
     }
 

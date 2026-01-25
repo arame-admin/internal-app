@@ -8,9 +8,9 @@
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('departments.index') }}" class="hover:text-blue-600">Departments</a></li>
+                <li><a href="{{ route('admin.departments.index') }}" class="hover:text-blue-600">Departments</a></li>
                 <li><span class="text-gray-400">/</span></li>
                 <li class="text-gray-900 font-medium">List</li>
             </ol>
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Floating Add Button -->
-        <a href="{{ route('departments.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Department">
+        <a href="{{ route('admin.departments.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Department">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
@@ -31,7 +31,7 @@
         <!-- Filters & Search -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div class="p-4 border-b border-gray-100">
-                <form action="{{ route('departments.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <form action="{{ route('admin.departments.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <!-- Search -->
                     <div class="relative flex-1 max-w-md">
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,17 +123,17 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('departments.status', $department['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                                    <a href="{{ route('admin.departments.status', $department['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                         </svg>
                                     </a>
-                                    <a href="{{ route('departments.edit', $department['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                                    <a href="{{ route('admin.departments.edit', $department['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('departments.destroy', $department['id']) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.departments.destroy', $department['id']) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this department?')">

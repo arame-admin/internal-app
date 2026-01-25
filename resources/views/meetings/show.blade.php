@@ -7,13 +7,13 @@
 <!-- Breadcrumb -->
 <nav class="mb-6">
     <ol class="flex items-center space-x-2 text-sm text-gray-600">
-        <li><a href="{{ route('dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
+        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li><a href="{{ route('projects.index') }}" class="hover:text-purple-600">Projects</a></li>
+        <li><a href="{{ route('admin.projects.index') }}" class="hover:text-purple-600">Projects</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li><a href="{{ route('projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
+        <li><a href="{{ route('admin.projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li><a href="{{ route('projects.meetings.index', $project['id']) }}" class="hover:text-purple-600">Meetings</a></li>
+        <li><a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="hover:text-purple-600">Meetings</a></li>
         <li><span class="text-gray-400">/</span></li>
         <li class="text-gray-900 font-medium">{{ $meeting['title'] }}</li>
     </ol>
@@ -79,7 +79,7 @@
         </div>
 
         <div class="flex items-center space-x-2">
-            <a href="{{ route('projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit MOM">
+            <a href="{{ route('admin.projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit MOM">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
@@ -206,7 +206,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
             <div class="space-y-3">
-                <a href="{{ route('projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                <a href="{{ route('admin.projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
@@ -214,7 +214,7 @@
                 </a>
 
                 @if($meeting['status'] === 'completed')
-                <a href="{{ route('projects.meetings.download', [$project['id'], $meeting['id']]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <a href="{{ route('admin.projects.meetings.download', [$project['id'], $meeting['id']]) }}" class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -229,7 +229,7 @@
                 </button>
                 @endif
 
-                <a href="{{ route('projects.meetings.index', $project['id']) }}" class="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
+                <a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>

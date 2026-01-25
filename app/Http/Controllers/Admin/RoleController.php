@@ -71,7 +71,7 @@ class RoleController extends Controller
 
         Role::create($validated);
 
-        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
     }
 
     /**
@@ -97,7 +97,7 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
         $role->update($validated);
 
-        return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**
@@ -128,7 +128,7 @@ class RoleController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
 
-        return redirect()->route('roles.index')->with('success', "Role {$statusMessage} successfully.");
+        return redirect()->route('admin.roles.index')->with('success', "Role {$statusMessage} successfully.");
     }
 
     /**
@@ -139,6 +139,6 @@ class RoleController extends Controller
         $role = Role::findOrFail($id);
         $role->delete();
 
-        return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
     }
 }

@@ -20,9 +20,16 @@
     @include('components.flash-message')
 
     <!-- Main Content -->
-    <main class="pt-20 p-8">
+    <main class="pt-24 p-8">
         @yield('content')
     </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 border-t border-gray-200 py-4 mt-12">
+        <div class="text-center text-sm text-gray-500">
+            © 2026 ArameGlobal. All rights reserved.
+        </div>
+    </footer>
 </body>
 </html>
 

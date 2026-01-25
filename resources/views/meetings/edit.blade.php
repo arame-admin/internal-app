@@ -8,20 +8,20 @@
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('projects.index') }}" class="hover:text-purple-600">Projects</a></li>
+                <li><a href="{{ route('admin.projects.index') }}" class="hover:text-purple-600">Projects</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
+                <li><a href="{{ route('admin.projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('projects.meetings.index', $project['id']) }}" class="hover:text-purple-600">Meetings</a></li>
+                <li><a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="hover:text-purple-600">Meetings</a></li>
                 <li><span class="text-gray-400">/</span></li>
                 <li class="text-gray-900 font-medium">Edit MOM</li>
             </ol>
         </nav>
 
         <!-- Meeting Form -->
-        <form action="{{ route('projects.meetings.update', [$project['id'], $meeting['id']]) }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-8">
+        <form action="{{ route('admin.projects.meetings.update', [$project['id'], $meeting['id']]) }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-8">
         @csrf
         @method('PUT')
 
@@ -248,7 +248,7 @@
 
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
-            <a href="{{ route('projects.meetings.index', $project['id']) }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                 Cancel
             </a>
             <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors font-medium shadow-lg shadow-purple-500/30">

@@ -8,9 +8,9 @@
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('leaves.index') }}" class="hover:text-blue-600">Leaves</a></li>
+                <li><a href="{{ route('admin.leaves.index') }}" class="hover:text-blue-600">Leaves</a></li>
                 <li><span class="text-gray-400">/</span></li>
                 <li class="text-gray-900 font-medium">Change Status</li>
             </ol>
@@ -21,7 +21,7 @@
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Change Leave Configuration Status</h2>
             <p class="text-gray-600 mb-6">Update the status for leave configuration of year {{ $leave['year'] }}.</p>
 
-            <form action="{{ route('leaves.update', $leave['id']) }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.leaves.update', $leave['id']) }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
 
@@ -50,7 +50,7 @@
 
                 <!-- Form Actions -->
                 <div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
-                    <a href="{{ route('leaves.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    <a href="{{ route('admin.leaves.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                         Cancel
                     </a>
                     <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors font-medium shadow-lg shadow-blue-500/30">

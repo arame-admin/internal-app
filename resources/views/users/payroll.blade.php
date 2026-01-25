@@ -8,7 +8,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Edit Payroll Section -->
             <div>
-                <form action="{{ route('users.payroll.update', $user['id']) }}" method="POST" class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
+                <form action="{{ route('admin.users.payroll.update', $user['id']) }}" method="POST" class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 hover:shadow-2xl transition-all duration-300">
                     @csrf
                     @method('PUT')
 
@@ -46,7 +46,7 @@
 
                         <!-- Form Actions -->
                         <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
-                            <a href="{{ route('users.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                            <a href="{{ route('admin.users.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                                 Cancel
                             </a>
                             <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors font-medium shadow-lg shadow-blue-500/30">

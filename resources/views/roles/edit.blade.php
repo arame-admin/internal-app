@@ -8,7 +8,7 @@
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
                 <li><span class="text-gray-400">/</span></li>
                 <li><a href="{{ route('admin.roles.index') }}" class="hover:text-blue-600">Roles</a></li>
                 <li><span class="text-gray-400">/</span></li>

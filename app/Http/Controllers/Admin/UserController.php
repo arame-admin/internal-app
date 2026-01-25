@@ -127,7 +127,7 @@ class UserController extends Controller
         // TODO: Save to database
         // User::create($validated);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
     /**
@@ -158,7 +158,7 @@ class UserController extends Controller
         // TODO: Update in database
         // User::where('id', $id)->update($validated);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     /**
@@ -184,7 +184,7 @@ class UserController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
         
-        return redirect()->route('users.index')->with('success', "User {$statusMessage} successfully.");
+        return redirect()->route('admin.users.index')->with('success', "User {$statusMessage} successfully.");
     }
 
     /**
@@ -195,7 +195,7 @@ class UserController extends Controller
         // TODO: Delete from database
         // User::where('id', $id)->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 
     /**
@@ -265,7 +265,7 @@ class UserController extends Controller
         // TODO: Update payroll in database
         // User::where('id', $id)->update(['payroll' => $validated]);
 
-        return redirect()->route('users.index')->with('success', 'Payroll updated successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'Payroll updated successfully.');
     }
 }
 

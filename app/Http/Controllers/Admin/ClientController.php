@@ -107,7 +107,7 @@ class ClientController extends Controller
         // TODO: Save to database
         // Client::create($validated);
 
-        return redirect()->route('clients.index')->with('success', 'Client created successfully.');
+        return redirect()->route('admin.clients.index')->with('success', 'Client created successfully.');
     }
 
     /**
@@ -153,7 +153,7 @@ class ClientController extends Controller
         // TODO: Update in database
         // Client::where('id', $id)->update($validated);
 
-        return redirect()->route('clients.index')->with('success', 'Client updated successfully.');
+        return redirect()->route('admin.clients.index')->with('success', 'Client updated successfully.');
     }
 
     /**
@@ -179,7 +179,7 @@ class ClientController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
 
-        return redirect()->route('clients.index')->with('success', "Client {$statusMessage} successfully.");
+        return redirect()->route('admin.clients.index')->with('success', "Client {$statusMessage} successfully.");
     }
 
     /**
@@ -190,6 +190,6 @@ class ClientController extends Controller
         // TODO: Delete from database
         // Client::where('id', $id)->delete();
 
-        return redirect()->route('clients.index')->with('success', 'Client deleted successfully.');
+        return redirect()->route('admin.clients.index')->with('success', 'Client deleted successfully.');
     }
 }

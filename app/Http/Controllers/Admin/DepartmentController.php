@@ -96,7 +96,7 @@ class DepartmentController extends Controller
         // TODO: Save to database
         // Department::create($validated);
 
-        return redirect()->route('departments.index')->with('success', 'Department created successfully.');
+        return redirect()->route('admin.departments.index')->with('success', 'Department created successfully.');
     }
 
     /**
@@ -130,7 +130,7 @@ class DepartmentController extends Controller
         // TODO: Update in database
         // Department::where('id', $id)->update($validated);
 
-        return redirect()->route('departments.index')->with('success', 'Department updated successfully.');
+        return redirect()->route('admin.departments.index')->with('success', 'Department updated successfully.');
     }
 
     /**
@@ -156,7 +156,7 @@ class DepartmentController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
 
-        return redirect()->route('departments.index')->with('success', "Department {$statusMessage} successfully.");
+        return redirect()->route('admin.departments.index')->with('success', "Department {$statusMessage} successfully.");
     }
 
     /**
@@ -167,6 +167,6 @@ class DepartmentController extends Controller
         // TODO: Delete from database
         // Department::where('id', $id)->delete();
 
-        return redirect()->route('departments.index')->with('success', 'Department deleted successfully.');
+        return redirect()->route('admin.departments.index')->with('success', 'Department deleted successfully.');
     }
 }

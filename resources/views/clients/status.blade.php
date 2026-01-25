@@ -41,7 +41,7 @@
         </div>
 
         <!-- Toggle Form -->
-        <form action="{{ route('clients.updateStatus', $id) }}" method="POST" class="p-6">
+        <form action="{{ route('admin.clients.updateStatus', $id) }}" method="POST" class="p-6">
             @csrf
 
             <div class="mb-6">
@@ -113,7 +113,7 @@
 
             <!-- Form Actions -->
             <div class="flex items-center justify-end space-x-4">
-                <a href="{{ route('clients.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                <a href="{{ route('admin.clients.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                     Cancel
                 </a>
                 <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-colors font-medium shadow-lg shadow-green-500/30">

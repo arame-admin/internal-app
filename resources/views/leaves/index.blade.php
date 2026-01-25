@@ -7,7 +7,7 @@
 <!-- Filters & Search -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
     <div class="p-4 border-b border-gray-100">
-        <form action="{{ route('leaves.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <form action="{{ route('admin.leaves.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <!-- Search -->
             <div class="relative flex-1 max-w-md">
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@
                 </button>
 
                 @if(request()->anyFilled(['search', 'year', 'status', 'sort']))
-                    <a href="{{ route('leaves.index') }}" class="px-4 py-2 text-sm text-red-600 hover:text-red-700">
+                    <a href="{{ route('admin.leaves.index') }}" class="px-4 py-2 text-sm text-red-600 hover:text-red-700">
                         Clear
                     </a>
                 @endif
@@ -61,7 +61,7 @@
                     <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                 </th>
                 <th class="px-6 py-4 text-left">
-                    <a href="{{ route('leaves.index', ['sort' => 'year', 'search' => request('search'), 'year' => request('year'), 'status' => request('status')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <a href="{{ route('admin.leaves.index', ['sort' => 'year', 'search' => request('search'), 'year' => request('year'), 'status' => request('status')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
                         <span>Year</span>
                         @if(request('sort') == 'year')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,17 +137,17 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                        <a href="{{ route('leaves.status', $leave['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                        <a href="{{ route('admin.leaves.status', $leave['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('leaves.edit', $leave['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <a href="{{ route('admin.leaves.edit', $leave['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
-                        <form action="{{ route('leaves.destroy', $leave['id']) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this leave configuration?')">
+                        <form action="{{ route('admin.leaves.destroy', $leave['id']) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this leave configuration?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
@@ -310,7 +310,7 @@
 </style>
 
 <!-- Floating Add Button -->
-<a href="{{ route('leaves.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Leave">
+<a href="{{ route('admin.leaves.create') }}" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full p-4 shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-colors z-50" title="Add New Leave">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
     </svg>

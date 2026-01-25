@@ -158,7 +158,7 @@ class ProjectController extends Controller
         // TODO: Save to database
         // Project::create($validated);
 
-        return redirect()->route('projects.index')->with('success', 'Project created successfully.');
+        return redirect()->route('admin.projects.index')->with('success', 'Project created successfully.');
     }
 
     /**
@@ -244,7 +244,7 @@ class ProjectController extends Controller
         // TODO: Update in database
         // Project::where('id', $id)->update($validated);
 
-        return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
+        return redirect()->route('admin.projects.index')->with('success', 'Project updated successfully.');
     }
 
     /**
@@ -278,7 +278,7 @@ class ProjectController extends Controller
             default => 'updated'
         };
 
-        return redirect()->route('projects.index')->with('success', "Project {$statusMessage} successfully.");
+        return redirect()->route('admin.projects.index')->with('success', "Project {$statusMessage} successfully.");
     }
 
     /**
@@ -289,6 +289,6 @@ class ProjectController extends Controller
         // TODO: Delete from database
         // Project::where('id', $id)->delete();
 
-        return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
+        return redirect()->route('admin.projects.index')->with('success', 'Project deleted successfully.');
     }
 }

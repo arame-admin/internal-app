@@ -7,11 +7,11 @@
 <!-- Breadcrumb -->
 <nav class="mb-6">
     <ol class="flex items-center space-x-2 text-sm text-gray-600">
-        <li><a href="{{ route('dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
+        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-purple-600">Dashboard</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li><a href="{{ route('projects.index') }}" class="hover:text-purple-600">Projects</a></li>
+        <li><a href="{{ route('admin.projects.index') }}" class="hover:text-purple-600">Projects</a></li>
         <li><span class="text-gray-400">/</span></li>
-        <li><a href="{{ route('projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
+        <li><a href="{{ route('admin.projects.show', $project['id']) }}" class="hover:text-purple-600">{{ $project['name'] }}</a></li>
         <li><span class="text-gray-400">/</span></li>
         <li class="text-gray-900 font-medium">Meetings</li>
     </ol>
@@ -24,7 +24,7 @@
             <h1 class="text-2xl font-bold text-gray-800">{{ $project['name'] }}</h1>
             <p class="text-gray-600 mt-1">Client: {{ $project['client_name'] }}</p>
         </div>
-        <a href="{{ route('projects.meetings.create', $project['id']) }}" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors font-medium shadow-lg shadow-purple-500/30">
+        <a href="{{ route('admin.projects.meetings.create', $project['id']) }}" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors font-medium shadow-lg shadow-purple-500/30">
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
@@ -125,7 +125,7 @@
             </div>
 
             <div class="flex items-center space-x-2 ml-6">
-                <a href="{{ route('projects.meetings.show', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
+                <a href="{{ route('admin.projects.meetings.show', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -133,7 +133,7 @@
                 </a>
 
                 @if($meeting['status'] === 'completed')
-                <a href="{{ route('projects.meetings.download', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Download MOM">
+                <a href="{{ route('admin.projects.meetings.download', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Download MOM">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -146,7 +146,7 @@
                 </button>
                 @endif
 
-                <a href="{{ route('projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit MOM">
+                <a href="{{ route('admin.projects.meetings.edit', [$project['id'], $meeting['id']]) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit MOM">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
@@ -166,7 +166,7 @@
         </svg>
         <h3 class="text-lg font-medium text-gray-900 mb-2">No meetings yet</h3>
         <p class="text-gray-500 mb-6">Get started by scheduling your first meeting for this project.</p>
-        <a href="{{ route('projects.meetings.create', $project['id']) }}" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors font-medium shadow-lg shadow-purple-500/30">
+        <a href="{{ route('admin.projects.meetings.create', $project['id']) }}" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-colors font-medium shadow-lg shadow-purple-500/30">
             Schedule First Meeting
         </a>
     </div>
