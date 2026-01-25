@@ -1,3 +1,7 @@
+{{-- Departments Index Page --}}
+{{-- This page displays a list of departments with search, filter, sort, and pagination functionality. --}}
+{{-- It includes AJAX status toggling and responsive design. --}}
+
 @extends('layouts.app')
 
 @section('title', 'Departments')
@@ -313,6 +317,9 @@ $(document).ready(function() {
                     '<h3 class="text-2xl font-bold text-gray-900 animate-slide-in mb-2">' + title + '</h3>' +
                     '<p class="text-gray-600 text-lg animate-slide-in-delay">' + message + '</p>' +
                 '</div>' +
+                '<button onclick="closeAlert()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors animate-fade-in">' +
+                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' +
+                '</button>' +
                 '<div class="mt-6 bg-gray-200 rounded-full h-1">' +
                     '<div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-1 rounded-full animate-progress"></div>' +
                 '</div>' +
@@ -328,7 +335,7 @@ $(document).ready(function() {
         if (alert) {
             alert.classList.add('animate-fade-out');
             setTimeout(() => {
-                alert.style.display = 'none';
+                alert.remove();
             }, 300);
         }
     }

@@ -1,3 +1,7 @@
+{{-- Department Create Form --}}
+{{-- This page provides a form to create a new department with validation and error display. --}}
+{{-- Includes client-side and server-side validation for name and code uniqueness. --}}
+
 @extends('layouts.app')
 
 @section('title', 'Add New Department')

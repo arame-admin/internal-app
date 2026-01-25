@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Role;
 use App\Http\Controllers\Controller;
 
@@ -63,15 +64,24 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name',
-            'description' => 'nullable|string|max:500',
-        ]);
+        try {
+            // Validation
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:roles,name',
+                'description' => 'nullable|string|max:500',
+            ]);
 
-        Role::create($validated);
+            Role::create($validated);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+            Log::channel('custom')->info('Role created successfully: ' . $validated['name']);
+
+            return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+        } catch (\Exception $e) {
+            Log::channel('custom')->error('Error creating role: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to create role.'])->withInput();
+        } finally {
+            Log::channel('custom')->info('Store method executed for role');
+        }
     }
 
     /**
@@ -88,16 +98,25 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validation
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $id,
-            'description' => 'nullable|string|max:500',
-        ]);
+        try {
+            // Validation
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:roles,name,' . $id,
+                'description' => 'nullable|string|max:500',
+            ]);
 
-        $role = Role::findOrFail($id);
-        $role->update($validated);
+            $role = Role::findOrFail($id);
+            $role->update($validated);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+            Log::channel('custom')->info('Role updated successfully: ' . $validated['name']);
+
+            return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
+        } catch (\Exception $e) {
+            Log::channel('custom')->error('Error updating role: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to update role.'])->withInput();
+        } finally {
+            Log::channel('custom')->info('Update method executed for role');
+        }
     }
 
     /**
@@ -114,21 +133,33 @@ class RoleController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $validated = $request->validate([
-            'status' => 'boolean',
-            'reason' => 'nullable|string|max:500',
-        ]);
+        try {
+            $validated = $request->validate([
+                'status' => 'boolean',
+                'reason' => 'nullable|string|max:500',
+            ]);
 
-        $role = Role::findOrFail($id);
-        $role->update(['status' => $validated['status']]);
+            $role = Role::findOrFail($id);
+            $role->update(['status' => $validated['status']]);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+            Log::channel('custom')->info('Role status updated: ' . $role->name);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+            }
+
+            $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
+
+            return redirect()->route('admin.roles.index')->with('success', "Role {$statusMessage} successfully.");
+        } catch (\Exception $e) {
+            Log::channel('custom')->error('Error updating role status: ' . $e->getMessage());
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update status.'], 500);
+            }
+            return back()->withErrors(['error' => 'Failed to update status.']);
+        } finally {
+            Log::channel('custom')->info('UpdateStatus method executed for role');
         }
-
-        $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
-
-        return redirect()->route('admin.roles.index')->with('success', "Role {$statusMessage} successfully.");
     }
 
     /**

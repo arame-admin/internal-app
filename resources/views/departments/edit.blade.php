@@ -1,3 +1,7 @@
+{{-- Department Edit Form --}}
+{{-- This page provides a form to edit an existing department with validation and error display. --}}
+{{-- Includes server-side validation for name and code uniqueness, excluding the current record. --}}
+
 @extends('layouts.app')
 
 @section('title', 'Edit Department')
