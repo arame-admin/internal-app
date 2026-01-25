@@ -23,7 +23,10 @@
             <!-- Department Name -->
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Department Name</label>
-                <input type="text" id="name" name="name" placeholder="e.g., Information Technology" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="e.g., Information Technology" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                @error('name')
+                    <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                @enderror
                 <span id="name-error" class="text-red-500 text-sm mt-1 hidden"></span>
                 <p class="text-xs text-gray-500 mt-1">A descriptive name for the department</p>
             </div>
@@ -31,7 +34,10 @@
             <!-- Department Code -->
             <div>
                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Department Code</label>
-                <input type="text" id="code" name="code" placeholder="e.g., IT" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <input type="text" id="code" name="code" value="{{ old('code') }}" placeholder="e.g., IT" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                @error('code')
+                    <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                @enderror
                 <span id="code-error" class="text-red-500 text-sm mt-1 hidden"></span>
                 <p class="text-xs text-gray-500 mt-1">Unique code identifier (e.g., IT, HR, FIN)</p>
             </div>

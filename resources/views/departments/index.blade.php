@@ -60,6 +60,9 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-left">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">S.No</span>
+                            </th>
+                            <th class="px-6 py-4 text-left">
                                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</span>
                             </th>
                             <th class="px-6 py-4 text-left">
@@ -79,6 +82,9 @@
                     <tbody class="bg-white divide-y divide-gray-50">
                         @forelse($departments as $department)
                         <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $departments->firstItem() + $loop->index }}
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
@@ -129,21 +135,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('admin.departments.destroy', Crypt::encrypt($department->id)) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this department?')">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -259,12 +256,42 @@ $(document).ready(function() {
     toggleIcons();
 
     function showFlashMessage(message, type) {
-        var colorClass = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-        var html = '<div class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in"><div class="' + colorClass + ' text-white px-6 py-4 rounded-lg shadow-lg border max-w-md"><p class="font-medium">' + message + '</p></div></div>';
+        var title = type === 'success' ? 'Success!' : 'Error!';
+        var iconHtml = type === 'success' ?
+            '<svg class="w-8 h-8 text-white animate-checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+            '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>';
+        var bgClass = type === 'success' ? 'from-blue-500 to-indigo-600' : 'from-red-500 to-pink-600';
+        var animateClass = type === 'success' ? 'animate-pulse' : 'animate-shake';
+
+        var html = '<div id="custom-alert" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">' +
+            '<div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-8 relative transform animate-bounce-in">' +
+                '<div class="text-center">' +
+                    '<div class="flex justify-center mb-4">' +
+                        '<div class="w-16 h-16 bg-gradient-to-br ' + bgClass + ' rounded-full flex items-center justify-center ' + animateClass + '">' +
+                            iconHtml +
+                        '</div>' +
+                    '</div>' +
+                    '<h3 class="text-2xl font-bold text-gray-900 animate-slide-in mb-2">' + title + '</h3>' +
+                    '<p class="text-gray-600 text-lg animate-slide-in-delay">' + message + '</p>' +
+                '</div>' +
+                '<div class="mt-6 bg-gray-200 rounded-full h-1">' +
+                    '<div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-1 rounded-full animate-progress"></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
         $('body').append(html);
-        setTimeout(function() {
-            $('.animate-fade-in').remove();
-        }, 3000);
+        setTimeout(closeAlert, 3000);
+    }
+
+    function closeAlert() {
+        const alert = document.getElementById('custom-alert');
+        if (alert) {
+            alert.classList.add('animate-fade-out');
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 300);
+        }
     }
 
     // Toggle status function
@@ -294,7 +321,7 @@ $(document).ready(function() {
                 }
 
                 // Show success message
-                showFlashMessage('Status updated successfully.', 'success');
+                showFlashMessage(response.message, 'success');
             },
             error: function() {
                 showFlashMessage('Failed to update status.', 'error');
@@ -317,6 +344,109 @@ $(document).ready(function() {
 </script>
 
 <style>
+/* Flash Message Animations */
+.animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+}
+
+.animate-checkmark {
+    animation: checkmark 0.8s ease-in-out 0.2s both;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+    animation: slideIn 0.5s ease-out 0.1s both;
+}
+
+.animate-slide-in-delay {
+    animation: slideIn 0.5s ease-out 0.3s both;
+}
+
+.animate-progress {
+    animation: progress 3s linear;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.3s ease-in-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes checkmark {
+    0% {
+        transform: scale(0) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(45deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes progress {
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
 /* Old Style Pagination */
 .pagination-container {
     display: flex;

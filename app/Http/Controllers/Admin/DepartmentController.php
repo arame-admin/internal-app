@@ -70,7 +70,7 @@ class DepartmentController extends Controller
     {
         // Validation
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:departments,name',
             'code' => 'required|string|max:10|unique:departments,code',
             'description' => 'nullable|string|max:500',
         ]);
@@ -100,7 +100,7 @@ class DepartmentController extends Controller
         $id = Crypt::decrypt($encryptedId);
         // Validation
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:departments,name,' . $id,
             'code' => 'required|string|max:10|unique:departments,code,' . $id,
             'description' => 'nullable|string|max:500',
         ]);
