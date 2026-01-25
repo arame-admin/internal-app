@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,13 +28,13 @@ class AuthController extends Controller
             // Redirect based on role
             switch ($roleId) {
                 case 1: // Admin
-                    return redirect()->intended(route('admin.dashboard'));
+                    return redirect()->intended('/admin/dashboard');
                 case 2: // Manager
-                    return redirect()->intended(route('manager.dashboard'));
+                    return redirect()->intended('/admin/dashboard');
                 case 3: // Employee
-                    return redirect()->intended(route('employee.dashboard'));
+                    return redirect()->intended('/admin/dashboard');
                 default:
-                    return redirect()->intended(route('admin.dashboard'));
+                    return redirect()->intended('/admin/dashboard');
             }
         }
 

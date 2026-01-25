@@ -83,7 +83,7 @@ class ProjectController extends Controller
             $total,
             $perPage,
             $page,
-            ['path' => route('projects.index', [], false)]
+            ['path' => route('admin.projects.index', [], false)]
         );
 
         // Get clients for filter dropdown

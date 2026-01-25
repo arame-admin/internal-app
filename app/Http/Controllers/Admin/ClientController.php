@@ -71,7 +71,7 @@ class ClientController extends Controller
             $total,
             $perPage,
             $page,
-            ['path' => route('clients.index', [], false)]
+            ['path' => route('admin.clients.index', [], false)]
         );
 
         return view('clients.index', compact('paginator', 'clients'));

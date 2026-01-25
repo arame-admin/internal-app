@@ -100,7 +100,7 @@ class PermissionController extends Controller
             $total,
             $perPage,
             $page,
-            ['path' => route('permissions.index', [], false)]
+            ['path' => route('admin.permissions.index', [], false)]
         );
 
         return view('permissions.index', compact('paginator', 'permissions', 'groups'));
@@ -132,7 +132,7 @@ class PermissionController extends Controller
         // TODO: Save to database
         // Permission::create($validated);
 
-        return redirect()->route('permissions.index')->with('success', 'Permission created successfully.');
+        return redirect()->route('admin.permissions.index')->with('success', 'Permission created successfully.');
     }
 
     /**
@@ -161,7 +161,7 @@ class PermissionController extends Controller
         // TODO: Update in database
         // Permission::where('id', $id)->update($validated);
 
-        return redirect()->route('permissions.index')->with('success', 'Permission updated successfully.');
+        return redirect()->route('admin.permissions.index')->with('success', 'Permission updated successfully.');
     }
 
     /**
@@ -187,7 +187,7 @@ class PermissionController extends Controller
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
         
-        return redirect()->route('permissions.index')->with('success', "Permission {$statusMessage} successfully.");
+        return redirect()->route('admin.permissions.index')->with('success', "Permission {$statusMessage} successfully.");
     }
 
     /**
@@ -198,7 +198,7 @@ class PermissionController extends Controller
         // TODO: Delete from database
         // Permission::where('id', $id)->delete();
 
-        return redirect()->route('permissions.index')->with('success', 'Permission deleted successfully.');
+        return redirect()->route('admin.permissions.index')->with('success', 'Permission deleted successfully.');
     }
 }
 

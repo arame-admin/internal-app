@@ -68,7 +68,7 @@ class DepartmentController extends Controller
             $total,
             $perPage,
             $page,
-            ['path' => route('departments.index', [], false)]
+            ['path' => route('admin.departments.index', [], false)]
         );
 
         return view('departments.index', compact('paginator', 'departments'));

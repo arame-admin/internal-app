@@ -88,7 +88,7 @@ class UserController extends Controller
             $total,
             $perPage,
             $page,
-            ['path' => route('users.index', [], false)]
+            ['path' => route('admin.users.index', [], false)]
         );
 
         return view('users.index', compact('paginator', 'users', 'departments'));

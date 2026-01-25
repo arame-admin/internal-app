@@ -8,9 +8,9 @@
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
+                <li><a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
                 <li><span class="text-gray-400">/</span></li>
-                <li><a href="{{ route('permissions.index') }}" class="hover:text-blue-600">Permissions</a></li>
+                <li><a href="{{ route('admin.permissions.index') }}" class="hover:text-blue-600">Permissions</a></li>
                 <li><span class="text-gray-400">/</span></li>
                 <li class="text-gray-900 font-medium">Edit Permission</li>
             </ol>
@@ -43,7 +43,7 @@
         
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
-            <a href="{{ route('permissions.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <a href="{{ route('admin.permissions.index') }}" class="px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                 Cancel
             </a>
             <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-colors font-medium shadow-lg shadow-blue-500/30">
