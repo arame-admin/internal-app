@@ -104,8 +104,8 @@
         </div>
 
         <!-- User Profile Dropdown -->
-        <div class="dropdown relative">
-            <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 cursor-pointer" onmouseenter="this.parentElement.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.parentElement.querySelector('.dropdown-menu').style.display='none'">
+        <div class="dropdown relative pt-2 pb-2" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
+            <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 cursor-pointer">
                 <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
                     <span class="text-white text-sm font-bold">{{ substr(auth()->user()?->name ?? 'JD', 0, 2) }}</span>
                 </div>
@@ -117,7 +117,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden" style="display: none;">
+            <div class="dropdown-menu absolute right-0 mt-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden">
                 <div class="px-4 py-3 border-b border-gray-100">
                     <p class="text-sm font-semibold text-gray-800">{{ auth()->user()?->name ?? 'John Doe' }}</p>
                     <p class="text-xs text-gray-500">{{ auth()->user()?->email ?? 'john@example.com' }}</p>

@@ -8,7 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .dropdown:hover .dropdown-menu {
-            display: block;
+            display: block !important;
         }
     </style>
 </head>
