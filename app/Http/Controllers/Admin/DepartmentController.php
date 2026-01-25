@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
@@ -19,6 +18,19 @@ use Illuminate\Support\Facades\Log;
  */
 class DepartmentController extends Controller
 {
+    /**
+     * Get a department by its encrypted ID.
+     *
+     * @param string $encryptedId The encrypted department ID
+     * @return Department The department model instance
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If department not found
+     */
+    private function getDepartment($encryptedId)
+    {
+        $id = Crypt::decrypt($encryptedId);
+        return Department::findOrFail($id);
+    }
+
     /**
      * Display a listing of departments with search, filter, and pagination.
      */
@@ -102,11 +114,13 @@ class DepartmentController extends Controller
 
     /**
      * Show the form for editing a department.
+     *
+     * @param string $encryptedId The encrypted department ID
+     * @return \Illuminate\View\View The edit view with department data
      */
     public function edit($encryptedId)
     {
-        $id = Crypt::decrypt($encryptedId);
-        $department = Department::findOrFail($id);
+        $department = $this->getDepartment($encryptedId);
         return view('departments.edit', compact('department'));
     }
 
@@ -116,15 +130,13 @@ class DepartmentController extends Controller
     public function update(Request $request, $encryptedId)
     {
         try {
-            $id = Crypt::decrypt($encryptedId);
+            $department = $this->getDepartment($encryptedId);
             // Validation
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:departments,name,' . $id,
-                'code' => 'required|string|max:10|unique:departments,code,' . $id,
+                'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
+                'code' => 'required|string|max:10|unique:departments,code,' . $department->id,
                 'description' => 'nullable|string|max:500',
             ]);
-
-            $department = Department::findOrFail($id);
             $department->update($validated);
 
             Log::channel('custom')->info('Department updated successfully: ' . $validated['name']);
@@ -145,13 +157,11 @@ class DepartmentController extends Controller
     public function updateStatus(Request $request, $encryptedId)
     {
         try {
-            $id = Crypt::decrypt($encryptedId);
+            $department = $this->getDepartment($encryptedId);
             $validated = $request->validate([
                 'status' => 'required|in:active,inactive',
                 'reason' => 'nullable|string|max:500',
             ]);
-
-            $department = Department::findOrFail($id);
             $department->update(['status' => $validated['status']]);
 
             $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
@@ -180,11 +190,13 @@ class DepartmentController extends Controller
 
     /**
      * Remove the specified department.
+     *
+     * @param string $encryptedId The encrypted department ID
+     * @return \Illuminate\Http\RedirectResponse Redirect to departments index
      */
     public function destroy($encryptedId)
     {
-        $id = Crypt::decrypt($encryptedId);
-        $department = Department::findOrFail($id);
+        $department = $this->getDepartment($encryptedId);
         $department->delete();
 
         return redirect()->route('admin.departments.index')->with('success', 'Department deleted successfully.');
