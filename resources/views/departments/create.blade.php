@@ -16,7 +16,7 @@
             </ol>
         </nav>
 
-        <form action="#" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <form action="{{ route('admin.departments.store') }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         @csrf
 
         <div class="space-y-6">
@@ -24,6 +24,7 @@
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Department Name</label>
                 <input type="text" id="name" name="name" placeholder="e.g., Information Technology" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <span id="name-error" class="text-red-500 text-sm mt-1 hidden"></span>
                 <p class="text-xs text-gray-500 mt-1">A descriptive name for the department</p>
             </div>
 
@@ -31,8 +32,17 @@
             <div>
                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Department Code</label>
                 <input type="text" id="code" name="code" placeholder="e.g., IT" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <span id="code-error" class="text-red-500 text-sm mt-1 hidden"></span>
                 <p class="text-xs text-gray-500 mt-1">Unique code identifier (e.g., IT, HR, FIN)</p>
             </div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="Optional description of the department..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Optional description (max 500 characters)</p>
+            </div>
+
         </div>
 
         <!-- Form Actions -->
@@ -45,6 +55,49 @@
             </button>
         </div>
     </form>
-    </div>
 </div>
+</div>
+
+<script>
+function showError(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.textContent = message;
+    el.classList.remove('hidden');
+}
+
+function hideError(elementId) {
+    const el = document.getElementById(elementId);
+    el.classList.add('hidden');
+}
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const code = document.getElementById('code').value.trim();
+
+    hideError('name-error');
+    hideError('code-error');
+
+    let hasError = false;
+
+    if (!name) {
+        showError('name-error', 'Department name is required.');
+        hasError = true;
+    }
+
+    if (!code) {
+        showError('code-error', 'Department code is required.');
+        hasError = true;
+    } else if (code.length > 10) {
+        showError('code-error', 'Department code must be 10 characters or less.');
+        hasError = true;
+    } else if (!/^[A-Z0-9]+$/.test(code)) {
+        showError('code-error', 'Department code must contain only uppercase letters and numbers.');
+        hasError = true;
+    }
+
+    if (hasError) {
+        e.preventDefault();
+    }
+});
+</script>
 @endsection

@@ -16,7 +16,7 @@
             </ol>
         </nav>
 
-        <form action="#" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <form action="{{ route('admin.departments.update', Crypt::encrypt($department->id)) }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         @csrf
         @method('PUT')
 
@@ -24,16 +24,17 @@
             <!-- Department Name -->
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Department Name</label>
-                <input type="text" id="name" name="name" value="{{ $department['name'] }}" placeholder="e.g., Information Technology" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <input type="text" id="name" name="name" value="{{ $department->name }}" placeholder="e.g., Information Technology" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                 <p class="text-xs text-gray-500 mt-1">A descriptive name for the department</p>
             </div>
 
             <!-- Department Code -->
             <div>
                 <label for="code" class="block text-sm font-medium text-gray-700 mb-2">Department Code</label>
-                <input type="text" id="code" name="code" value="{{ $department['code'] }}" placeholder="e.g., IT" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                <input type="text" id="code" name="code" value="{{ $department->code }}" placeholder="e.g., IT" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                 <p class="text-xs text-gray-500 mt-1">Unique code identifier (cannot be changed)</p>
             </div>
+
         </div>
 
         <!-- Form Actions -->

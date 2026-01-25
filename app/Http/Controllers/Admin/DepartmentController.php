@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use Illuminate\Support\Facades\Crypt;
 
 class DepartmentController extends Controller
 {
@@ -11,67 +13,46 @@ class DepartmentController extends Controller
      */
     public function index(Request $request)
     {
-        // Sample data - replace with actual database query
-        $departments = [
-            ['id' => 1, 'name' => 'Information Technology', 'code' => 'IT', 'description' => 'Handles all IT operations and development', 'status' => 'active', 'created_at' => '2023-01-15'],
-            ['id' => 2, 'name' => 'Human Resources', 'code' => 'HR', 'description' => 'Manages employee relations and policies', 'status' => 'active', 'created_at' => '2023-01-20'],
-            ['id' => 3, 'name' => 'Finance', 'code' => 'FIN', 'description' => 'Manages financial operations and accounting', 'status' => 'active', 'created_at' => '2023-02-01'],
-            ['id' => 4, 'name' => 'Marketing', 'code' => 'MKT', 'description' => 'Handles marketing and brand management', 'status' => 'active', 'created_at' => '2023-02-15'],
-            ['id' => 5, 'name' => 'Operations', 'code' => 'OPS', 'description' => 'Oversees daily operations and logistics', 'status' => 'inactive', 'created_at' => '2023-03-01'],
-        ];
+        $query = Department::query();
 
         // Search filter
         if ($request->has('search') && !empty($request->search)) {
-            $search = strtolower($request->search);
-            $departments = array_filter($departments, function($department) use ($search) {
-                return str_contains(strtolower($department['name']), $search) ||
-                       str_contains(strtolower($department['code']), $search) ||
-                       str_contains(strtolower($department['description']), $search);
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
-            $departments = array_values($departments);
         }
 
         // Status filter
         if ($request->has('status') && !empty($request->status)) {
-            $departments = array_filter($departments, function($department) use ($request) {
-                return $department['status'] === $request->status;
-            });
-            $departments = array_values($departments);
+            $query->where('status', $request->status);
         }
 
         // Sort
         if ($request->has('sort') && !empty($request->sort)) {
             switch ($request->sort) {
                 case 'name':
-                    usort($departments, fn($a, $b) => strcmp($a['name'], $b['name']));
+                    $query->orderBy('name');
                     break;
                 case 'code':
-                    usort($departments, fn($a, $b) => strcmp($a['code'], $b['code']));
+                    $query->orderBy('code');
                     break;
                 case 'date':
-                    usort($departments, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+                    $query->orderBy('created_at', 'desc');
                     break;
                 default:
-                    break;
+                    $query->orderBy('created_at', 'desc');
             }
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         // Paginate
-        $perPage = 5;
-        $page = $request->get('page', 1);
-        $total = count($departments);
-        $departments = array_slice($departments, ($page - 1) * $perPage, $perPage);
+        $departments = $query->paginate(10);
 
-        // Create a paginator-like object
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $departments,
-            $total,
-            $perPage,
-            $page,
-            ['path' => route('admin.departments.index', [], false)]
-        );
-
-        return view('departments.index', compact('paginator', 'departments'));
+        return view('departments.index', compact('departments'));
     }
 
     /**
@@ -91,10 +72,12 @@ class DepartmentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:10|unique:departments,code',
+            'description' => 'nullable|string|max:500',
         ]);
 
-        // TODO: Save to database
-        // Department::create($validated);
+        $validated['status'] = 'active';
+
+        Department::create($validated);
 
         return redirect()->route('admin.departments.index')->with('success', 'Department created successfully.');
     }
@@ -102,33 +85,28 @@ class DepartmentController extends Controller
     /**
      * Show the form for editing a department.
      */
-    public function edit($id)
+    public function edit($encryptedId)
     {
-        // Sample department data - replace with actual database query
-        $department = [
-            'id' => $id,
-            'name' => 'Information Technology',
-            'code' => 'IT',
-            'description' => 'Handles all IT operations and development',
-            'status' => 'active'
-        ];
-
+        $id = Crypt::decrypt($encryptedId);
+        $department = Department::findOrFail($id);
         return view('departments.edit', compact('department'));
     }
 
     /**
      * Update the specified department.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $encryptedId)
     {
+        $id = Crypt::decrypt($encryptedId);
         // Validation
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10',
+            'code' => 'required|string|max:10|unique:departments,code,' . $id,
+            'description' => 'nullable|string|max:500',
         ]);
 
-        // TODO: Update in database
-        // Department::where('id', $id)->update($validated);
+        $department = Department::findOrFail($id);
+        $department->update($validated);
 
         return redirect()->route('admin.departments.index')->with('success', 'Department updated successfully.');
     }
@@ -136,23 +114,26 @@ class DepartmentController extends Controller
     /**
      * Show the form for changing department status.
      */
-    public function showStatus($id)
+    public function showStatus($encryptedId)
     {
-        return view('departments.status', ['id' => $id]);
+        $id = Crypt::decrypt($encryptedId);
+        $department = Department::findOrFail($id);
+        return view('departments.status', compact('department'));
     }
 
     /**
      * Update the status of the specified department.
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $encryptedId)
     {
+        $id = Crypt::decrypt($encryptedId);
         $validated = $request->validate([
             'status' => 'required|in:active,inactive',
             'reason' => 'nullable|string|max:500',
         ]);
 
-        // TODO: Update status in database
-        // Department::where('id', $id)->update(['status' => $validated['status']]);
+        $department = Department::findOrFail($id);
+        $department->update(['status' => $validated['status']]);
 
         $statusMessage = $validated['status'] === 'active' ? 'activated' : 'deactivated';
 
@@ -162,10 +143,11 @@ class DepartmentController extends Controller
     /**
      * Remove the specified department.
      */
-    public function destroy($id)
+    public function destroy($encryptedId)
     {
-        // TODO: Delete from database
-        // Department::where('id', $id)->delete();
+        $id = Crypt::decrypt($encryptedId);
+        $department = Department::findOrFail($id);
+        $department->delete();
 
         return redirect()->route('admin.departments.index')->with('success', 'Department deleted successfully.');
     }

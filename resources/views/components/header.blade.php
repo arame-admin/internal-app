@@ -1,5 +1,5 @@
 <!-- Top Navigation Bar -->
-<nav class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm z-50">
+<nav class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-50">
     <div class="h-full px-6 flex items-center justify-between">
         <!-- Logo -->
         <div class="flex items-center space-x-3">

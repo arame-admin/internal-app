@@ -125,28 +125,28 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-800">{{ $permission['name'] }}</p>
+                            <p class="font-semibold text-gray-800">{{ $permission->name }}</p>
                         </div>
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <code class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $permission['slug'] }}</code>
+                    <code class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{{ $permission->slug }}</code>
                 </td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {{ $permission['group'] }}
+                        {{ $permission->group }}
                     </span>
                 </td>
                 <td class="px-6 py-4">
-                    <p class="text-sm text-gray-600 max-w-xs truncate">{{ $permission['description'] }}</p>
+                    <p class="text-sm text-gray-600 max-w-xs truncate">{{ $permission->description }}</p>
                 </td>
                 <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                        {{ $permission['roles_count'] }} roles
+                        {{ $permission->roles_count ?? 0 }} roles
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    @if($permission['status'] == 'active')
+                    @if($permission->status == 'active')
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Active
                         </span>
@@ -158,17 +158,17 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                        <a href="{{ route('admin.permissions.status', $permission['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                        <a href="{{ route('admin.permissions.status', $permission->id) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('admin.permissions.edit', $permission['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <a href="{{ route('admin.permissions.edit', $permission->id) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
-                        <form action="{{ route('admin.permissions.destroy', $permission['id']) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.permissions.destroy', $permission->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this permission?')">
