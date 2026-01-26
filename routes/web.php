@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\DesignationController;
 use App\Http\Controllers\Admin\BusinessUnitController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\ClientController;
@@ -42,6 +43,9 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     Route::resource('business-units', BusinessUnitController::class);
     Route::put('/business-units/{id}/status', [BusinessUnitController::class, 'updateStatus'])->name('business-units.status.update');
+
+    Route::resource('locations', LocationController::class);
+    Route::put('/locations/{id}/status', [LocationController::class, 'updateStatus'])->name('locations.status.update');
 
     Route::resource('users', UserController::class);
     Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
