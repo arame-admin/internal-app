@@ -38,9 +38,14 @@
 
     <script>
         $(document).ready(function() {
-            $('select').select2({
-                width: '100%',
-                minimumResultsForSearch: -1
+            $('select').each(function() {
+                var $select = $(this);
+                var optionCount = $select.find('option').length;
+
+                $select.select2({
+                    width: '100%',
+                    minimumResultsForSearch: optionCount > 10 ? 0 : -1
+                });
             });
         });
     </script>

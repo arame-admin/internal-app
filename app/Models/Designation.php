@@ -3,23 +3,23 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Department Model
+ * Designation Model
  *
- * Represents a department in the organization.
- * Handles department data including name, code, description, and status.
+ * Represents a designation in the organization.
+ * Handles designation data including name, code, description, and status.
  *
  * @property int $id Primary key
- * @property string $name Department name
- * @property string $code Unique department code
- * @property string|null $description Department description
- * @property string $status Department status (active/inactive)
+ * @property string $name Designation name
+ * @property string $code Unique designation code
+ * @property string|null $description Designation description
+ * @property string $status Designation status (active/inactive)
  * @property \Carbon\Carbon $created_at Creation timestamp
  * @property \Carbon\Carbon $updated_at Update timestamp
  */
-class Department extends Model
+class Designation extends Model
 {
     use HasFactory;
 
@@ -28,7 +28,7 @@ class Department extends Model
      *
      * @var string
      */
-    protected $table = 'departments';
+    protected $table = 'designations';
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +39,7 @@ class Department extends Model
         'name',
         'code',
         'description',
+        'department_id',
         'status',
     ];
 
@@ -52,10 +53,10 @@ class Department extends Model
     ];
 
     /**
-     * Get the designations for the department.
+     * Get the department that owns the designation.
      */
-    public function designations()
+    public function department()
     {
-        return $this->hasMany(Designation::class);
+        return $this->belongsTo(Department::class);
     }
 }

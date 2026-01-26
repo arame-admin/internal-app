@@ -66,7 +66,7 @@ class DepartmentController extends Controller
         // Paginate
         $departments = $query->paginate(10);
 
-        return view('departments.index', compact('departments'));
+        return view('Admin.departments.index', compact('departments'));
     }
 
     /**
@@ -74,7 +74,7 @@ class DepartmentController extends Controller
      */
     public function create()
     {
-        return view('departments.create');
+        return view('Admin.departments.create');
     }
 
     /**
@@ -121,7 +121,7 @@ class DepartmentController extends Controller
     public function edit($encryptedId)
     {
         $department = $this->getDepartment($encryptedId);
-        return view('departments.edit', compact('department'));
+        return view('Admin.departments.edit', compact('department'));
     }
 
     /**

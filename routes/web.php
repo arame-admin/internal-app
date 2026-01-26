@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DesignationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\ClientController;
@@ -33,6 +34,10 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     Route::resource('departments', DepartmentController::class);
     Route::put('/departments/{id}/status', [DepartmentController::class, 'updateStatus'])->name('departments.status.update');
+
+    Route::resource('designations', DesignationController::class);
+    Route::get('/designations/{id}/status', [DesignationController::class, 'showStatus'])->name('designations.status');
+    Route::put('/designations/{id}/status', [DesignationController::class, 'updateStatus'])->name('designations.status.update');
 
     Route::resource('users', UserController::class);
     Route::get('/users/{id}/status', [UserController::class, 'showStatus'])->name('users.status');
