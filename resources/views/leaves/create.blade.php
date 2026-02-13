@@ -27,42 +27,34 @@
                         <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year</label>
                         <select id="year" name="year" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                             <option value="">Select Year</option>
-                            @for ($y = date('Y'); $y <= date('Y') + 5; $y++)
+                            @for ($y = date('Y') + 1; $y >= 2025; $y--)
                                 <option value="{{ $y }}" {{ old('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
                         <p class="text-xs text-gray-500 mt-1">The year for which leave configuration applies</p>
                     </div>
 
-                    <!-- Status -->
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select id="status" name="status" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
-                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Sick Leaves -->
                     <div>
                         <label for="sick_leaves" class="block text-sm font-medium text-gray-700 mb-2">Sick Leaves</label>
-                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ old('sick_leaves', 10) }}" min="0" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ old('sick_leaves', 10) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of sick leaves per year</p>
                     </div>
 
                     <!-- Casual Leaves -->
                     <div>
                         <label for="casual_leaves" class="block text-sm font-medium text-gray-700 mb-2">Casual Leaves</label>
-                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ old('casual_leaves', 12) }}" min="0" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ old('casual_leaves', 12) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of casual leaves per year</p>
                     </div>
 
                     <!-- Earned Leaves -->
                     <div>
                         <label for="earned_leaves" class="block text-sm font-medium text-gray-700 mb-2">Earned Leaves</label>
-                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ old('earned_leaves', 15) }}" min="0" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ old('earned_leaves', 15) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of earned leaves per year</p>
                     </div>
                 </div>

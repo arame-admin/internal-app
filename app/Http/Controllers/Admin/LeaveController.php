@@ -12,56 +12,21 @@ class LeaveController extends Controller
      */
     public function index(Request $request)
     {
-        // Mock leave data
-        $leaves = [
-            [
-                'id' => 1,
-                'year' => 2024,
+        // Generate dynamic mock leave data starting from 2025
+        $currentYear = date('Y');
+        $leaves = [];
+        
+        // Generate leave configurations for 2025 and current year + 1
+        for ($year = 2025; $year <= $currentYear + 1; $year++) {
+            $leaves[] = [
+                'id' => $year - 2024,
+                'year' => $year,
                 'sick_leaves' => 10,
                 'casual_leaves' => 12,
                 'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2023-01-01'
-            ],
-            [
-                'id' => 2,
-                'year' => 2025,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2024-01-01'
-            ],
-            [
-                'id' => 3,
-                'year' => 2026,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'inactive',
-                'created_at' => '2025-01-01'
-            ],
-        ];
-
-        // Filter by year if provided
-        if ($request->filled('year')) {
-            $leaves = array_filter($leaves, function($leave) use ($request) {
-                return $leave['year'] == $request->year;
-            });
-        }
-
-        // Filter by status if provided
-        if ($request->filled('status')) {
-            $leaves = array_filter($leaves, function($leave) use ($request) {
-                return $leave['status'] == $request->status;
-            });
-        }
-
-        // Sort by year if requested
-        if ($request->filled('sort') && $request->sort == 'year') {
-            usort($leaves, function($a, $b) {
-                return $b['year'] <=> $a['year'];
-            });
+                'status' => $year == $currentYear ? 'active' : 'inactive',
+                'created_at' => ($year - 1) . '-01-01'
+            ];
         }
 
         return view('leaves.index', compact('leaves'));
@@ -81,11 +46,10 @@ class LeaveController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'year' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 5),
-            'sick_leaves' => 'required|integer|min:0',
-            'casual_leaves' => 'required|integer|min:0',
-            'earned_leaves' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
+            'year' => 'required|integer|min:2025|max:' . (date('Y') + 1),
+            'sick_leaves' => 'required|integer|min:0|max:365',
+            'casual_leaves' => 'required|integer|min:0|max:365',
+            'earned_leaves' => 'required|integer|min:0|max:365',
         ]);
 
         // In a real app, save to database
@@ -98,36 +62,21 @@ class LeaveController extends Controller
      */
     public function edit($id)
     {
-        // Mock finding the leave
-        $leaves = [
-            [
-                'id' => 1,
-                'year' => 2024,
+        // Generate dynamic mock leave data
+        $currentYear = date('Y');
+        $leaves = [];
+        
+        for ($year = 2025; $year <= $currentYear + 1; $year++) {
+            $leaves[] = [
+                'id' => $year - 2024,
+                'year' => $year,
                 'sick_leaves' => 10,
                 'casual_leaves' => 12,
                 'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2023-01-01'
-            ],
-            [
-                'id' => 2,
-                'year' => 2025,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2024-01-01'
-            ],
-            [
-                'id' => 3,
-                'year' => 2026,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'inactive',
-                'created_at' => '2025-01-01'
-            ],
-        ];
+                'status' => $year == $currentYear ? 'active' : 'inactive',
+                'created_at' => ($year - 1) . '-01-01'
+            ];
+        }
 
         $leave = collect($leaves)->firstWhere('id', $id);
 
@@ -144,11 +93,10 @@ class LeaveController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'year' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 5),
-            'sick_leaves' => 'required|integer|min:0',
-            'casual_leaves' => 'required|integer|min:0',
-            'earned_leaves' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
+            'year' => 'required|integer|min:2025|max:' . (date('Y') + 1),
+            'sick_leaves' => 'required|integer|min:0|max:365',
+            'casual_leaves' => 'required|integer|min:0|max:365',
+            'earned_leaves' => 'required|integer|min:0|max:365',
         ]);
 
         // In a real app, update in database
@@ -171,36 +119,21 @@ class LeaveController extends Controller
      */
     public function showStatus($id)
     {
-        // Mock finding the leave
-        $leaves = [
-            [
-                'id' => 1,
-                'year' => 2024,
+        // Generate dynamic mock leave data
+        $currentYear = date('Y');
+        $leaves = [];
+        
+        for ($year = 2025; $year <= $currentYear + 1; $year++) {
+            $leaves[] = [
+                'id' => $year - 2024,
+                'year' => $year,
                 'sick_leaves' => 10,
                 'casual_leaves' => 12,
                 'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2023-01-01'
-            ],
-            [
-                'id' => 2,
-                'year' => 2025,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'active',
-                'created_at' => '2024-01-01'
-            ],
-            [
-                'id' => 3,
-                'year' => 2026,
-                'sick_leaves' => 10,
-                'casual_leaves' => 12,
-                'earned_leaves' => 15,
-                'status' => 'inactive',
-                'created_at' => '2025-01-01'
-            ],
-        ];
+                'status' => $year == $currentYear ? 'active' : 'inactive',
+                'created_at' => ($year - 1) . '-01-01'
+            ];
+        }
 
         $leave = collect($leaves)->firstWhere('id', $id);
 

@@ -22,13 +22,31 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'name' => 'Manager',
-                'description' => 'Team management and reporting access',
+                'name' => 'Leadership',
+                'description' => 'Strategic leadership and company-wide access',
                 'is_active' => true
             ],
             [
                 'id' => 3,
-                'name' => 'Employee',
+                'name' => 'Managers',
+                'description' => 'Team management and reporting access',
+                'is_active' => true
+            ],
+            [
+                'id' => 4,
+                'name' => 'Asst Managers',
+                'description' => 'Assistant management and team support',
+                'is_active' => true
+            ],
+            [
+                'id' => 5,
+                'name' => 'Team Lead',
+                'description' => 'Team coordination and leadership',
+                'is_active' => true
+            ],
+            [
+                'id' => 6,
+                'name' => 'Users',
                 'description' => 'Standard employee access',
                 'is_active' => true
             ],

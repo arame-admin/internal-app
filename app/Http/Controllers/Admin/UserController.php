@@ -96,7 +96,15 @@ class UserController extends Controller
         $businessUnits = BusinessUnit::where('status', 'active')->get();
         $locations = Location::where('status', 'active')->get();
 
-        return view('Admin.users.create', compact('roles', 'departments', 'designations', 'businessUnits', 'locations'));
+        // Generate next employee code
+        $lastUser = User::orderBy('id', 'desc')->first();
+        if ($lastUser && !empty($lastUser->employee_code)) {
+            $nextEmployeeCode = intval($lastUser->employee_code) + 1;
+        } else {
+            $nextEmployeeCode = 1000;
+        }
+
+        return view('Admin.users.create', compact('roles', 'departments', 'designations', 'businessUnits', 'locations', 'nextEmployeeCode'));
     }
 
     /**
@@ -112,9 +120,7 @@ class UserController extends Controller
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'personal_email' => 'nullable|string|email|max:255|unique:users,personal_email',
-                'phone_country_code' => 'nullable|string|max:5',
                 'phone_number' => 'nullable|string|max:20',
-                'password' => 'required|string|min:8|confirmed',
 
                 // Personal Details
                 'about_me' => 'nullable|string|max:1000',
@@ -147,7 +153,6 @@ class UserController extends Controller
 
             // Set default values
             $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
-            $validated['password'] = Hash::make($validated['password']);
             $validated['is_active'] = true;
 
             User::create($validated);

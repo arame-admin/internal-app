@@ -4,64 +4,13 @@
 
 @section('content')
 
-<!-- Filters & Search -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-    <div class="p-4 border-b border-gray-100">
-        <form action="{{ route('admin.leaves.index') }}" method="GET" class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <!-- Search -->
-            <div class="relative flex-1 max-w-md">
-                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search leaves..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-            </div>
-
-            <!-- Filters -->
-            <div class="flex items-center space-x-3">
-                <select name="year" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
-                    <option value="">All Years</option>
-                    <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
-                    <option value="2025" {{ request('year') == '2025' ? 'selected' : '' }}>2025</option>
-                    <option value="2026" {{ request('year') == '2026' ? 'selected' : '' }}>2026</option>
-                </select>
-
-                <select name="status" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
-                    <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-
-                <select name="sort" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
-                    <option value="">Sort By</option>
-                    <option value="year" {{ request('sort') == 'year' ? 'selected' : '' }}>Year</option>
-                </select>
-
-                <button type="submit" class="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                    </svg>
-                </button>
-
-                @if(request()->anyFilled(['search', 'year', 'status', 'sort']))
-                    <a href="{{ route('admin.leaves.index') }}" class="px-4 py-2 text-sm text-red-600 hover:text-red-700">
-                        Clear
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Leaves Table -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <table class="w-full">
         <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
                 <th class="px-6 py-4 text-left">
-                    <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                </th>
-                <th class="px-6 py-4 text-left">
-                    <a href="{{ route('admin.leaves.index', ['sort' => 'year', 'search' => request('search'), 'year' => request('year'), 'status' => request('status')]) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                    <a href="{{ route('admin.leaves.index', ['sort' => 'year']) }}" class="flex items-center space-x-1 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700">
                         <span>Year</span>
                         @if(request('sort') == 'year')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,9 +43,6 @@
         <tbody class="divide-y divide-gray-50">
             @forelse($leaves as $leave)
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4">
-                    <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
@@ -147,21 +93,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
-                        <form action="{{ route('admin.leaves.destroy', $leave['id']) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this leave configuration?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </form>
                     </div>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="px-6 py-12 text-center">
+                <td colspan="6" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center justify-center">
                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

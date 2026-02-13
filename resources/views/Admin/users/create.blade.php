@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen py-8">
-    <div class="max-w-4xl mx-auto px-4">
+    <div class="max-w-full mx-auto px-4">
         <!-- Breadcrumb -->
         <nav class="mb-6">
             <ol class="flex items-center space-x-2 text-sm text-gray-600">
@@ -66,22 +66,10 @@
                     </div>
 
                     <!-- Phone Number -->
-                    <div class="md:col-span-2">
+                    <div>
                         <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <div class="flex">
-                            <select name="phone_country_code" class="px-3 py-3 border border-r-0 border-gray-200 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50">
-                                <option value="">+XX</option>
-                                <option value="1" {{ old('phone_country_code') == '1' ? 'selected' : '' }}>+1 (US)</option>
-                                <option value="91" {{ old('phone_country_code') == '91' ? 'selected' : '' }}>+91 (IN)</option>
-                                <option value="44" {{ old('phone_country_code') == '44' ? 'selected' : '' }}>+44 (UK)</option>
-                                <option value="61" {{ old('phone_country_code') == '61' ? 'selected' : '' }}>+61 (AU)</option>
-                            </select>
-                            <input type="text" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" placeholder="1234567890" class="flex-1 px-4 py-3 border border-gray-200 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                        </div>
+                        <input type="text" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" placeholder="1234567890" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         @error('phone_number')
-                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                        @enderror
-                        @error('phone_country_code')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
                     </div>
@@ -92,25 +80,6 @@
             <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                        <input type="password" id="password" name="password" placeholder="Enter password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
-                        @error('password')
-                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                        @enderror
-                        <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
-                        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Confirm password" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
-                        @error('password_confirmation')
-                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                        @enderror
-                    </div>
-
                     <!-- Role -->
                     <div>
                         <label for="role_id" class="block text-sm font-medium text-gray-700 mb-2">Role <span class="text-red-500">*</span></label>
@@ -128,7 +97,7 @@
                     <!-- Employee Code -->
                     <div>
                         <label for="employee_code" class="block text-sm font-medium text-gray-700 mb-2">Employee Code</label>
-                        <input type="text" id="employee_code" name="employee_code" value="{{ old('employee_code') }}" placeholder="EMP001" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <input type="text" id="employee_code" name="employee_code" value="{{ old('employee_code', $nextEmployeeCode) }}" placeholder="EMP001" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         @error('employee_code')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
@@ -408,19 +377,6 @@ function updateFullName() {
     // Note: Full name is generated in the controller
 }
 
-// Form validation
-document.querySelector('form').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('password_confirmation').value;
-
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Passwords do not match!');
-        return;
-    }
-
-    // Additional client-side validations can be added here
-});
 </script>
 
 @endsection
