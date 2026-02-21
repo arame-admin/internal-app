@@ -18,7 +18,16 @@
 
         <!-- Leave Form -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <form action="{{ route('admin.leaves.update', $leave['id']) }}" method="POST" class="space-y-6">
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <ul class="list-disc list-inside text-sm text-red-600">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            <form action="{{ route('admin.leaves.update', encrypt($leaveData['id'])) }}" method="POST" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -26,12 +35,13 @@
                     <!-- Year -->
                     <div>
                         <label for="year" class="block text-sm font-medium text-gray-700 mb-2">Year</label>
-                        <select id="year" name="year" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <select id="year" name="year" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required disabled>
                             <option value="">Select Year</option>
                             @for ($y = date('Y') + 1; $y >= 2025; $y--)
-                                <option value="{{ $y }}" {{ $leave['year'] == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                <option value="{{ $y }}" {{ $leaveData['year'] == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
+                        <input type="hidden" name="year" value="{{ $leaveData['year'] }}">
                         <p class="text-xs text-gray-500 mt-1">The year for which leave configuration applies</p>
                     </div>
                 </div>
@@ -40,21 +50,21 @@
                     <!-- Sick Leaves -->
                     <div>
                         <label for="sick_leaves" class="block text-sm font-medium text-gray-700 mb-2">Sick Leaves</label>
-                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ $leave['sick_leaves'] }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ $leaveData['sick_leaves'] }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of sick leaves per year</p>
                     </div>
 
                     <!-- Casual Leaves -->
                     <div>
                         <label for="casual_leaves" class="block text-sm font-medium text-gray-700 mb-2">Casual Leaves</label>
-                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ $leave['casual_leaves'] }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ $leaveData['casual_leaves'] }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of casual leaves per year</p>
                     </div>
 
                     <!-- Earned Leaves -->
                     <div>
                         <label for="earned_leaves" class="block text-sm font-medium text-gray-700 mb-2">Earned Leaves</label>
-                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ $leave['earned_leaves'] }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ $leaveData['earned_leaves'] }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of earned leaves per year</p>
                     </div>
                 </div>

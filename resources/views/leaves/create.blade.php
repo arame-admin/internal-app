@@ -18,6 +18,15 @@
 
         <!-- Leave Form -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <ul class="list-disc list-inside text-sm text-red-600">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <form action="{{ route('admin.leaves.store') }}" method="POST" class="space-y-6">
                 @csrf
 
@@ -40,21 +49,21 @@
                     <!-- Sick Leaves -->
                     <div>
                         <label for="sick_leaves" class="block text-sm font-medium text-gray-700 mb-2">Sick Leaves</label>
-                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ old('sick_leaves', 10) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="sick_leaves" name="sick_leaves" value="{{ old('sick_leaves', 10) }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of sick leaves per year</p>
                     </div>
 
                     <!-- Casual Leaves -->
                     <div>
                         <label for="casual_leaves" class="block text-sm font-medium text-gray-700 mb-2">Casual Leaves</label>
-                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ old('casual_leaves', 12) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="casual_leaves" name="casual_leaves" value="{{ old('casual_leaves', 12) }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of casual leaves per year</p>
                     </div>
 
                     <!-- Earned Leaves -->
                     <div>
                         <label for="earned_leaves" class="block text-sm font-medium text-gray-700 mb-2">Earned Leaves</label>
-                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ old('earned_leaves', 15) }}" min="0" max="365" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
+                        <input type="number" id="earned_leaves" name="earned_leaves" value="{{ old('earned_leaves', 15) }}" min="0" max="99" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" required>
                         <p class="text-xs text-gray-500 mt-1">Number of earned leaves per year</p>
                     </div>
                 </div>
