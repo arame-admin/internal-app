@@ -160,6 +160,36 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Get the selected year
+    const yearSelect = document.getElementById('year');
+    const selectedYear = yearSelect ? yearSelect.value : new Date().getFullYear();
+
+    // Function to update date input min/max based on selected year
+    function updateDateRestrictions(year) {
+        const minDate = `${year}-01-01`;
+        const maxDate = `${year}-12-31`;
+        
+        // Update all mandatory holiday date inputs
+        document.querySelectorAll('#holiday-rows input[type="date"]').forEach(input => {
+            input.min = minDate;
+            input.max = maxDate;
+        });
+        
+        // Update all optional holiday date inputs
+        document.querySelectorAll('#optional-holiday-rows input[type="date"]').forEach(input => {
+            input.min = minDate;
+            input.max = maxDate;
+        });
+    }
+
+    // Initial date restriction based on selected year
+    updateDateRestrictions(selectedYear);
+
+    // Update date restrictions when year changes
+    yearSelect.addEventListener('change', function() {
+        updateDateRestrictions(this.value);
+    });
+
     // Mandatory Holidays
     const addMandatoryHolidayBtn = document.getElementById('add-holiday-row');
     const mandatoryHolidayRowsContainer = document.getElementById('holiday-rows');
@@ -216,6 +246,13 @@ document.addEventListener('DOMContentLoaded', function() {
     addMandatoryHolidayBtn.addEventListener('click', function() {
         const newRow = mandatoryHolidayRowTemplate.replace(/INDEX/g, mandatoryRowIndex);
         mandatoryHolidayRowsContainer.insertAdjacentHTML('beforeend', newRow);
+        
+        // Apply date restrictions to new row
+        const year = document.getElementById('year').value;
+        const newInput = mandatoryHolidayRowsContainer.lastElementChild.querySelector('input[type="date"]');
+        newInput.min = `${year}-01-01`;
+        newInput.max = `${year}-12-31`;
+        
         mandatoryRowIndex++;
         updateMandatoryHolidayCount();
     });
@@ -224,6 +261,13 @@ document.addEventListener('DOMContentLoaded', function() {
     addOptionalHolidayBtn.addEventListener('click', function() {
         const newRow = optionalHolidayRowTemplate.replace(/INDEX/g, optionalRowIndex);
         optionalHolidayRowsContainer.insertAdjacentHTML('beforeend', newRow);
+        
+        // Apply date restrictions to new row
+        const year = document.getElementById('year').value;
+        const newInput = optionalHolidayRowsContainer.lastElementChild.querySelector('input[type="date"]');
+        newInput.min = `${year}-01-01`;
+        newInput.max = `${year}-12-31`;
+        
         optionalRowIndex++;
         updateOptionalHolidayCount();
     });

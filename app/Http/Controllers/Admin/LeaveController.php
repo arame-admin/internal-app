@@ -146,4 +146,53 @@ class LeaveController extends Controller
 
         return redirect()->route('admin.leaves.index')->with('success', "Leave configuration {$statusMessage} successfully.");
     }
+
+    /**
+     * Show the apply leave form for employees/managers.
+     */
+    public function apply()
+    {
+        return view('leaves.apply');
+    }
+
+    /**
+     * Store a leave application submitted by employee/manager.
+     */
+    public function storeApplication(Request $request)
+    {
+        $request->validate([
+            'leave_type' => 'required|in:sick,casual,earned',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'required|string|max:500',
+        ]);
+
+        // Store the leave application
+        // This is a placeholder - would need a separate table for leave applications
+        return redirect()->back()->with('success', 'Leave application submitted successfully.');
+    }
+
+    /**
+     * Show the leave approval page for managers.
+     */
+    public function approve()
+    {
+        return view('leaves.approve');
+    }
+
+    /**
+     * Update the status of a leave application (approve/reject).
+     */
+    public function approveUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+        ]);
+
+        // Update the leave application status
+        // This is a placeholder - would need a separate table for leave applications
+        $statusMessage = $request->status === 'approved' ? 'approved' : 'rejected';
+        
+        return redirect()->route('manager.leaves.approve')->with('success', "Leave application {$statusMessage} successfully.");
+    }
 }

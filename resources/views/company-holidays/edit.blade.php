@@ -21,12 +21,12 @@
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-800">Edit Company Holiday</h1>
-            <p class="text-gray-600 mt-1">Update holiday information for {{ $holiday['year'] }}.</p>
+            <p class="text-gray-600 mt-1">Update holiday information for {{ $companyHoliday->year }}.</p>
         </div>
 
         <!-- Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-            <form action="{{ route('company-holidays.update', $holiday['id']) }}" method="POST">
+            <form action="{{ route('company-holidays.update', $companyHoliday->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -34,7 +34,7 @@
                     <!-- Year -->
                     <div>
                         <label for="year" class="block text-sm font-semibold text-gray-700 mb-2">Year <span class="text-red-500">*</span></label>
-                        <input type="number" id="year" name="year" value="{{ old('year', $holiday['year']) }}" min="2020" max="2030"
+                        <input type="number" id="year" name="year" value="{{ old('year', $companyHoliday->year) }}" min="2020" max="2030"
                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('year') border-red-300 @enderror"
                                placeholder="Select year">
                         @error('year')
@@ -66,7 +66,7 @@
                             </thead>
                             <tbody id="holiday-rows">
                                 @php
-                                    $mandatoryHolidays = old('mandatory_holidays', $holiday['mandatory_holidays'] ?? []);
+                                    $mandatoryHolidays = old('mandatory_holidays', $companyHoliday->mandatory_holidays ?? []);
                                     if (empty($mandatoryHolidays)) {
                                         $mandatoryHolidays = [['date' => '', 'name' => '']];
                                     }
@@ -130,7 +130,7 @@
                             </thead>
                             <tbody id="optional-holiday-rows">
                                 @php
-                                    $optionalHolidays = old('optional_holidays', $holiday['optional_holidays'] ?? []);
+                                    $optionalHolidays = old('optional_holidays', $companyHoliday->optional_holidays ?? []);
                                 @endphp
                                 @foreach($optionalHolidays as $index => $holidayData)
                                 <tr class="optional-holiday-row">

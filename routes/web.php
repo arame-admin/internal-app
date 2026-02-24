@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\BusinessUnitController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LeaveController;
+use App\Http\Controllers\Admin\CompanyHolidayController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\MeetingController;
@@ -21,6 +22,16 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Company Holidays Routes (accessible via /admin/company-holidays)
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/company-holidays', [CompanyHolidayController::class, 'index'])->name('company-holidays.index');
+    Route::get('/company-holidays/create', [CompanyHolidayController::class, 'create'])->name('company-holidays.create');
+    Route::post('/company-holidays', [CompanyHolidayController::class, 'store'])->name('company-holidays.store');
+    Route::get('/company-holidays/{id}/edit', [CompanyHolidayController::class, 'edit'])->name('company-holidays.edit');
+    Route::put('/company-holidays/{id}', [CompanyHolidayController::class, 'update'])->name('company-holidays.update');
+    Route::delete('/company-holidays/{id}', [CompanyHolidayController::class, 'destroy'])->name('company-holidays.destroy');
+});
 
 // Admin Routes
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
@@ -79,7 +90,12 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
     Route::get('/dashboard', function () {
         return view('manager.dashboard');
     })->name('dashboard');
-    // Add manager-specific routes here as needed
+    
+    // Leave Management
+    Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
+    Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
+    Route::get('/leaves/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approve'])->name('leaves.approve');
+    Route::put('/leaves/{id}/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approveUpdate'])->name('leaves.approve.update');
 });
 
 // Employee Routes
@@ -87,5 +103,8 @@ Route::prefix('employee')->middleware('auth')->name('employee.')->group(function
     Route::get('/dashboard', function () {
         return view('employee.dashboard');
     })->name('dashboard');
-    // Add employee-specific routes here as needed
+    
+    // Leave Management
+    Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
+    Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
 });
