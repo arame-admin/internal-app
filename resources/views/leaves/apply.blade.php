@@ -1,8 +1,61 @@
 @extends('layouts.app')
 
+@section('title', 'Apply Leave')
+
 @section('content')
 <div class="p-6 mt-16">
     <div class="max-w-2xl mx-auto">
+        <!-- Leave Balance Cards -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Leave Balance for {{ $year }}</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Sick Leave</p>
+                            <p class="text-2xl font-bold text-red-600">{{ $leaveBalance['sick_leave_balance'] ?? 0 }}</p>
+                            <p class="text-xs text-gray-400">of {{ $leaveBalance['sick_leave'] ?? 0 }} days</p>
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Casual Leave</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ $leaveBalance['casual_leave_balance'] ?? 0 }}</p>
+                            <p class="text-xs text-gray-400">of {{ $leaveBalance['casual_leave'] ?? 0 }} days</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Earned Leave</p>
+                            <p class="text-2xl font-bold text-green-600">{{ $leaveBalance['earned_leave_balance'] ?? 0 }}</p>
+                            <p class="text-xs text-gray-400">of {{ $leaveBalance['earned_leave'] ?? 0 }} days</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
                 <h2 class="text-xl font-semibold text-gray-800">Apply for Leave</h2>
@@ -13,6 +66,23 @@
                 @csrf
                 
                 <div class="space-y-6">
+                    <!-- Year Selection -->
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700 mb-2">
+                            Year <span class="text-red-500">*</span>
+                        </label>
+                        <select id="year" name="year" required
+                            onchange="updateDatePickerYear()"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            @for($y = date('Y'); $y <= date('Y') + 1; $y++)
+                                <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                        @error('year')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
                     <!-- Leave Type -->
                     <div>
                         <label for="leave_type" class="block text-sm font-medium text-gray-700 mb-2">
@@ -21,9 +91,9 @@
                         <select id="leave_type" name="leave_type" required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Select Leave Type</option>
-                            <option value="sick">Sick Leave</option>
-                            <option value="casual">Casual Leave</option>
-                            <option value="earned">Earned Leave</option>
+                            <option value="sick_leave">Sick Leave</option>
+                            <option value="casual_leave">Casual Leave</option>
+                            <option value="earned_leave">Earned Leave</option>
                         </select>
                         @error('leave_type')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -36,22 +106,32 @@
                             <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
                                 Start Date <span class="text-red-500">*</span>
                             </label>
-                            <input type="date" id="start_date" name="start_date" required
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <input type="text" id="start_date" name="start_date" required
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="Select start date" autocomplete="off">
                             @error('start_date')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}enderror</p>
-                            @
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                         
                         <div>
                             <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">
                                 End Date <span class="text-red-500">*</span>
                             </label>
-                            <input type="date" id="end_date" name="end_date" required
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <input type="text" id="end_date" name="end_date" required
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="Select end date" autocomplete="off">
                             @error('end_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                        </div>
+                    </div>
+                    
+                    <!-- Days Display -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-blue-700">Number of Days:</span>
+                            <span id="total_days" class="text-2xl font-bold text-blue-700">0</span>
                         </div>
                     </div>
                     
@@ -84,4 +164,102 @@
         </div>
     </div>
 </div>
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+<!-- jQuery and jQuery UI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+<style>
+.ui-datepicker .ui-state-disabled {
+    opacity: 0.4;
+}
+.ui-datepicker-week-end .ui-state-default {
+    color: #999;
+    background: #f5f5f5;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    var selectedYear = {{ $year }};
+    
+    // Initialize datepickers with weekend disabled
+    $('#start_date').datepicker({
+        dateFormat: 'yy-mm-dd',
+        changeMonth: true,
+        changeYear: true,
+        minDate: new Date(selectedYear, 0, 1),
+        maxDate: new Date(selectedYear, 11, 31),
+        beforeShowDay: function(date) {
+            var day = date.getDay();
+            // 0 = Sunday, 6 = Saturday - disable weekends
+            if (day === 0 || day === 6) {
+                return [false, 'ui-datepicker-week-end', 'Weekend'];
+            }
+            return [true, '', ''];
+        },
+        onSelect: function(selectedDate) {
+            // Set end date min to start date
+            $('#end_date').datepicker('option', 'minDate', selectedDate);
+            calculateDays();
+        }
+    });
+    
+    $('#end_date').datepicker({
+        dateFormat: 'yy-mm-dd',
+        changeMonth: true,
+        changeYear: true,
+        minDate: new Date(selectedYear, 0, 1),
+        maxDate: new Date(selectedYear, 11, 31),
+        beforeShowDay: function(date) {
+            var day = date.getDay();
+            // 0 = Sunday, 6 = Saturday - disable weekends
+            if (day === 0 || day === 6) {
+                return [false, 'ui-datepicker-week-end', 'Weekend'];
+            }
+            return [true, '', ''];
+        },
+        onSelect: function() {
+            calculateDays();
+        }
+    });
+    
+    // Calculate days excluding weekends
+    function calculateDays() {
+        var startDate = $('#start_date').datepicker('getDate');
+        var endDate = $('#end_date').datepicker('getDate');
+        
+        if (startDate && endDate) {
+            var diffDays = 0;
+            var currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                var day = currentDate.getDay();
+                if (day !== 0 && day !== 6) {
+                    diffDays++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            $('#total_days').text(diffDays);
+        } else {
+            $('#total_days').text('0');
+        }
+    }
+    
+    // Expose function globally
+    window.calculateDays = calculateDays;
+    
+    // Update datepicker year range when year changes
+    window.updateDatePickerYear = function() {
+        var year = parseInt($('#year').val());
+        $('#start_date, #end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
+        $('#start_date, #end_date').datepicker('option', 'maxDate', new Date(year, 11, 31));
+        $('#start_date, #end_date').val('');
+        $('#end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
+        $('#total_days').text('0');
+    };
+});
+</script>
 @endsection

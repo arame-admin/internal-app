@@ -105,6 +105,7 @@ Route::prefix('employee')->middleware('auth')->name('employee.')->group(function
     })->name('dashboard');
     
     // Leave Management
+    Route::get('/leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'indexEmployee'])->name('leaves.index');
     Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
     Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
 });

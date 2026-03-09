@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Leave;
+use App\Models\ApplyLeave;
+use App\Models\User;
+use App\Mail\LeaveApplicationNotification;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
 
 class LeaveController extends Controller
 {
@@ -16,6 +20,17 @@ class LeaveController extends Controller
     {
         $id = Crypt::decrypt($encryptedId);
         return Leave::findOrFail($id);
+    }
+
+    /**
+     * Calculate the number of leave days between two dates.
+     */
+    private function calculateLeaveDays($startDate, $endDate)
+    {
+        $start = new \DateTime($startDate);
+        $end = new \DateTime($endDate);
+        $interval = $start->diff($end);
+        return $interval->days + 1; // Include both start and end date
     }
 
     /**
@@ -150,9 +165,39 @@ class LeaveController extends Controller
     /**
      * Show the apply leave form for employees/managers.
      */
-    public function apply()
+    public function apply(Request $request)
     {
-        return view('leaves.apply');
+        $user = auth()->user();
+        $year = $request->year ?? date('Y');
+        
+        // Get leave balance for the user
+        $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
+        
+        // Get all applied leaves for the user
+        $appliedLeaves = ApplyLeave::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('leaves.apply', compact('leaveBalance', 'year', 'appliedLeaves'));
+    }
+
+    /**
+     * Show leave list page for employees.
+     */
+    public function indexEmployee(Request $request)
+    {
+        $user = auth()->user();
+        $year = $request->year ?? date('Y');
+        
+        // Get leave balance for the user
+        $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
+        
+        // Get all applied leaves for the user
+        $appliedLeaves = ApplyLeave::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('leaves.index-employee', compact('leaveBalance', 'year', 'appliedLeaves'));
     }
 
     /**
@@ -161,15 +206,74 @@ class LeaveController extends Controller
     public function storeApplication(Request $request)
     {
         $request->validate([
-            'leave_type' => 'required|in:sick,casual,earned',
+            'leave_type' => 'required|in:sick_leave,casual_leave,earned_leave',
+            'year' => 'required|integer|min:2025',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string|max:500',
         ]);
 
-        // Store the leave application
-        // This is a placeholder - would need a separate table for leave applications
-        return redirect()->back()->with('success', 'Leave application submitted successfully.');
+        // Validate that start and end dates are not weekends
+        $startDate = new \DateTime($request->start_date);
+        $endDate = new \DateTime($request->end_date);
+        
+        $startDay = $startDate->format('N'); // 1 (Monday) to 7 (Sunday)
+        $endDay = $endDate->format('N');
+        
+        if ($startDay >= 6) {
+            return redirect()->back()->with('error', 'Start date cannot be on a weekend. Please select a weekday.')->withInput();
+        }
+        if ($endDay >= 6) {
+            return redirect()->back()->with('error', 'End date cannot be on a weekend. Please select a weekday.')->withInput();
+        }
+
+        $user = auth()->user();
+        $year = $request->year;
+        $totalDays = $this->calculateLeaveDays($request->start_date, $request->end_date);
+        
+        // Get leave balance
+        $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
+        
+        // Map leave type to balance key
+        $leaveTypeMap = [
+            'sick_leave' => 'sick_leave_balance',
+            'casual_leave' => 'casual_leave_balance',
+            'earned_leave' => 'earned_leave_balance',
+        ];
+        
+        $balanceKey = $leaveTypeMap[$request->leave_type];
+        $availableBalance = $leaveBalance[$balanceKey] ?? 0;
+        
+        // Check if user has sufficient leave balance
+        if ($totalDays > $availableBalance) {
+            return redirect()->back()->with('error', 'Insufficient leave balance. You have ' . $availableBalance . ' days available.');
+        }
+
+        // Create leave application
+        $applyLeave = ApplyLeave::create([
+            'user_id' => $user->id,
+            'leave_type' => $request->leave_type,
+            'year' => $year,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'total_days' => $totalDays,
+            'reason' => $request->reason,
+            'status' => 'pending',
+        ]);
+
+        // Send email notification to reporting manager
+        if ($user->reportingManager) {
+            try {
+                Mail::to($user->reportingManager->email)->send(
+                    new LeaveApplicationNotification($applyLeave, $user, $user->reportingManager)
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the request
+                \Log::error('Failed to send leave application email: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->back()->with('success', 'Leave application submitted successfully and notification sent to your reporting manager.');
     }
 
     /**
@@ -177,7 +281,18 @@ class LeaveController extends Controller
      */
     public function approve()
     {
-        return view('leaves.approve');
+        $user = auth()->user();
+        
+        // Get all leave applications from subordinates
+        $subordinateIds = $user->subordinates()->pluck('users.id');
+        
+        $pendingLeaves = ApplyLeave::with(['user', 'user.department'])
+            ->whereIn('user_id', $subordinateIds)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('leaves.approve', compact('pendingLeaves'));
     }
 
     /**
@@ -187,10 +302,19 @@ class LeaveController extends Controller
     {
         $request->validate([
             'status' => 'required|in:approved,rejected',
+            'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
         ]);
 
-        // Update the leave application status
-        // This is a placeholder - would need a separate table for leave applications
+        $applyLeave = ApplyLeave::findOrFail($id);
+        $approver = auth()->user();
+
+        $applyLeave->update([
+            'status' => $request->status,
+            'approved_by' => $approver->id,
+            'approved_at' => now(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
         $statusMessage = $request->status === 'approved' ? 'approved' : 'rejected';
         
         return redirect()->route('manager.leaves.approve')->with('success', "Leave application {$statusMessage} successfully.");

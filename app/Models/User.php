@@ -107,6 +107,7 @@ class User extends Authenticatable
         'designation_id',
         'bu_id',
         'location_id',
+        'reporting_manager_id',
         'is_active',
     ];
 
@@ -168,6 +169,26 @@ class User extends Authenticatable
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Get the reporting manager for the user.
+     *
+     * @return BelongsTo<User, User>
+     */
+    public function reportingManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reporting_manager_id');
+    }
+
+    /**
+     * Get the subordinates reporting to this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<User>
+     */
+    public function subordinates()
+    {
+        return $this->hasMany(User::class, 'reporting_manager_id');
     }
 
     /**
