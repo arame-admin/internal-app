@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $total_days Total number of leave days
  * @property string $reason Reason for leave
  * @property string $status Status of leave (pending, approved, rejected)
+ * @property string $duration_type Type of leave duration (full_day, half_day)
+ * @property string|null $half_period Half day period (first_half, second_half)
  * @property int|null $approved_by Foreign key to users table (approver)
  * @property \Carbon\Carbon|null $approved_at Approval timestamp
  * @property string|null $rejection_reason Reason for rejection
@@ -56,7 +58,10 @@ class ApplyLeave extends Model
         'approved_by',
         'approved_at',
         'rejection_reason',
+        'duration_type',
+        'half_period',
     ];
+
 
     /**
      * The attributes that should be cast.
@@ -73,7 +78,10 @@ class ApplyLeave extends Model
         'status' => 'string',
         'approved_by' => 'integer',
         'approved_at' => 'datetime',
+        'duration_type' => 'string',
+        'half_period' => 'string',
     ];
+
 
     /**
      * Get the user who applied for the leave.
@@ -93,6 +101,44 @@ class ApplyLeave extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Scope for pending leaves.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    /**
+     * Scope for filtering leaves by status and search.
+     */
+    public function scopeFilter($query, array $filters = [])
+    {
+        if (isset($filters['status']) && $filters['status']) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['leave_type']) && $filters['leave_type']) {
+            $query->where('leave_type', $filters['leave_type']);
+        }
+
+        if (isset($filters['year']) && $filters['year']) {
+            $query->where('year', $filters['year']);
+        }
+
+        if (isset($filters['search']) && $filters['search']) {
+            $query->where(function ($q) use ($filters) {
+                $search = $filters['search'];
+                $q->where('reason', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($u) use ($search) {
+                      $u->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -145,3 +191,4 @@ class ApplyLeave extends Model
         ];
     }
 }
+

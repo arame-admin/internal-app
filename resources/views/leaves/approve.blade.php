@@ -6,15 +6,37 @@
 <div class="p-6 mt-16">
     <div class="max-w-6xl mx-auto">
         <div class="mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Approve Leaves</h2>
-            <p class="text-gray-500 mt-1">Review and approve leave requests from your team</p>
+            <h2 class="text-2xl font-bold text-gray-800">
+                @if(isset($isAdmin) && $isAdmin)
+                    Admin Leave Approval
+                @else
+                    Approve Team Leaves
+                @endif
+            </h2>
+            <p class="text-gray-500 mt-1">
+                @if(isset($isAdmin) && $isAdmin)
+                    Review all pending leave requests across the organization
+                @else
+                    Review and approve leave requests from your team
+                @endif
+            </p>
         </div>
 
         <!-- Pending Leaves Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-lg font-semibold text-gray-800">Pending Leave Requests</h3>
+                <h3 class="text-lg font-semibold text-gray-800">
+                    @if(isset($isAdmin) && $isAdmin)
+                        All Pending Leave Requests
+                    @else
+                        Team Pending Leave Requests
+                    @endif
+                    <span class="ml-2 px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
+                        {{ $pendingLeaves->total() ?? $pendingLeaves->count() }}
+                    </span>
+                </h3>
             </div>
+
             
             <div class="p-6">
                 @if($pendingLeaves->isEmpty())
@@ -72,7 +94,11 @@
                                             </div>
                                         </td>
                                         <td class="py-3 px-4 text-gray-800 font-medium">
-                                            {{ $leave->total_days }} day(s)
+                                            @if($leave->duration_type === 'half_day')
+                                                {{ $leave->total_days }} day ({{ ucwords(str_replace('_', ' ', $leave->half_period ?? '')) }})
+                                            @else
+                                                {{ $leave->total_days }} day{{ $leave->total_days != 1 ? 's' : '' }}
+                                            @endif
                                         </td>
                                         <td class="py-3 px-4 text-gray-600 text-sm max-w-xs">
                                             {{ Str::limit($leave->reason, 50) }}
@@ -82,7 +108,7 @@
                                         </td>
                                         <td class="py-3 px-4">
                                             <div class="flex items-center justify-center gap-2">
-                                                <form action="{{ route('manager.leaves.approve.update', $leave->id) }}" method="POST" class="inline">
+                                                <form action="{{ isset($isAdmin) && $isAdmin ? route('admin.leaves.applications.approve', $leave->id) : route('manager.leaves.approve.update', $leave->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="status" value="approved">
@@ -91,6 +117,7 @@
                                                         Approve
                                                     </button>
                                                 </form>
+
                                                 <button type="button" 
                                                     onclick="showRejectModal({{ $leave->id }})"
                                                     class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
@@ -189,7 +216,8 @@
 <script>
     function showRejectModal(leaveId) {
         const form = document.getElementById('rejectForm');
-        form.action = '{{ route("manager.leaves.approve.update", "") }}' + '/' + leaveId;
+        form.action = '{{ isset($isAdmin) && $isAdmin ? route("admin.leaves.applications.approve", ":id") : route("manager.leaves.approve.update", ":id") }}'.replace(':id', leaveId);
+
         document.getElementById('rejectModal').classList.remove('hidden');
     }
 
