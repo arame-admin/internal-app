@@ -187,6 +187,11 @@ class LeaveController extends Controller
     public function indexEmployee(Request $request)
     {
         $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.leaves.applications');
+        }
+        
         $year = $request->year ?? date('Y');
         
         // Get leave balance for the user
