@@ -24,6 +24,44 @@
             <p class="text-gray-600 mt-1">Add a new holiday year with mandatory and optional holidays.</p>
         </div>
 
+        <!-- Global Flash Messages -->
+        @if (session('error'))
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765 -1.36 2.722 -1.36 3.486 0l5.58 9.92c.75 1.334 -.213 2.98 -1.742 2.98H4.42c -1.53 0 -2.493 -1.646 -1.743 -2.98l5.58 -9.92zM11 13a1 1 0 11 -2 0 1 1 0 012 0zm -1 1a2 2 0 100 -4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Please correct the following errors:</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
             <form action="{{ route('company-holidays.store') }}" method="POST">
@@ -56,7 +94,7 @@
                 <div class="mt-8">
                     <div class="flex items-center justify-between mb-4">
                         <label class="block text-sm font-semibold text-gray-700">Mandatory Holidays <span class="text-red-500">*</span></label>
-                        <button type="button" id="add-holiday-row" class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
+                        <button type="button" id="add-mandatory-row" class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
@@ -65,7 +103,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table id="mandatory-holidays-table" class="w-full border border-gray-200 rounded-lg">
+                        <table id="mandatory-table" class="w-full border border-gray-200 rounded-lg">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Holiday Date</th>
@@ -73,25 +111,24 @@
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="holiday-rows">
+                            <tbody id="mandatory-rows">
                                 <!-- Default row -->
                                 <tr class="holiday-row">
                                     <td class="px-4 py-3">
-                                    <input type="text" name="mandatory_holidays[0][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('mandatory_holidays.0.date') border-red-300 @enderror" autocomplete="off" placeholder="YYYY-MM-DD">
-
+                                        <input type="date" name="mandatory_holidays[0][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('mandatory_holidays.0.date') border-red-300 @enderror" value="{{ old('mandatory_holidays.0.date') }}">
                                         @error('mandatory_holidays.0.date')
                                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                         @enderror
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="text" name="mandatory_holidays[0][name]" placeholder="Enter holiday name"
+                                        <input type="text" name="mandatory_holidays[0][name]" value="{{ old('mandatory_holidays.0.name') }}" placeholder="Enter holiday name"
                                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('mandatory_holidays.0.name') border-red-300 @enderror">
                                         @error('mandatory_holidays.0.name')
                                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                         @enderror
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <button type="button" class="remove-holiday-row p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
+                                        <button type="button" class="remove-row text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors p-2" title="Remove" disabled>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
@@ -101,10 +138,9 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="mt-4">
                         <p class="text-sm text-gray-600">
-                            <span id="holiday-count">1</span> mandatory holiday(s) added.
+                            <span id="mandatory-count">1</span> mandatory holiday(s)
                         </p>
                     </div>
                 </div>
@@ -113,7 +149,7 @@
                 <div class="mt-8">
                     <div class="flex items-center justify-between mb-4">
                         <label class="block text-sm font-semibold text-gray-700">Optional Holidays</label>
-                        <button type="button" id="add-optional-holiday-row" class="px-4 py-2 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                        <button type="button" id="add-optional-row" class="px-4 py-2 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
@@ -122,7 +158,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table id="optional-holidays-table" class="w-full border border-gray-200 rounded-lg">
+                        <table id="optional-table" class="w-full border border-gray-200 rounded-lg">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Holiday Date</th>
@@ -130,15 +166,13 @@
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="optional-holiday-rows">
-                                <!-- Optional: start with no default row, users can add as needed -->
+                            <tbody id="optional-rows">
                             </tbody>
                         </table>
                     </div>
-
                     <div class="mt-4">
                         <p class="text-sm text-gray-600">
-                            <span id="optional-holiday-count">0</span> optional holiday(s) added.
+                            <span id="optional-count">0</span> optional holiday(s)
                         </p>
                     </div>
                 </div>
@@ -159,88 +193,44 @@
     </div>
 </div>
 
-<!-- jQuery and jQuery UI for datepicker -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-
-<style>
-.ui-datepicker .ui-state-disabled {
-    opacity: 0.4;
-}
-.ui-datepicker-week-end .ui-state-default {
-    color: #999;
-    background: #f5f5f5;
-}
-</style>
-
 <script>
-$(document).ready(function() {
-
-    // Get the selected year
+// Native JavaScript - No jQuery needed
+document.addEventListener('DOMContentLoaded', function() {
     const yearSelect = document.getElementById('year');
-    let mandatoryRowIndex = 1;
-    let optionalRowIndex = 0;
-    let selectedYear = $('#year').val() || new Date().getFullYear();
+    const mandatoryRows = document.getElementById('mandatory-rows');
+    const optionalRows = document.getElementById('optional-rows');
+    const mandatoryCount = document.getElementById('mandatory-count');
+    const optionalCount = document.getElementById('optional-count');
+    
+    let mandatoryIndex = 1;
+    let optionalIndex = 0;
+    const disabledDates = @json($existingHolidayDates ?? []);
+    let currentYear = parseInt(yearSelect.value);
 
-    const existingHolidayDates = @json($existingHolidayDates ?? []);
-
-    // Initialize datepickers
-    function initDatePickers() {
-        $('.date-input').datepicker({
-            dateFormat: 'yy-mm-dd',
-            minDate: new Date(selectedYear, 0, 1),
-            maxDate: new Date(selectedYear, 11, 31),
-            beforeShowDay: function(date) {
-                var day = date.getDay();
-                var d = $.datepicker.formatDate('yy-mm-dd', date);
-                if (day === 0 || day === 6 || existingHolidayDates.includes(d)) {
-                    return [false, 'ui-state-disabled', day === 0 || day === 6 ? 'Weekend' : 'Holiday'];
-                }
-                return [true, ''];
-            }
+    // Update date inputs min/max based on year
+    function updateDateRanges() {
+        currentYear = parseInt(yearSelect.value);
+        const dateInputs = document.querySelectorAll('.date-input');
+        dateInputs.forEach(input => {
+            input.min = `${currentYear}-01-01`;
+            input.max = `${currentYear}-12-31`;
         });
     }
 
-    initDatePickers();
+    yearSelect.addEventListener('change', updateDateRanges);
+    updateDateRanges(); // Initial
 
-    $('#year').on('change', function() {
-        selectedYear = parseInt($(this).val()) || new Date().getFullYear();
-        $('.date-input').datepicker('destroy').datepicker({
-            dateFormat: 'yy-mm-dd',
-            minDate: new Date(selectedYear, 0, 1),
-            maxDate: new Date(selectedYear, 11, 31),
-            beforeShowDay: function(date) {
-                var day = date.getDay();
-                var d = $.datepicker.formatDate('yy-mm-dd', date);
-                if (day === 0 || day === 6 || existingHolidayDates.includes(d)) {
-                    return [false, 'ui-state-disabled', day === 0 || day === 6 ? 'Weekend' : 'Holiday'];
-                }
-                return [true, ''];
-            }
-        });
-    });
-
-    // Convert vanilla JS to jQuery for dynamic rows
-
-
-    // Mandatory Holidays
-    var addMandatoryHolidayBtn = $('#add-holiday-row');
-    var mandatoryHolidayRowsContainer = $('#holiday-rows');
-    var mandatoryHolidayCountDisplay = $('#holiday-count');
-
-    var mandatoryRowIndex = 1;
-
-    var mandatoryHolidayRowTemplate = `
+    // Mandatory row template
+    const mandatoryTemplate = `
         <tr class="holiday-row">
             <td class="px-4 py-3">
-                <input type="text" name="mandatory_holidays[INDEX][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" autocomplete="off" placeholder="YYYY-MM-DD">
+                <input type="date" name="mandatory_holidays[%INDEX%][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </td>
             <td class="px-4 py-3">
-                <input type="text" name="mandatory_holidays[INDEX][name]" placeholder="Enter holiday name" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <input type="text" name="mandatory_holidays[%INDEX%][name]" placeholder="Enter holiday name" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </td>
             <td class="px-4 py-3 text-center">
-                <button type="button" class="remove-holiday-row p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
+                <button type="button" class="remove-row p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -249,24 +239,17 @@ $(document).ready(function() {
         </tr>
     `;
 
-    // Optional Holidays
-    const addOptionalHolidayBtn = document.getElementById('add-optional-holiday-row');
-    const optionalHolidayRowsContainer = document.getElementById('optional-holiday-rows');
-    const optionalHolidayCountDisplay = document.getElementById('optional-holiday-count');
-
-    let optionalRowIndex = 0; // Start from 0 since we have no default rows
-
-    // Template for new optional holiday row
-    const optionalHolidayRowTemplate = `
-        <tr class="optional-holiday-row">
+    // Optional row template
+    const optionalTemplate = `
+        <tr class="optional-row">
             <td class="px-4 py-3">
-                <input type="text" name="optional_holidays[INDEX][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" autocomplete="off" placeholder="YYYY-MM-DD">
+                <input type="date" name="optional_holidays[%INDEX%][date]" class="date-input w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </td>
             <td class="px-4 py-3">
-                <input type="text" name="optional_holidays[INDEX][name]" placeholder="Enter holiday name" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <input type="text" name="optional_holidays[%INDEX%][name]" placeholder="Enter holiday name" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
             </td>
             <td class="px-4 py-3 text-center">
-                <button type="button" class="remove-optional-holiday-row p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
+                <button type="button" class="remove-row p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -275,91 +258,73 @@ $(document).ready(function() {
         </tr>
     `;
 
-// Add mandatory holiday row
-    $('#add-holiday-row').on('click', function() {
-        var newRow = mandatoryHolidayRowTemplate.replace(/INDEX/g, mandatoryRowIndex);
-        $('#holiday-rows').append(newRow);
-        initDatePickers();
-        mandatoryRowIndex++;
-        updateMandatoryHolidayCount();
+    // Add mandatory row
+    document.getElementById('add-mandatory-row').addEventListener('click', () => {
+        const newRow = mandatoryTemplate.replace('%INDEX%', mandatoryIndex);
+        mandatoryRows.insertAdjacentHTML('beforeend', newRow);
+        mandatoryIndex++;
+        updateCounts();
+        toggleRemoveButtons('mandatory');
+        updateDateRanges();
     });
 
-    // Add optional holiday row
-    addOptionalHolidayBtn.addEventListener('click', function() {
-        const newRow = optionalHolidayRowTemplate.replace(/INDEX/g, optionalRowIndex);
-        optionalHolidayRowsContainer.insertAdjacentHTML('beforeend', newRow);
-        
-        // Apply date restrictions to new row
-        const year = document.getElementById('year').value;
-        initDatePickers(); // Re-init picker for new row
-        
-        optionalRowIndex++;
-        updateOptionalHolidayCount();
+    // Add optional row
+    document.getElementById('add-optional-row').addEventListener('click', () => {
+        const newRow = optionalTemplate.replace('%INDEX%', optionalIndex);
+        optionalRows.insertAdjacentHTML('beforeend', newRow);
+        optionalIndex++;
+        updateCounts();
+        toggleRemoveButtons('optional');
+        updateDateRanges();
     });
 
-    // Remove holiday rows
-    document.addEventListener('click', function(e) {
-        // Remove mandatory holiday row
-        if (e.target.closest('.remove-holiday-row')) {
-            const row = e.target.closest('.holiday-row');
-            const rows = document.querySelectorAll('.holiday-row');
-
-            // Don't remove if it's the last row
-            if (rows.length > 1) {
+    // Remove row handler (delegated)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-row')) {
+            const row = e.target.closest('tr');
+            const isMandatory = row.parentNode.id === 'mandatory-rows';
+            
+            if ((isMandatory && mandatoryRows.children.length > 1) || (!isMandatory && optionalRows.children.length > 0)) {
                 row.remove();
-                updateMandatoryHolidayCount();
-                reindexMandatoryRows();
+                if (isMandatory) {
+                    reindexRows(mandatoryRows);
+                    mandatoryIndex--;
+                } else {
+                    reindexRows(optionalRows);
+                    optionalIndex--;
+                }
+                updateCounts();
+                toggleRemoveButtons(isMandatory ? 'mandatory' : 'optional');
             }
         }
-
-        // Remove optional holiday row
-        if (e.target.closest('.remove-optional-holiday-row')) {
-            const row = e.target.closest('.optional-holiday-row');
-            row.remove();
-            updateOptionalHolidayCount();
-            reindexOptionalRows();
-        }
     });
 
-    // Update holiday count displays
-    function updateMandatoryHolidayCount() {
-        const rowCount = document.querySelectorAll('.holiday-row').length;
-        mandatoryHolidayCountDisplay.textContent = rowCount;
-    }
-
-    function updateOptionalHolidayCount() {
-        const rowCount = document.querySelectorAll('.optional-holiday-row').length;
-        optionalHolidayCountDisplay.textContent = rowCount;
-    }
-
-    // Reindex array indices after row removal
-    function reindexMandatoryRows() {
-        const rows = document.querySelectorAll('.holiday-row');
-        rows.forEach((row, index) => {
+    function reindexRows(container) {
+        Array.from(container.children).forEach((row, index) => {
             const dateInput = row.querySelector('input[type="date"]');
             const nameInput = row.querySelector('input[type="text"]');
-
-            if (dateInput) dateInput.name = `mandatory_holidays[${index}][date]`;
-            if (nameInput) nameInput.name = `mandatory_holidays[${index}][name]`;
+            if (dateInput) dateInput.name = dateInput.name.replace(/\[\d+\]/, `[${index}]`);
+            if (nameInput) nameInput.name = nameInput.name.replace(/\[\d+\]/, `[${index}]`);
         });
-        mandatoryRowIndex = rows.length;
     }
 
-    function reindexOptionalRows() {
-        const rows = document.querySelectorAll('.optional-holiday-row');
-        rows.forEach((row, index) => {
-            const dateInput = row.querySelector('input[type="date"]');
-            const nameInput = row.querySelector('input[type="text"]');
-
-            if (dateInput) dateInput.name = `optional_holidays[${index}][date]`;
-            if (nameInput) nameInput.name = `optional_holidays[${index}][name]`;
-        });
-        optionalRowIndex = rows.length;
+    function updateCounts() {
+        mandatoryCount.textContent = mandatoryRows.children.length;
+        optionalCount.textContent = optionalRows.children.length;
     }
 
-    // Initial count updates
-    updateMandatoryHolidayCount();
-    updateOptionalHolidayCount();
+    function toggleRemoveButtons(type) {
+        const container = type === 'mandatory' ? mandatoryRows : optionalRows;
+        Array.from(container.children).forEach((row, index) => {
+            const btn = row.querySelector('.remove-row');
+            btn.disabled = (type === 'mandatory' && index === 0);
+        });
+    }
+
+    // Initial setup
+    updateCounts();
+    toggleRemoveButtons('mandatory');
 });
 </script>
 @endsection
+

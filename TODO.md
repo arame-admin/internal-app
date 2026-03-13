@@ -1,18 +1,19 @@
-# Leave Applications Filters & Counts Enhancement
+# Holiday Creation Fix - TODO List
 
-## Progress
-- [x] 1. Update ApplyLeave model: Extend scopeFilter for leave_type, year ✓
-- [x] 2. Update LeaveController: Add overall counts (total, pending, approved), update query to use request()->all() in filter ✓
-- [x] 3. Update applications-index.blade.php: Added top count cards, leave_type & year filters to form ✓
-- [x] 4. Cleared Laravel caches ✓
+## Status: In Progress
 
-**TASK COMPLETE!** Visit http://127.0.0.1:8000/admin/leaves/applications to see:
-- Top cards: Total Requests, Pending, Approved counts
-- Filters: Search, Status, Leave Type (Sick/Casual/Earned), Year dropdowns
+### Steps from Approved Plan:
+✅ 1. Deleted duplicate CompanyHolidayController-fixed.php
+✅ 2. Updated CompanyHolidayController.php (fixed validation cycle, conditional status, simplified verification)
+- [x] 3. Read/confirm views (create-fixed.blade.php, edit-fixed.blade.php done)
+✅ 4. Added global error/success displays to create-fixed.blade.php and edit-fixed.blade.php
+- [ ] 6. Update app/Models/CompanyHoliday.php if needed (status cast)
 
-All filters preserve state in pagination. Test by selecting combinations.
+### Followup:
+✅ Ran migration for status column
+- [ ] Test create form
+- [ ] `php artisan tinker` -> App\Models\CompanyHoliday::all()
+- [ ] attempt_completion
 
-## Details
-See approved plan for implementation details.
+**Next step: Add global error display to views**
 
-Updated: {{ now()->format('Y-m-d H:i:s') }} by BLACKBOXAI
