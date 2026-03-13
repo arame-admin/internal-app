@@ -45,10 +45,16 @@
                 Timesheet
             </a>
             
-            {{-- Leave (visible to all) --}}
+            {{-- Leave (role-specific) --}}
+            @if($userRole == 1)
+            <a href="{{ route('admin.leaves.applications') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
+                Leave
+            </a>
+            @else
             <a href="{{ route('employee.leaves.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
                 Leave
             </a>
+            @endif
             
             {{-- Admin & Manager specific menus --}}
             @if($userRole == 1 || $userRole == 2)

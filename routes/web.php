@@ -81,9 +81,12 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::post('meetings/{meetingId}/send', [MeetingController::class, 'send'])->name('meetings.send');
     });
 
+    Route::get('/leaves/applications', [LeaveController::class, 'indexApplications'])->name('leaves.applications');
+    Route::put('/leaves/applications/{id}/approve', [LeaveController::class, 'adminApproveUpdate'])->name('leaves.applications.approve');
     Route::resource('leaves', LeaveController::class)->except(['show']);
     Route::put('/leaves/{id}/status', [LeaveController::class, 'updateStatus'])->name('leaves.status.update');
 });
+
 
 // Manager Routes
 Route::prefix('manager')->middleware('auth')->name('manager.')->group(function () {
@@ -95,7 +98,8 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
     Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
     Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
     Route::get('/leaves/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approve'])->name('leaves.approve');
-    Route::put('/leaves/{id}/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approveUpdate'])->name('leaves.approve.update');
+    Route::get('/timesheets/approve', [\App\Http\Controllers\Admin\TimesheetController::class, 'approve'])->name('timesheets.approve');
+    Route::put('/timesheets/{id}/approve', [\App\Http\Controllers\Admin\TimesheetController::class, 'approveUpdate'])->name('timesheets.approve.update');
 });
 
 // Employee Routes
@@ -108,4 +112,10 @@ Route::prefix('employee')->middleware('auth')->name('employee.')->group(function
     Route::get('/leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'indexEmployee'])->name('leaves.index');
     Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
     Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
+    
+    // Timesheet Management
+    Route::get('/timesheets', [\App\Http\Controllers\Admin\TimesheetController::class, 'indexEmployee'])->name('timesheets.index');
+    Route::get('/timesheets/apply', [\App\Http\Controllers\Admin\TimesheetController::class, 'apply'])->name('timesheets.apply');
+    Route::post('/timesheets', [\App\Http\Controllers\Admin\TimesheetController::class, 'store'])->name('timesheets.store');
+    Route::patch('/timesheets/{id}/draft', [\App\Http\Controllers\Admin\TimesheetController::class, 'updateDraft'])->name('timesheets.updateDraft');
 });

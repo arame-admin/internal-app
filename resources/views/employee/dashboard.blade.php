@@ -119,12 +119,12 @@
             <h2 class="text-lg font-semibold text-gray-800">Quick Actions</h2>
         </div>
         <div class="p-6 grid grid-cols-2 gap-4">
-            <button class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-colors border border-blue-100">
+            <a href="{{ route('employee.timesheets.apply') }}" class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-colors border border-blue-100">
                 <svg class="w-8 h-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 <span class="text-sm font-medium text-gray-700">Log Time</span>
-            </button>
+            </a>
             
             <button class="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl hover:from-purple-100 hover:to-pink-100 transition-colors border border-purple-100">
                 <svg class="w-8 h-8 text-purple-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

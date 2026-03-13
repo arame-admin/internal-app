@@ -99,8 +99,44 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- Leave Duration -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Leave Duration <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="duration_type" value="full_day" id="full_day" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <span class="ml-2 text-sm font-medium">Full Day</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="duration_type" value="half_day" id="half_day" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <span class="ml-2 text-sm font-medium">Half Day</span>
+                            </label>
+                        </div>
+                        @error('duration_type')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Half Period (hidden by default) -->
+                    <div id="half_period_container" style="display: none;">
+                        <label for="half_period" class="block text-sm font-medium text-gray-700 mb-2">
+                            Half Day Period <span class="text-red-500">*</span>
+                        </label>
+                        <select id="half_period" name="half_period" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">Select Period</option>
+                            <option value="first_half">First Half (Morning)</option>
+                            <option value="second_half">Second Half (Afternoon)</option>
+                        </select>
+                        @error('half_period')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                     
-                    <!-- Date Range -->
+                    <!-- Date Range -->  
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
@@ -202,8 +238,7 @@ $(document).ready(function() {
             return [true, '', ''];
         },
         onSelect: function(selectedDate) {
-            // Set end date min to start date
-            $('#end_date').datepicker('option', 'minDate', selectedDate);
+            updateDateRange();
             calculateDays();
         }
     });
@@ -227,10 +262,16 @@ $(document).ready(function() {
         }
     });
     
-    // Calculate days excluding weekends
+    // Calculate days excluding weekends or handle half day
     function calculateDays() {
+        var durationType = $('input[name=\"duration_type\"]:checked').val();
         var startDate = $('#start_date').datepicker('getDate');
         var endDate = $('#end_date').datepicker('getDate');
+        
+        if (durationType === 'half_day') {
+            $('#total_days').html('<span class=\"text-lg\">0.5</span><span class=\"text-sm ml-1\">Half Day</span>');
+            return;
+        }
         
         if (startDate && endDate) {
             var diffDays = 0;
@@ -248,18 +289,51 @@ $(document).ready(function() {
         }
     }
     
-    // Expose function globally
-    window.calculateDays = calculateDays;
+// Duration type change handler
+$('input[name="duration_type"]').change(function() {
+    var durationType = $(this).val();
+    var halfContainer = $('#half_period_container');
+    var startDate = $('#start_date').datepicker('getDate');
     
-    // Update datepicker year range when year changes
-    window.updateDatePickerYear = function() {
-        var year = parseInt($('#year').val());
-        $('#start_date, #end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
-        $('#start_date, #end_date').datepicker('option', 'maxDate', new Date(year, 11, 31));
-        $('#start_date, #end_date').val('');
-        $('#end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
-        $('#total_days').text('0');
-    };
+    if (durationType === 'half_day') {
+        halfContainer.show();
+        // For half day, force single day
+        if (startDate) {
+            $('#end_date').datepicker('option', 'minDate', startDate);
+            $('#end_date').datepicker('option', 'maxDate', startDate);
+            $('#end_date').val(startDate ? startDate.toLocaleDateString('en-CA') : '');
+        } else {
+            $('#end_date').datepicker('option', 'minDate', null);
+            $('#end_date').datepicker('option', 'maxDate', null);
+        }
+        $('#end_date').datepicker('option', 'minDate', new Date(selectedYear, 0, 1));
+    } else {
+        halfContainer.hide();
+        $('#half_period').val('');
+        // Allow multi-day for full day
+        if (startDate) {
+            $('#end_date').datepicker('option', 'minDate', startDate);
+        }
+        $('#end_date').datepicker('option', 'maxDate', new Date(selectedYear, 11, 31));
+    }
+    calculateDays();
+});
+
+// Expose function globally
+window.calculateDays = calculateDays;
+
+// Update datepicker year range when year changes
+window.updateDatePickerYear = function() {
+    var year = parseInt($('#year').val());
+    selectedYear = year;
+    $('#start_date, #end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
+    $('#start_date, #end_date').datepicker('option', 'maxDate', new Date(year, 11, 31));
+    $('#start_date, #end_date').val('');
+    $('#end_date').datepicker('option', 'minDate', new Date(year, 0, 1));
+    $('#total_days').text('0');
+    // Trigger duration check
+    $('input[name="duration_type"]').trigger('change');
+};
 });
 </script>
 @endsection
