@@ -102,11 +102,19 @@
                                             {{ ucwords(str_replace('_', ' ', $leave->leave_type)) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $leave->start_date->format('d M, Y') }} - {{ $leave->end_date->format('d M, Y') }}
+                                <td class="px-6 py-4 text-sm text-gray-600">
+                                        @if($leave->duration_type === 'half_day')
+                                            {{ $leave->start_date->format('d M Y') }} ({{ ucwords(str_replace('_', ' ', $leave->half_period ?? '')) }})
+                                        @else
+                                            {{ $leave->start_date->format('d M, Y') }} - {{ $leave->end_date->format('d M, Y') }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                                        {{ $leave->total_days }} day(s)
+                                        @if($leave->duration_type === 'half_day')
+                                            {{ $leave->total_days }} day ({{ ucwords(str_replace('_', ' ', $leave->half_period ?? '')) }})
+                                        @else
+                                            {{ $leave->total_days }} day{{ $leave->total_days != 1 ? 's' : '' }}
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
