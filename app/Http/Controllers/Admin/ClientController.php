@@ -74,7 +74,7 @@ class ClientController extends Controller
             ['path' => route('admin.clients.index', [], false)]
         );
 
-        return view('clients.index', compact('paginator', 'clients'));
+        return view('Admin.clients.index', compact('paginator', 'clients'));
     }
 
     /**
@@ -82,7 +82,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        return view('clients.create');
+        return view('Admin.clients.create');
     }
 
     /**
@@ -128,7 +128,7 @@ class ClientController extends Controller
             'status' => 'active'
         ];
 
-        return view('clients.edit', compact('client', 'id'));
+        return view('Admin.clients.edit', compact('client', 'id'));
     }
 
     /**
@@ -161,7 +161,7 @@ class ClientController extends Controller
      */
     public function showStatus($id)
     {
-        return view('clients.status', ['id' => $id]);
+        return view('Admin.clients.status', ['id' => $id]);
     }
 
     /**

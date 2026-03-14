@@ -49,14 +49,14 @@ class RoleController extends Controller
 
         $roles = $query->paginate(5);
 
-        return view('roles.index', compact('roles'));
+        return view('Admin.roles.index', compact('roles'));
     }
     /**
      * Show the form for creating a new role.
      */
     public function create()
     {
-        return view('roles.create');
+        return view('Admin.roles.create');
     }
 
     /**
@@ -90,7 +90,7 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
-        return view('roles.edit', compact('role'));
+        return view('Admin.roles.edit', compact('role'));
     }
 
     /**
@@ -125,7 +125,7 @@ class RoleController extends Controller
     public function showStatus($id)
     {
         $role = Role::findOrFail($id);
-        return view('roles.status', compact('role'));
+        return view('Admin.roles.status', compact('role'));
     }
 
     /**

@@ -49,7 +49,7 @@ class LeaveController extends Controller
                 'created_at' => $leave->created_at,
             ];
         });
-        return view('leaves.index', compact('leaves'));
+        return view('Admin.leaves.index', compact('leaves'));
     }
 
     /**
@@ -57,7 +57,7 @@ class LeaveController extends Controller
      */
     public function create()
     {
-        return view('leaves.create');
+        return view('Admin.leaves.create');
     }
 
     /**
@@ -98,7 +98,7 @@ class LeaveController extends Controller
             'status' => $leave->status,
             'created_at' => $leave->created_at,
         ];
-        return view('leaves.edit', compact('leaveData'));
+        return view('Admin.leaves.edit', compact('leaveData'));
     }
 
     /**
@@ -178,7 +178,7 @@ class LeaveController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('leaves.apply', compact('leaveBalance', 'year', 'appliedLeaves'));
+        return view('User.leaves.apply', compact('leaveBalance', 'year', 'appliedLeaves'));
     }
 
     /**
@@ -202,7 +202,7 @@ class LeaveController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('leaves.index-employee', compact('leaveBalance', 'year', 'appliedLeaves'));
+        return view('User.leaves.index-employee', compact('leaveBalance', 'year', 'appliedLeaves'));
     }
 
     /**
@@ -320,7 +320,7 @@ class LeaveController extends Controller
                 ->get();
         }
 
-        return view('leaves.approve', compact('pendingLeaves', 'isAdmin'));
+        return view('User.leaves.approve', compact('pendingLeaves', 'isAdmin'));
     }
 
     /**
@@ -339,7 +339,7 @@ class LeaveController extends Controller
 
         $applications = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('leaves.applications-index', compact('applications', 'totalRequests', 'pendingCount', 'approvedCount', 'canceledCount'));
+        return view('Admin.leaves.applications-index', compact('applications', 'totalRequests', 'pendingCount', 'approvedCount', 'canceledCount'));
     }
 
     /**

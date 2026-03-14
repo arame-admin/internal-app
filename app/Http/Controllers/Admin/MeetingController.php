@@ -71,7 +71,7 @@ class MeetingController extends Controller
             'client_name' => 'John Doe'
         ];
 
-        return view('meetings.index', compact('meetings', 'project'));
+        return view('Admin.meetings.index', compact('meetings', 'project'));
     }
 
     /**
@@ -94,7 +94,7 @@ class MeetingController extends Controller
             ['id' => 5, 'name' => 'Charlie Wilson'],
         ];
 
-        return view('meetings.create', compact('project', 'teamMembers'));
+        return view('Admin.meetings.create', compact('project', 'teamMembers'));
     }
 
     /**
@@ -166,7 +166,7 @@ class MeetingController extends Controller
             'client_name' => 'John Doe'
         ];
 
-        return view('meetings.show', compact('meeting', 'project'));
+        return view('Admin.meetings.show', compact('meeting', 'project'));
     }
 
     /**
@@ -210,7 +210,7 @@ class MeetingController extends Controller
             ['id' => 5, 'name' => 'Charlie Wilson'],
         ];
 
-        return view('meetings.edit', compact('meeting', 'project', 'teamMembers'));
+        return view('Admin.meetings.edit', compact('meeting', 'project', 'teamMembers'));
     }
 
     /**

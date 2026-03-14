@@ -12,13 +12,13 @@ class CompanyHolidayController extends Controller
     {
         $year = $request->get('year', date('Y'));
         $companyHolidays = CompanyHoliday::all();
-        return view('company-holidays.index', compact('companyHolidays', 'year'));
+        return view('Admin.company-holidays.index', compact('companyHolidays', 'year'));
     }
 
     public function create(Request $request)
     {
         $selectedYear = $request->get('year', date('Y') + 1);
-        return view('company-holidays.create', compact('selectedYear'));
+        return view('Admin.company-holidays.create', compact('selectedYear'));
     }
 
     public function store(Request $request)
@@ -56,7 +56,7 @@ class CompanyHolidayController extends Controller
     public function edit($id)
     {
         $companyHoliday = CompanyHoliday::findOrFail($id);
-        return view('company-holidays.edit', compact('companyHoliday'));
+        return view('Admin.company-holidays.edit', compact('companyHoliday'));
     }
 
     public function update(Request $request, $id)

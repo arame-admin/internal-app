@@ -98,7 +98,7 @@ class ProjectController extends Controller
             ['id' => 8, 'name' => 'Fiona Garcia'],
         ];
 
-        return view('projects.index', compact('paginator', 'projects', 'clients'));
+        return view('Admin.projects.index', compact('paginator', 'projects', 'clients'));
     }
 
     /**
@@ -118,7 +118,7 @@ class ProjectController extends Controller
             ['id' => 8, 'name' => 'Fiona Garcia'],
         ];
 
-        return view('projects.create', compact('clients'));
+        return view('Admin.projects.create', compact('clients'));
     }
 
     /**
@@ -208,7 +208,7 @@ class ProjectController extends Controller
             ['id' => 8, 'name' => 'Fiona Garcia'],
         ];
 
-        return view('projects.edit', compact('project', 'clients', 'id'));
+        return view('Admin.projects.edit', compact('project', 'clients', 'id'));
     }
 
     /**
@@ -252,7 +252,7 @@ class ProjectController extends Controller
      */
     public function showStatus($id)
     {
-        return view('projects.status', ['id' => $id]);
+        return view('Admin.projects.status', ['id' => $id]);
     }
 
     /**

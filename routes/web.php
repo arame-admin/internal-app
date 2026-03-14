@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\CompanyHolidayController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\MeetingController;
+use App\Http\Controllers\User\LeaveController as UserLeaveController;
+use App\Http\Controllers\User\TimesheetController as UserTimesheetController;
+use App\Http\Controllers\User\ManagerController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -90,32 +93,34 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
 // Manager Routes
 Route::prefix('manager')->middleware('auth')->name('manager.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('manager.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
     
     // Leave Management
-    Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
-    Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
-    Route::get('/leaves/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approve'])->name('leaves.approve');
-    Route::get('/timesheets/approve', [\App\Http\Controllers\Admin\TimesheetController::class, 'approve'])->name('timesheets.approve');
-    Route::put('/timesheets/{id}/approve', [\App\Http\Controllers\Admin\TimesheetController::class, 'approveUpdate'])->name('timesheets.approve.update');
+    Route::get('/leaves/apply', [UserLeaveController::class, 'apply'])->name('leaves.apply');
+    Route::post('/leaves/apply', [UserLeaveController::class, 'store'])->name('leaves.store');
+    Route::get('/leaves/approve', [ManagerController::class, 'approveLeave'])->name('leaves.approve');
+    Route::put('/leaves/{id}/approve', [ManagerController::class, 'updateLeave'])->name('leaves.update');
+    Route::put('/leaves/{id}/status', [ManagerController::class, 'updateLeave'])->name('leaves.status.update');
+    
+    // Timesheet Management
+    Route::get('/timesheets/approve', [ManagerController::class, 'approveTimesheet'])->name('timesheets.approve');
+    Route::put('/timesheets/{id}/approve', [ManagerController::class, 'updateTimesheet'])->name('timesheets.approve.update');
 });
 
 // Employee Routes
 Route::prefix('employee')->middleware('auth')->name('employee.')->group(function () {
     Route::get('/dashboard', function () {
-        return view('employee.dashboard');
+        return view('User.employee.dashboard');
     })->name('dashboard');
     
     // Leave Management
-    Route::get('/leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'indexEmployee'])->name('leaves.index');
-    Route::get('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'apply'])->name('leaves.apply');
-    Route::post('/leaves/apply', [\App\Http\Controllers\Admin\LeaveController::class, 'storeApplication'])->name('leaves.store');
+    Route::get('/leaves', [UserLeaveController::class, 'index'])->name('leaves.index');
+    Route::get('/leaves/apply', [UserLeaveController::class, 'apply'])->name('leaves.apply');
+    Route::post('/leaves/apply', [UserLeaveController::class, 'store'])->name('leaves.store');
     
     // Timesheet Management
-    Route::get('/timesheets', [\App\Http\Controllers\Admin\TimesheetController::class, 'indexEmployee'])->name('timesheets.index');
-    Route::get('/timesheets/apply', [\App\Http\Controllers\Admin\TimesheetController::class, 'apply'])->name('timesheets.apply');
-    Route::post('/timesheets', [\App\Http\Controllers\Admin\TimesheetController::class, 'store'])->name('timesheets.store');
-    Route::patch('/timesheets/{id}/draft', [\App\Http\Controllers\Admin\TimesheetController::class, 'updateDraft'])->name('timesheets.updateDraft');
+    Route::get('/timesheets', [UserTimesheetController::class, 'index'])->name('timesheets.index');
+    Route::get('/timesheets/apply', [UserTimesheetController::class, 'apply'])->name('timesheets.apply');
+    Route::post('/timesheets', [UserTimesheetController::class, 'store'])->name('timesheets.store');
+    Route::patch('/timesheets/{id}/draft', [UserTimesheetController::class, 'updateDraft'])->name('timesheets.updateDraft');
 });

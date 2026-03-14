@@ -41,9 +41,19 @@
             @endswitch
             
             {{-- Timesheet (visible to all) --}}
-            <a href="#" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
-                Timesheet
-            </a>
+            @if($userRole == 1)
+                <a href="{{ route('admin.leaves.applications') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
+                    Timesheet
+                </a>
+            @elseif($userRole == 2)
+                <a href="{{ route('manager.timesheets.approve') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
+                    Timesheet
+                </a>
+            @else
+                <a href="{{ route('employee.timesheets.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
+                    Timesheet
+                </a>
+            @endif
             
             {{-- Leave (role-specific) --}}
             @if($userRole == 1)
