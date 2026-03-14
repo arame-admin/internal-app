@@ -349,6 +349,24 @@
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <!-- Emergency Contact Number -->
+                    <div>
+                        <label for="emergency_contact_number" class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Number</label>
+                        <input type="text" id="emergency_contact_number" name="emergency_contact_number" value="{{ old('emergency_contact_number') }}" placeholder="Emergency contact phone number" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        @error('emergency_contact_number')
+                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Concern Person -->
+                    <div>
+                        <label for="concern_person" class="block text-sm font-medium text-gray-700 mb-2">Concern Person</label>
+                        <input type="text" id="concern_person" name="concern_person" value="{{ old('concern_person') }}" placeholder="Mother, Father, Wife, etc." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        @error('concern_person')
+                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
                 </div>
             </div>
         </div>

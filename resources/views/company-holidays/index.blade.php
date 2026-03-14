@@ -43,10 +43,10 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div class="p-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
+                    <form method="GET" action="{{ route('company-holidays.index') }}" class="flex items-center space-x-4">
                         <label for="year" class="text-sm font-semibold text-gray-700">Select Year:</label>
                         <select name="year" id="year" onchange="this.form.submit()"
-                                class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
+                                class="px-6 py-2 w-40 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
                             @php
                                 $currentYear = date('Y');
                                 $startYear = $currentYear - 2;
@@ -58,11 +58,7 @@
                                 </option>
                             @endfor
                         </select>
-                        <form action="{{ route('company-holidays.index') }}" method="GET" class="hidden">
-                            <input type="hidden" name="year" value="{{ $selectedYear }}">
-                        </form>
-                    </div>
-
+                    </form>
                     <div class="flex items-center space-x-6">
                         @if($holidayData)
                             <a href="{{ route('company-holidays.edit', $holidayData['id']) }}"

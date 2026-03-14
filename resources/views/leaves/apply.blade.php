@@ -201,23 +201,7 @@
     </div>
 </div>
 
-<!-- jQuery UI CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-
-<!-- jQuery and jQuery UI -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-
-<style>
-.ui-datepicker .ui-state-disabled {
-    opacity: 0.4;
-}
-.ui-datepicker-week-end .ui-state-default {
-    color: #999;
-    background: #f5f5f5;
-}
-</style>
-
+@push('scripts')
 <script>
 $(document).ready(function() {
     var selectedYear = {{ $year }};
@@ -336,4 +320,5 @@ window.updateDatePickerYear = function() {
 };
 });
 </script>
+@endpush
 @endsection
