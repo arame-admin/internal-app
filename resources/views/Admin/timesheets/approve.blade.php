@@ -5,7 +5,15 @@
 @section('content')
 <div class="p-6 mt-16">
     <div class="max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Approve Timesheets</h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Approve Timesheets</h2>
+            <a href="{{ route('admin.timesheets.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Timesheets
+            </a>
+        </div>
         
         <!-- Status Filter -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">

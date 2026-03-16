@@ -116,7 +116,8 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
 // Employee Routes
 Route::prefix('employee')->middleware('auth')->name('employee.')->group(function () {
     Route::get('/dashboard', function () {
-        return view('User.employee.dashboard');
+        $reminders = \App\Models\TimesheetReminder::getActiveRemindersForUser(auth()->id());
+        return view('User.employee.dashboard', compact('reminders'));
     })->name('dashboard');
     
     // Leave Management

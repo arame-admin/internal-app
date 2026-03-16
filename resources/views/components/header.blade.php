@@ -222,8 +222,62 @@
         </div>
 
         <!-- User Profile Dropdown -->
-        <div class="dropdown relative pt-2 pb-2" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
-            <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 cursor-pointer">
+        <div class="flex items-center space-x-4">
+            <!-- Timesheet Reminder Notification Bell -->
+            @php
+                $reminderCount = 0;
+                $activeReminders = collect();
+                if (auth()->check() && auth()->user()->role_id == 3) {
+                    $activeReminders = \App\Models\TimesheetReminder::getActiveRemindersForUser(auth()->id());
+                    $reminderCount = $activeReminders->count();
+                }
+            @endphp
+            @if($reminderCount > 0)
+            <div class="relative" onmouseenter="this.querySelector('.notification-dropdown').style.display='block'" onmouseleave="this.querySelector('.notification-dropdown').style.display='none'">
+                <button class="relative p-2 text-amber-600 hover:text-amber-700 transition-colors cursor-pointer" title="Missing Timesheet Reminder">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                        {{ $reminderCount }}
+                    </span>
+                </button>
+                <!-- Notification Dropdown -->
+                <div class="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 hidden">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <h3 class="text-sm font-semibold text-gray-800">Timesheet Reminder{{ $reminderCount > 1 ? 's' : '' }}</h3>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto">
+                        @foreach($activeReminders as $reminder)
+                        <a href="{{ route('employee.timesheets.apply') }}" class="flex items-start space-x-3 px-4 py-3 hover:bg-amber-50 transition-colors border-b border-gray-50 last:border-0">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-800">Missing Timesheet</p>
+                                <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($reminder->missed_date)->format('M d, Y') }}</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium text-amber-700 bg-amber-100 rounded">
+                                    Log Now
+                                </span>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                    <div class="px-4 py-2 border-t border-gray-100">
+                        <a href="{{ route('employee.timesheets.apply') }}" class="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                            View All & Log Timesheet
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+            
+            <div class="dropdown relative pt-2 pb-2" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
+                <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 cursor-pointer">
                 <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30">
                     <span class="text-white text-sm font-bold">{{ substr(auth()->user()?->name ?? 'JD', 0, 2) }}</span>
                 </div>
@@ -264,6 +318,7 @@
                     </form>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </nav>

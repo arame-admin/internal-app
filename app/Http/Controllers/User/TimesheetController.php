@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Timesheet;
+use App\Models\TimesheetReminder;
 
 class TimesheetController extends Controller
 {
@@ -65,6 +66,14 @@ class TimesheetController extends Controller
 
         $user = auth()->user();
         
+        // Check if the date is beyond 48 hours (cannot apply old timesheets)
+        $timesheetDate = \Carbon\Carbon::parse($request->date)->startOfDay();
+        $cutoffDate = now()->subHours(48)->startOfDay();
+        
+        if ($timesheetDate->lt($cutoffDate)) {
+            return back()->with('error', 'Timesheet cannot be applied for dates older than 48 hours. Please contact your manager or HR for assistance.');
+        }
+        
         // Calculate hours from times
         $start = \Carbon\Carbon::createFromFormat('H:i', $request->start_time);
         $end = \Carbon\Carbon::createFromFormat('H:i', $request->end_time);
@@ -101,6 +110,11 @@ class TimesheetController extends Controller
             'description' => $request->description,
             'status' => 'draft',
         ]);
+
+        // Dismiss any reminder for this date if it exists
+        TimesheetReminder::where('user_id', $user->id)
+            ->where('missed_date', $request->date)
+            ->update(['status' => TimesheetReminder::STATUS_DISMISSED]);
 
         return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
     }
