@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\MeetingController;
 use App\Http\Controllers\User\LeaveController as UserLeaveController;
 use App\Http\Controllers\User\TimesheetController as UserTimesheetController;
+use App\Http\Controllers\Admin\TimesheetController as AdminTimesheetController;
 use App\Http\Controllers\User\ManagerController;
 
 Route::get('/', function () {
@@ -88,6 +89,11 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::put('/leaves/applications/{id}/approve', [LeaveController::class, 'adminApproveUpdate'])->name('leaves.applications.approve');
     Route::resource('leaves', LeaveController::class)->except(['show']);
     Route::put('/leaves/{id}/status', [LeaveController::class, 'updateStatus'])->name('leaves.status.update');
+    
+    // Timesheet Management (Admin)
+    Route::get('/timesheets', [AdminTimesheetController::class, 'adminIndex'])->name('timesheets.index');
+    Route::get('/timesheets/approve', [AdminTimesheetController::class, 'adminApprove'])->name('timesheets.approve');
+    Route::put('/timesheets/{id}/approve', [AdminTimesheetController::class, 'adminApproveUpdate'])->name('timesheets.approve.update');
 });
 
 
@@ -123,4 +129,6 @@ Route::prefix('employee')->middleware('auth')->name('employee.')->group(function
     Route::get('/timesheets/apply', [UserTimesheetController::class, 'apply'])->name('timesheets.apply');
     Route::post('/timesheets', [UserTimesheetController::class, 'store'])->name('timesheets.store');
     Route::patch('/timesheets/{id}/draft', [UserTimesheetController::class, 'updateDraft'])->name('timesheets.updateDraft');
+    Route::post('/timesheets/{id}/submit', [UserTimesheetController::class, 'submit'])->name('timesheets.submit');
+    Route::delete('/timesheets/{id}', [UserTimesheetController::class, 'destroy'])->name('timesheets.destroy');
 });
