@@ -20,12 +20,28 @@ class LeaveController extends Controller
     /**
      * Calculate the number of leave days between two dates.
      */
-    private function calculateLeaveDays($startDate, $endDate)
+    private function calculateLeaveDays($startDate, $endDate, $durationType = 'full_day')
     {
+        if ($durationType === 'half_day') {
+            return 0.5;
+        }
+        
         $start = new \DateTime($startDate);
         $end = new \DateTime($endDate);
         $interval = $start->diff($end);
-        return $interval->days + 1;
+        $days = $interval->days + 1;
+        
+        // Exclude weekends
+        $workingDays = 0;
+        $current = clone $start;
+        while ($current <= $end) {
+            $day = $current->format('N'); // 1=Mon ... 7=Sun
+            if ($day < 6) { // Mon-Fri
+                $workingDays++;
+            }
+            $current->modify('+1 day');
+        }
+        return $workingDays;
     }
 
     /**
@@ -71,19 +87,18 @@ class LeaveController extends Controller
         $year = date('Y');
         
         $request->validate([
-            'leave_type' => 'required|in:sick,casual,earned',
+'leave_type' => 'required|in:sick_leave,casual_leave,earned_leave',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string|max:1000',
-            'is_half_day' => 'nullable|boolean',
-            'half_day_period' => 'required_if:is_half_day,1|in:morning,afternoon',
+'duration_type' => 'required|in:full_day,half_day',
+            'half_period' => 'nullable|in:first_half,second_half',
         ]);
 
-        $leaveDays = $this->calculateLeaveDays($request->start_date, $request->end_date);
+        $leaveDays = $this->calculateLeaveDays($request->start_date, $request->end_date, $request->duration_type ?? 'full_day');
         
-        if ($request->is_half_day) {
-            $leaveDays = 0.5;
-        }
+        // Half day logic handled in calculateLeaveDays()
+
 
         $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
         
@@ -96,13 +111,14 @@ class LeaveController extends Controller
         ApplyLeave::create([
             'user_id' => $user->id,
             'leave_type' => $request->leave_type,
+            'year' => $year,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'leave_days' => $leaveDays,
+            'total_days' => $leaveDays,
             'reason' => $request->reason,
             'status' => 'pending',
-            'is_half_day' => $request->is_half_day ?? false,
-            'half_day_period' => $request->half_day_period ?? null,
+            'duration_type' => $request->duration_type ?? 'full_day',
+            'half_period' => $request->half_period ?? null,
         ]);
 
         return redirect()->route('employee.leaves.index')->with('success', 'Leave application submitted successfully.');

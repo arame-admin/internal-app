@@ -42,8 +42,7 @@
             const selects = document.querySelectorAll('select');
             selects.forEach(function(select) {
                 if (select.options.length > 0) {
-                    new Choices(select, {
-                        width: '100%',
+new Choices(select, {
                         searchEnabled: select.options.length > 10
                     });
                 }

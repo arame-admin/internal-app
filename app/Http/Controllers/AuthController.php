@@ -58,11 +58,11 @@ class AuthController extends Controller
                     case 1: // Admin
                         return redirect()->intended('/admin/dashboard');
                     case 2: // Manager
-                        return redirect()->intended('/admin/dashboard');
+                        return redirect()->intended('/manager/dashboard');
                     case 3: // Employee
-                        return redirect()->intended('/admin/dashboard');
+                        return redirect()->intended('/employee/dashboard');
                     default:
-                        return redirect()->intended('/admin/dashboard');
+                        return redirect()->intended('/employee/dashboard');
                 }
             }
 

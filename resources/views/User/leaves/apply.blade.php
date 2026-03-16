@@ -273,6 +273,18 @@ $(document).ready(function() {
         }
     }
     
+    // Update date range when start date changes
+    function updateDateRange() {
+        var startDate = $('#start_date').datepicker('getDate');
+        if (startDate) {
+            var dateStr = $.datepicker.formatDate('yy-mm-dd', startDate);
+            $('#end_date').datepicker('option', 'minDate', startDate);
+            $('#end_date').val(dateStr); // Auto-fill end date with start date
+            calculateDays();
+        }
+    }
+    window.updateDateRange = updateDateRange;
+    
 // Duration type change handler
 $('input[name="duration_type"]').change(function() {
     var durationType = $(this).val();
