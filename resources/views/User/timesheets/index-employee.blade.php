@@ -4,6 +4,8 @@
 
 @php
 $weeklyTotal = \App\Models\Timesheet::weeklyTotal(auth()->id());
+$userRole = auth()->user()->role_id ?? 0;
+$timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
 @endphp
 
 @section('content')
@@ -54,7 +56,7 @@ $weeklyTotal = \App\Models\Timesheet::weeklyTotal(auth()->id());
                 <h3 class="text-lg font-semibold text-gray-800">
                     {{ $timesheets->count() }} entries for {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
                 </h3>
-                <a href="{{ route('employee.timesheets.apply', ['year' => $year, 'month' => $month]) }}" 
+                <a href="{{ route($timesheetRoutePrefix . 'timesheets.apply', ['year' => $year, 'month' => $month]) }}" 
                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
                     Log Hours
                 </a>

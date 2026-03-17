@@ -15,6 +15,9 @@
         <div class="flex items-center space-x-1">
             @php
                 $userRole = auth()->user()?->role_id ?? 0;
+                $user = auth()->user();
+                $hasSubordinates = $user && $user->subordinates()->count() > 0;
+                $isManager = $userRole == 2 || $hasSubordinates;
             @endphp
             
             {{-- Dashboard (visible to all) --}}
@@ -30,9 +33,15 @@
                     </a>
                     @break
                 @case(3)
+                    @if($hasSubordinates)
+                    <a href="{{ route('manager.dashboard') }}" class="relative px-4 py-2 text-sm font-semibold text-blue-600 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500">
+                        Dashboard
+                    </a>
+                    @else
                     <a href="{{ route('employee.dashboard') }}" class="relative px-4 py-2 text-sm font-semibold text-blue-600 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500">
                         Dashboard
                     </a>
+                    @endif
                     @break
                 @default
                     <a href="#" class="relative px-4 py-2 text-sm font-semibold text-blue-600 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-gradient-to-r after:from-blue-500 after:to-indigo-500">
@@ -45,10 +54,42 @@
                 <a href="{{ route('admin.timesheets.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
                     Timesheet
                 </a>
-            @elseif($userRole == 2)
-                <a href="{{ route('manager.timesheets.approve') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
-                    Timesheet
-                </a>
+            @elseif($isManager)
+                <!-- Timesheet Dropdown for Managers -->
+                <div class="dropdown relative" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
+                    <button class="group flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                        <span class="group-hover:text-blue-600 transition-colors">Timesheet</span>
+                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu absolute left-0 mt-0 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden" style="display: none;">
+                        <a href="{{ route('manager.timesheets.index') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-gray-900 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <span>My Timesheets</span>
+                        </a>
+                        <a href="{{ route('manager.timesheets.apply') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            <span>Log Hours</span>
+                        </a>
+                        <a href="{{ route('manager.timesheets.team') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <span>Team Timesheets</span>
+                        </a>
+                        <a href="{{ route('manager.timesheets.approve') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Approve Timesheets</span>
+                        </a>
+                    </div>
+                </div>
             @else
                 <!-- Timesheet Dropdown for Employees -->
                 <div class="dropdown relative" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
@@ -100,10 +141,30 @@
                         </a>
                     </div>
                 </div>
-            @elseif($userRole == 2)
-            <a href="{{ route('employee.leaves.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
-                Leave
-            </a>
+            @elseif($isManager)
+            <!-- Leave Dropdown for Managers -->
+            <div class="dropdown relative" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
+                <button class="group flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                    <span class="group-hover:text-blue-600 transition-colors">Leave</span>
+                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div class="dropdown-menu absolute left-0 mt-0 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden" style="display: none;">
+                    <a href="{{ route('employee.leaves.index') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>My Leaves</span>
+                    </a>
+                    <a href="{{ route('manager.leaves.approve') }}" class="flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Approve Leaves</span>
+                    </a>
+                </div>
+            </div>
             @else
             <a href="{{ route('employee.leaves.index') }}" class="relative px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors before:absolute before:bottom-0 before:left-4 before:right-4 before:h-0.5 before:bg-gray-300 before:scale-x-0 before:transition-transform hover:before:scale-x-100">
                 Leave
@@ -111,7 +172,7 @@
             @endif
             
             {{-- Admin & Manager specific menus --}}
-            @if($userRole == 1 || $userRole == 2)
+            @if($userRole == 1 || $isManager)
                 <!-- Project Management Dropdown -->
                 <div class="dropdown relative" onmouseenter="this.querySelector('.dropdown-menu').style.display='block'" onmouseleave="this.querySelector('.dropdown-menu').style.display='none'">
                     <button class="group flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">

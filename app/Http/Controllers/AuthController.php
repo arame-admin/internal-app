@@ -50,19 +50,19 @@ class AuthController extends Controller
 
                 $user = Auth::user();
                 $roleId = $user->role_id;
-
+                
                 Log::channel('custom')->info('User logged in: ' . $user->email);
 
-                // Redirect based on role
-                switch ($roleId) {
-                    case 1: // Admin
-                        return redirect()->intended('/admin/dashboard');
-                    case 2: // Manager
-                        return redirect()->intended('/manager/dashboard');
-                    case 3: // Employee
-                        return redirect()->intended('/employee/dashboard');
-                    default:
-                        return redirect()->intended('/employee/dashboard');
+                // Check if user has subordinates (is a reporting manager)
+                $hasSubordinates = $user->subordinates()->count() > 0;
+                
+                // Redirect based on role or if user is a reporting manager
+                if ($roleId == 1) { // Admin
+                    return redirect()->intended('/admin/dashboard');
+                } elseif ($roleId == 2 || $hasSubordinates) { // Manager or has subordinates
+                    return redirect()->intended('/manager/dashboard');
+                } else { // Employee
+                    return redirect()->intended('/employee/dashboard');
                 }
             }
 

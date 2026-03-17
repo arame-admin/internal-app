@@ -108,12 +108,21 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
     Route::put('/leaves/{id}/approve', [ManagerController::class, 'updateLeave'])->name('leaves.update');
     Route::put('/leaves/{id}/status', [ManagerController::class, 'updateLeave'])->name('leaves.status.update');
     
-    // Timesheet Management
+    // Timesheet Management (own timesheet - accessible via /manager/timesheets)
+    Route::get('/timesheets', [UserTimesheetController::class, 'index'])->name('timesheets.index');
+    Route::get('/timesheets/apply', [UserTimesheetController::class, 'apply'])->name('timesheets.apply');
+    Route::post('/timesheets', [UserTimesheetController::class, 'store'])->name('timesheets.store');
+    Route::patch('/timesheets/{id}/draft', [UserTimesheetController::class, 'updateDraft'])->name('timesheets.updateDraft');
+    Route::post('/timesheets/{id}/submit', [UserTimesheetController::class, 'submit'])->name('timesheets.submit');
+    Route::delete('/timesheets/{id}', [UserTimesheetController::class, 'destroy'])->name('timesheets.destroy');
+    
+    // Timesheet Management (subordinates timesheets)
+    Route::get('/timesheets/team', [ManagerController::class, 'teamTimesheets'])->name('timesheets.team');
     Route::get('/timesheets/approve', [ManagerController::class, 'approveTimesheet'])->name('timesheets.approve');
     Route::put('/timesheets/{id}/approve', [ManagerController::class, 'updateTimesheet'])->name('timesheets.approve.update');
 });
 
-// Employee Routes
+// Employee Routes (also accessible for reporting managers to view their own timesheets)
 Route::prefix('employee')->middleware('auth')->name('employee.')->group(function () {
     Route::get('/dashboard', function () {
         $reminders = \App\Models\TimesheetReminder::getActiveRemindersForUser(auth()->id());

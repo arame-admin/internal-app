@@ -3,6 +3,10 @@
 @section('title', 'Log Timesheet')
 
 @section('content')
+@php
+    $userRole = auth()->user()->role_id ?? 0;
+    $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
+@endphp
 <div class="p-6 mt-16">
     <div class="max-w-2xl mx-auto">
         <!-- Monthly & Weekly Total -->
@@ -31,7 +35,7 @@
         <!-- Log New Entry Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Log Hours</h2>
-            <form action="{{ route('employee.timesheets.store') }}" method="POST">
+            <form action="{{ route($timesheetRoutePrefix . 'timesheets.store') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
@@ -72,7 +76,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
-                    <a href="{{ route('employee.timesheets.index') }}" class="px-5 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    <a href="{{ route($timesheetRoutePrefix . 'timesheets.index') }}" class="px-5 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                         Cancel
                     </a>
                     <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
@@ -119,7 +123,7 @@
                                 <p class="text-sm text-gray-600 mb-4">{{ Str::limit($entry->description, 100) }}</p>
                             @endif
                             @if($entry->status == 'draft' || $entry->status == 'rejected')
-                                <form action="{{ route('employee.timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2">
+                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2">
                                     @csrf @method('PATCH')
                                     <input type="time" name="start_time" value="{{ $entry->start_time }}" class="px-2 py-1 border rounded text-sm" required>
                                     <span class="text-gray-500">to</span>
@@ -129,12 +133,12 @@
                                     <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Update</button>
                                 </form>
                                 @if($entry->status == 'draft')
-                                    <form action="{{ route('employee.timesheets.submit', $entry->id) }}" method="POST" class="inline">
+                                    <form action="{{ route($timesheetRoutePrefix . 'timesheets.submit', $entry->id) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">Submit for Approval</button>
                                     </form>
                                 @endif
-                                <form action="{{ route('employee.timesheets.destroy', $entry->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry?')">
+                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.destroy', $entry->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="px-4 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200">Delete</button>
                                 </form>
