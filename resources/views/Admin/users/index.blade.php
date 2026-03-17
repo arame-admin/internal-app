@@ -101,6 +101,9 @@
                     </a>
                 </th>
                 <th class="px-6 py-4 text-left">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Reporting Manager</span>
+                </th>
+                <th class="px-6 py-4 text-left">
                     <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</span>
                 </th>
                 <th class="px-6 py-4 text-center">
@@ -120,30 +123,33 @@
                 <td class="px-6 py-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-bold">{{ substr($user['name'], 0, 2) }}</span>
+{{ substr($user->name, 0, 2) }}
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-800">{{ $user['name'] }}</p>
-                            <p class="text-xs text-gray-500">Joined: {{ $user['joined_date'] }}</p>
+{{ $user->name }}
+{{ $user->created_at->format('M Y') }}
                         </div>
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <p class="text-sm text-gray-600">{{ $user['email'] }}</p>
+{{ $user->email }}
                 </td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {{ $user['role'] }}
+                        {{ $user->role->name ?? 'N/A' }}
                     </span>
                 </td>
                 <td class="px-6 py-4">
-                    <span class="text-sm text-gray-600">{{ $user['department'] }}</span>
+                    <span class="text-sm text-gray-600">{{ $user->department->name ?? 'N/A' }}</span>
                 </td>
                 <td class="px-6 py-4">
-                    <span class="text-sm text-gray-600">{{ $user['phone'] }}</span>
+                    <span class="text-sm text-gray-600">{{ $user->reportingManager->name ?? 'N/A' }}</span>
+                </td>
+                <td class="px-6 py-4">
+{{ $user->phone_number }}
                 </td>
                 <td class="px-6 py-4 text-center">
-                    @if($user['status'] == 'active')
+@if($user->is_active)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Active
                         </span>
@@ -155,22 +161,22 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                        <a href="{{ route('admin.users.status', $user['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                        <a href="{{ route('admin.users.status', Crypt::encrypt($user->id)) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Toggle Status">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('admin.users.edit', $user['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <a href="{{ route('admin.users.edit', Crypt::encrypt($user->id)) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('admin.users.payroll', $user['id']) }}" class="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Edit Payroll">
+                        <a href="{{ route('admin.users.payroll', Crypt::encrypt($user->id)) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Payroll">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                             </svg>
                         </a>
-                        <form action="{{ route('admin.users.destroy', $user['id']) }}" method="POST" class="inline">
+                        <form action="{{ route('admin.users.destroy', Crypt::encrypt($user->id)) }}" method="POST" style="display: inline;">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this user?')">
@@ -184,7 +190,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="px-6 py-12 text-center">
+                <td colspan="9" class="px-6 py-12 text-center">
                     <div class="flex flex-col items-center justify-center">
                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
