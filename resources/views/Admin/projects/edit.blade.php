@@ -28,7 +28,7 @@
                 <!-- Project Name -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $project['name'] ?? '') }}" placeholder="Enter project name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
+                    <input type="text" id="name" name="name" value="{{ old('name', $project->name ?? '') }}" placeholder="Enter project name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
                     <p class="text-xs text-gray-500 mt-1">The full name of the project</p>
                 </div>
 
@@ -38,7 +38,7 @@
                     <select id="client_id" name="client_id" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                         <option value="">Select a client</option>
                         @foreach($clients as $client)
-                            <option value="{{ $client['id'] }}" {{ old('client_id', $project['client_id'] ?? '') == $client['id'] ? 'selected' : '' }}>{{ $client['name'] }}</option>
+                            <option value="{{ $client->id }}" {{ old('client_id', $project->client_id ?? '') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                         @endforeach
                     </select>
                     <p class="text-xs text-gray-500 mt-1">The client this project belongs to</p>
@@ -49,7 +49,11 @@
                     <label class="block text-sm font-medium text-gray-700 mb-3">Project Type</label>
                     <div class="space-y-3">
                         @php
-                            $selectedTypes = old('project_type', $project['project_type'] ?? []);
+                            $projectType = $project->project_type;
+                            if (is_string($projectType)) {
+                                $projectType = json_decode($projectType, true);
+                            }
+                            $selectedTypes = old('project_type', $projectType ?? []);
                         @endphp
                         <label class="flex items-center space-x-3">
                             <input type="checkbox" name="project_type[]" value="web_application" {{ in_array('web_application', $selectedTypes) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
@@ -80,10 +84,10 @@
                     <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
                     <select id="priority" name="priority" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                         <option value="">Select priority</option>
-                        <option value="low" {{ old('priority', $project['priority'] ?? '') == 'low' ? 'selected' : '' }}>Low</option>
-                        <option value="medium" {{ old('priority', $project['priority'] ?? '') == 'medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="high" {{ old('priority', $project['priority'] ?? '') == 'high' ? 'selected' : '' }}>High</option>
-                        <option value="critical" {{ old('priority', $project['priority'] ?? '') == 'critical' ? 'selected' : '' }}>Critical</option>
+                        <option value="low" {{ old('priority', $project->priority ?? '') == 'low' ? 'selected' : '' }}>Low</option>
+                        <option value="medium" {{ old('priority', $project->priority ?? '') == 'medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="high" {{ old('priority', $project->priority ?? '') == 'high' ? 'selected' : '' }}>High</option>
+                        <option value="critical" {{ old('priority', $project->priority ?? '') == 'critical' ? 'selected' : '' }}>Critical</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Project priority level</p>
                 </div>
@@ -92,7 +96,7 @@
             <!-- Description -->
             <div class="mt-6">
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea id="description" name="description" rows="4" placeholder="Describe the project scope, objectives, and requirements" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none">{{ old('description', $project['description'] ?? '') }}</textarea>
+                <textarea id="description" name="description" rows="4" placeholder="Describe the project scope, objectives, and requirements" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none">{{ old('description', $project->description ?? '') }}</textarea>
                 <p class="text-xs text-gray-500 mt-1">Detailed project description</p>
             </div>
         </div>
@@ -104,14 +108,14 @@
                 <!-- Start Date -->
                 <div>
                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                    <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $project['start_date'] ?? '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
+                    <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $project->start_date ?? '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" required>
                     <p class="text-xs text-gray-500 mt-1">Project start date</p>
                 </div>
 
                 <!-- End Date -->
                 <div>
                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                    <input type="date" id="end_date" name="end_date" value="{{ old('end_date', $project['end_date'] ?? '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                    <input type="date" id="end_date" name="end_date" value="{{ old('end_date', $project->end_date ?? '') }}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
                     <p class="text-xs text-gray-500 mt-1">Expected completion date</p>
                 </div>
 
@@ -120,7 +124,7 @@
                     <label for="budget" class="block text-sm font-medium text-gray-700 mb-2">Budget</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                        <input type="number" id="budget" name="budget" value="{{ old('budget', $project['budget'] ?? '') }}" placeholder="0.00" step="0.01" min="0" class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                        <input type="number" id="budget" name="budget" value="{{ old('budget', $project->budget ?? '') }}" placeholder="0.00" step="0.01" min="0" class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Project budget in USD</p>
                 </div>
@@ -145,7 +149,7 @@
                             </button>
                         </div>
                     </div>
-                    <input type="hidden" name="technologies" id="technologies-hidden" value="{{ old('technologies', json_encode($project['technologies'] ?? [])) }}">
+                    <input type="hidden" name="technologies" id="technologies-hidden" value="{{ old('technologies', json_encode($project->technologies ?? [])) }}">
                     <p class="text-xs text-gray-500 mt-1">Technologies used in the project</p>
                 </div>
 
@@ -163,8 +167,26 @@
                             </button>
                         </div>
                     </div>
-                    <input type="hidden" name="features" id="features-hidden" value="{{ old('features', json_encode($project['features'] ?? [])) }}">
+                    <input type="hidden" name="features" id="features-hidden" value="{{ old('features', json_encode($project->features ?? [])) }}">
                     <p class="text-xs text-gray-500 mt-1">Key features of the project</p>
+                </div>
+
+                <!-- Tasks -->
+                <div>
+                    <label for="tasks" class="block text-sm font-medium text-gray-700 mb-2">Tasks</label>
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap gap-2" id="tasks-container">
+                            <!-- Tasks will be added here -->
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="task-input" placeholder="Enter task name" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                            <button type="button" id="add-task" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="tasks" id="tasks-hidden" value="{{ old('tasks', json_encode($project->tasks ?? [])) }}">
+                    <p class="text-xs text-gray-500 mt-1">Add tasks for this project</p>
                 </div>
             </div>
         </div>
@@ -174,7 +196,7 @@
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Project Requirements</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="design_required" value="1" {{ old('design_required', $project['design_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="design_required" value="1" {{ old('design_required', $project->design_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Design</div>
                         <div class="text-sm text-gray-500">UI/UX design required</div>
@@ -182,7 +204,7 @@
                 </label>
 
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="mobile_app_required" value="1" {{ old('mobile_app_required', $project['mobile_app_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="mobile_app_required" value="1" {{ old('mobile_app_required', $project->mobile_app_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Mobile App</div>
                         <div class="text-sm text-gray-500">Mobile application development</div>
@@ -190,7 +212,7 @@
                 </label>
 
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="web_app_required" value="1" {{ old('web_app_required', $project['web_app_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="web_app_required" value="1" {{ old('web_app_required', $project->web_app_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Web App</div>
                         <div class="text-sm text-gray-500">Web application development</div>
@@ -198,7 +220,7 @@
                 </label>
 
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="deployment_required" value="1" {{ old('deployment_required', $project['deployment_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="deployment_required" value="1" {{ old('deployment_required', $project->deployment_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Deployment</div>
                         <div class="text-sm text-gray-500">Server deployment and setup</div>
@@ -206,7 +228,7 @@
                 </label>
 
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="testing_required" value="1" {{ old('testing_required', $project['testing_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="testing_required" value="1" {{ old('testing_required', $project->testing_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Testing</div>
                         <div class="text-sm text-gray-500">Quality assurance and testing</div>
@@ -214,7 +236,7 @@
                 </label>
 
                 <label class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 transition-colors cursor-pointer">
-                    <input type="checkbox" name="maintenance_required" value="1" {{ old('maintenance_required', $project['maintenance_required'] ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                    <input type="checkbox" name="maintenance_required" value="1" {{ old('maintenance_required', $project->maintenance_required ?? false) ? 'checked' : '' }} class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
                     <div>
                         <div class="font-medium text-gray-800">Maintenance</div>
                         <div class="text-sm text-gray-500">Post-launch support and maintenance</div>
@@ -261,7 +283,7 @@
                     @endphp
                     @foreach($statuses as $status)
                         <label class="flex items-center">
-                            <input type="radio" name="status" value="{{ $status }}" {{ old('status', $project['status'] ?? '') == $status ? 'checked' : '' }} class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
+                            <input type="radio" name="status" value="{{ $status }}" {{ old('status', $project->status ?? '') == $status ? 'checked' : '' }} class="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500">
                             <span class="ml-2 text-sm text-gray-700">{{ $statusLabels[$status] }}</span>
                         </label>
                     @endforeach
@@ -286,7 +308,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Technologies management
-    let technologies = @json(old('technologies', $project['technologies'] ?? []));
+    let technologies = @json(old('technologies', $project->technologies ?? []));
     const techContainer = document.getElementById('technologies-container');
     const techInput = document.getElementById('technology-input');
     const addTechBtn = document.getElementById('add-technology');
@@ -334,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Features management
-    let features = @json(old('features', $project['features'] ?? []));
+    let features = @json(old('features', $project->features ?? []));
     const featuresContainer = document.getElementById('features-container');
     const featureInput = document.getElementById('feature-input');
     const addFeatureBtn = document.getElementById('add-feature');
@@ -381,9 +403,61 @@ document.addEventListener('DOMContentLoaded', function() {
         updateFeaturesDisplay();
     };
 
+    // Tasks management
+    let projectTasks = @json(old('tasks', $project->tasks ?? []));
+    if (typeof projectTasks === 'string') {
+        projectTasks = JSON.parse(projectTasks);
+    }
+    const tasks = projectTasks || [];
+    const tasksContainer = document.getElementById('tasks-container');
+    const taskInput = document.getElementById('task-input');
+    const addTaskBtn = document.getElementById('add-task');
+    const tasksHidden = document.getElementById('tasks-hidden');
+
+    function updateTasksDisplay() {
+        tasksContainer.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const tag = document.createElement('span');
+            tag.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800';
+            tag.innerHTML = `
+                ${task}
+                <button type="button" class="ml-2 text-green-600 hover:text-green-800" onclick="removeTask(${index})">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            tasksContainer.appendChild(tag);
+        });
+        tasksHidden.value = JSON.stringify(tasks);
+    }
+
+    updateTasksDisplay();
+
+    addTaskBtn.addEventListener('click', function() {
+        const value = taskInput.value.trim();
+        if (value && !tasks.includes(value)) {
+            tasks.push(value);
+            updateTasksDisplay();
+            taskInput.value = '';
+        }
+    });
+
+    taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTaskBtn.click();
+        }
+    });
+
+    window.removeTask = function(index) {
+        tasks.splice(index, 1);
+        updateTasksDisplay();
+    };
+
     // Team Members management
     let memberIndex = 0;
-    let teamMembers = @json(old('team_members', $project['team_members'] ?? []));
+    let teamMembers = @json(old('team_members', $project->team_members ?? []));
 
     const teamContainer = document.getElementById('team-members');
 
