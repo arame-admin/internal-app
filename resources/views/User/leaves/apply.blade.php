@@ -205,6 +205,7 @@
 <script>
 $(document).ready(function() {
     var selectedYear = {{ $year }};
+    var holidayDates = @if(isset($holidayDates)) {!! json_encode($holidayDates) !!} @else {} @endif;
     
     // Initialize datepickers with weekend disabled
     $('#start_date').datepicker({
@@ -215,6 +216,13 @@ $(document).ready(function() {
         maxDate: new Date(selectedYear, 11, 31),
         beforeShowDay: function(date) {
             var day = date.getDay();
+            var dateStr = $.datepicker.formatDate('yy-mm-dd', date);
+            
+            // Check for company holiday
+            if (holidayDates[dateStr]) {
+                return [false, 'ui-datepicker-company-holiday', holidayDates[dateStr]];
+            }
+            
             // 0 = Sunday, 6 = Saturday - disable weekends
             if (day === 0 || day === 6) {
                 return [false, 'ui-datepicker-week-end', 'Weekend'];
@@ -235,6 +243,13 @@ $(document).ready(function() {
         maxDate: new Date(selectedYear, 11, 31),
         beforeShowDay: function(date) {
             var day = date.getDay();
+            var dateStr = $.datepicker.formatDate('yy-mm-dd', date);
+            
+            // Check for company holiday
+            if (holidayDates[dateStr]) {
+                return [false, 'ui-datepicker-company-holiday', holidayDates[dateStr]];
+            }
+            
             // 0 = Sunday, 6 = Saturday - disable weekends
             if (day === 0 || day === 6) {
                 return [false, 'ui-datepicker-week-end', 'Weekend'];
@@ -332,5 +347,18 @@ window.updateDatePickerYear = function() {
 };
 });
 </script>
+<style>
+.ui-datepicker-company-holiday {
+    background-color: #fee2e2 !important;
+    background-image: none !important;
+    color: #dc2626 !important;
+    font-weight: bold !important;
+    border: 2px solid #f87171 !important;
+}
+.ui-datepicker-company-holiday:hover {
+    background-color: #fecaca !important;
+}
+</style>
+
 @endpush
 @endsection

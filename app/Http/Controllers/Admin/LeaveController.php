@@ -334,12 +334,14 @@ class LeaveController extends Controller
         $approvedCount = ApplyLeave::where('status', 'approved')->count();
         $canceledCount = ApplyLeave::where('status', 'canceled')->count();
 
+        $departments = \App\Models\Department::orderBy('name')->get();
+
         $query = ApplyLeave::with(['user', 'user.department', 'approver'])
             ->filter($request->all());
 
         $applications = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('Admin.leaves.applications-index', compact('applications', 'totalRequests', 'pendingCount', 'approvedCount', 'canceledCount'));
+        return view('Admin.leaves.applications-index', compact('applications', 'totalRequests', 'pendingCount', 'approvedCount', 'canceledCount', 'departments'));
     }
 
     /**

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\ApplyLeave;
 use App\Models\Leave;
+use App\Models\CompanyHoliday;
 
 class LeaveController extends Controller
 {
@@ -71,11 +72,22 @@ class LeaveController extends Controller
         
         $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
         
+        // Fetch company holidays for the selected year
+        $companyHoliday = CompanyHoliday::where('year', $year)->first();
+        $holidayDates = [];
+        if ($companyHoliday) {
+            $allHolidays = array_merge($companyHoliday->mandatory_holidays ?? [], $companyHoliday->optional_holidays ?? []);
+            foreach ($allHolidays as $holiday) {
+                $date = \Carbon\Carbon::parse($holiday['date'])->format('Y-m-d');
+                $holidayDates[$date] = $holiday['name'];
+            }
+        }
+        
         $appliedLeaves = ApplyLeave::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('User.leaves.apply', compact('leaveBalance', 'year', 'appliedLeaves'));
+        return view('User.leaves.apply', compact('leaveBalance', 'year', 'holidayDates', 'appliedLeaves'));
     }
 
     /**
