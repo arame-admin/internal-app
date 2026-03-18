@@ -31,7 +31,7 @@
                 <select name="client" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white">
                     <option value="">All Clients</option>
                     @foreach($clients as $client)
-                        <option value="{{ $client['id'] }}" {{ request('client') == $client['id'] ? 'selected' : '' }}>{{ $client['name'] }}</option>
+                        <option value="{{ $client->id }}" {{ request('client') == $client->id ? 'selected' : '' }}>{{ $client->name }}</option>
                     @endforeach
                 </select>
 
@@ -135,17 +135,24 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="font-semibold text-gray-800">{{ $project['name'] }}</p>
-                            <p class="text-xs text-gray-500">{{ $project['start_date'] }} - {{ $project['end_date'] ?? 'Ongoing' }}</p>
+                            <p class="font-semibold text-gray-800">{{ $project->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $project->start_date }} - {{ $project->end_date ?? 'Ongoing' }}</p>
                         </div>
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <p class="text-sm text-gray-600">{{ $project['client_name'] }}</p>
+                    <p class="text-sm text-gray-600">{{ $project->client->name ?? 'N/A' }}</p>
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex flex-wrap gap-1">
-                        @foreach($project['project_type'] as $type)
+                        @php
+                            $projectTypes = $project->project_type;
+                            if (is_string($projectTypes)) {
+                                $projectTypes = json_decode($projectTypes, true);
+                            }
+                            $projectTypes = $projectTypes ?? [];
+                        @endphp
+                        @foreach($projectTypes as $type)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {{ ucwords(str_replace('_', ' ', $type)) }}
                             </span>
@@ -155,9 +162,9 @@
                 <td class="px-6 py-4 text-center">
                     <div class="flex items-center justify-center space-x-2">
                         <div class="w-16 bg-gray-200 rounded-full h-2">
-                            <div class="bg-purple-600 h-2 rounded-full" style="width: {{ $project['progress_percentage'] }}%"></div>
+                            <div class="bg-purple-600 h-2 rounded-full" style="width: {{ $project->progress_percentage }}%"></div>
                         </div>
-                        <span class="text-xs text-gray-600">{{ $project['progress_percentage'] }}%</span>
+                        <span class="text-xs text-gray-600">{{ $project->progress_percentage }}%</span>
                     </div>
                 </td>
                 <td class="px-6 py-4 text-center">
@@ -179,23 +186,23 @@
                             'cancelled' => 'Cancelled',
                         ];
                     @endphp
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$project['status']] ?? 'bg-gray-100 text-gray-800' }}">
-                        {{ $statusLabels[$project['status']] ?? ucwords(str_replace('_', ' ', $project['status'])) }}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$project->status] ?? 'bg-gray-100 text-gray-800' }}">
+                        {{ $statusLabels[$project->status] ?? ucwords(str_replace('_', ' ', $project->status)) }}
                     </span>
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end space-x-2">
-                        <a href="{{ route('admin.projects.meetings.index', $project['id']) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Meetings">
+                        <a href="{{ route('admin.projects.meetings.index', $project->id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Meetings">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('admin.projects.status', $project['id']) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
+                        <a href="{{ route('admin.projects.status', $project->id) }}" class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Change Status">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
                         </a>
-                        <a href="{{ route('admin.projects.edit', $project['id']) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                        <a href="{{ route('admin.projects.edit', $project->id) }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
@@ -225,42 +232,42 @@
     </table>
 
     <!-- Pagination -->
-    @if(isset($paginator) && $paginator->hasPages())
+    @if($projects->hasPages())
         <div class="px-6 py-4 border-t border-gray-100 pagination-container">
             <p class="pagination-info">
-                Showing {{ ($paginator->currentPage() - 1) * $paginator->perPage() + 1 }} to
-                {{ min($paginator->currentPage() * $paginator->perPage(), $paginator->total()) }}
-                of {{ $paginator->total() }} projects
+                Showing {{ ($projects->currentPage() - 1) * $projects->perPage() + 1 }} to
+                {{ min($projects->currentPage() * $projects->perPage(), $projects->total()) }}
+                of {{ $projects->total() }} projects
             </p>
 
             <div class="pagination">
                 {{-- Previous Page Link --}}
-                @if ($paginator->onFirstPage())
+                @if ($projects->onFirstPage())
                     <span class="page-item disabled">
                         <span class="page-link page-btn">&lsaquo;</span>
                     </span>
                 @else
-                    <a href="{{ $paginator->previousPageUrl() }}" class="page-item">
+                    <a href="{{ $projects->previousPageUrl() }}" class="page-item">
                         <span class="page-link page-btn">&lsaquo;</span>
                     </a>
                 @endif
 
                 {{-- Page Numbers --}}
-                @for ($i = 1; $i <= $paginator->lastPage(); $i++)
-                    @if ($i == $paginator->currentPage())
+                @for ($i = 1; $i <= $projects->lastPage(); $i++)
+                    @if ($i == $projects->currentPage())
                         <span class="page-item active">
                             <span class="page-link">{{ $i }}</span>
                         </span>
                     @else
-                        <a href="{{ $paginator->url($i) }}" class="page-item">
+                        <a href="{{ $projects->url($i) }}" class="page-item">
                             <span class="page-link">{{ $i }}</span>
                         </a>
                     @endif
                 @endfor
 
                 {{-- Next Page Link --}}
-                @if ($paginator->hasMorePages())
-                    <a href="{{ $paginator->nextPageUrl() }}" class="page-item">
+                @if ($projects->hasMorePages())
+                    <a href="{{ $projects->nextPageUrl() }}" class="page-item">
                         <span class="page-link page-btn">&rsaquo;</span>
                     </a>
                 @else

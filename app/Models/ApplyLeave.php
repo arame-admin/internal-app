@@ -138,6 +138,12 @@ class ApplyLeave extends Model
             });
         }
 
+        if (isset($filters['department']) && $filters['department']) {
+            $query->whereHas('user.department', function ($q) use ($filters) {
+                $q->where('id', $filters['department']);
+            });
+        }
+
         return $query;
     }
 

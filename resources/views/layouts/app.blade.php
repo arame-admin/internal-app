@@ -41,11 +41,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             const selects = document.querySelectorAll('select');
             selects.forEach(function(select) {
-                if (select.options.length > 0) {
-                    new Choices(select, {
-                        width: '100%',
-                        searchEnabled: select.options.length > 10
-                    });
+                if (select.options.length > 0 && typeof Choices !== 'undefined') {
+                    try {
+                        const forceSearch = select.classList.contains('enable-search') || select.dataset.enableSearch === 'true';
+                        new Choices(select, {
+                            searchEnabled: forceSearch || select.options.length > 5
+                        });
+                    } catch (e) {
+                        console.warn('Choices.js failed to initialize for select:', select.id || select.name, e);
+                    }
                 }
             });
             

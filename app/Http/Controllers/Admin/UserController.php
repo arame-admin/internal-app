@@ -95,6 +95,9 @@ class UserController extends Controller
         $designations = Designation::where('status', 'active')->get();
         $businessUnits = BusinessUnit::where('status', 'active')->get();
         $locations = Location::where('status', 'active')->get();
+        $managers = User::where('is_active', true)
+                       ->orderBy('name')
+                       ->get();
 
         // Generate next employee code
         $lastUser = User::orderBy('id', 'desc')->first();
@@ -104,7 +107,7 @@ class UserController extends Controller
             $nextEmployeeCode = 1000;
         }
 
-        return view('Admin.users.create', compact('roles', 'departments', 'designations', 'businessUnits', 'locations', 'nextEmployeeCode'));
+        return view('Admin.users.create', compact('roles', 'departments', 'designations', 'businessUnits', 'locations', 'managers', 'nextEmployeeCode'));
     }
 
     /**
@@ -113,56 +116,35 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validation
+            // Validation - added password and status handling
             $validated = $request->validate([
                 // Basic Information
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
-                'personal_email' => 'nullable|string|email|max:255|unique:users,personal_email',
                 'phone_number' => 'nullable|string|max:20',
-
-                // Personal Details
-                'about_me' => 'nullable|string|max:1000',
-                'what_i_love_about_job' => 'nullable|string|max:1000',
-                'gender' => 'nullable|in:male,female,other',
-                'dob' => 'nullable|date|before:today',
-                'marital_status' => 'nullable|in:single,married,divorced,widowed',
-                'marriage_date' => 'nullable|date|before_or_equal:today',
-                'blood_group' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-                'physically_handicapped' => 'boolean',
-                'nationality' => 'nullable|string|max:100',
-
-                // Work Information
-                'work_email' => 'nullable|string|email|max:255|unique:users,work_email',
-                'work_number' => 'nullable|string|max:20',
-                'residence_number' => 'nullable|string|max:20',
-                'current_address' => 'nullable|string|max:500',
-                'permanent_address' => 'nullable|string|max:500',
                 'employee_code' => 'nullable|string|max:50|unique:users,employee_code',
-                'date_of_joining' => 'nullable|date|before_or_equal:today',
-                'job_title' => 'nullable|string|max:255',
-
-                // Relationships
+                'reporting_manager_id' => 'nullable|exists:users,id',
+                'password' => 'required|string|min:8|confirmed',
                 'role_id' => 'required|exists:roles,id',
-                'department_id' => 'nullable|exists:departments,id',
-                'designation_id' => 'nullable|exists:designations,id',
-                'bu_id' => 'nullable|exists:business_units,id',
-                'location_id' => 'nullable|exists:locations,id',
+                'department_id' => 'required|exists:departments,id',
+                'is_active' => 'boolean',
             ]);
 
-            // Set default values
-            $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
-            $validated['is_active'] = true;
+            // Hash password
+            $validated['password'] = Hash::make($validated['password']);
+            
+            // Name combination
+            $validated['name'] = trim($validated['first_name'] . ' ' . $validated['last_name']);
 
             User::create($validated);
 
             Log::channel('custom')->info('User created successfully: ' . $validated['name']);
 
-            return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.users.index')->with('success', 'User created successfully with temporary password. Ask user to change it on first login.');
         } catch (\Exception $e) {
             Log::channel('custom')->error('Error creating user: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to create user.'])->withInput();
+            return back()->withErrors(['error' => 'Failed to create user: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -171,15 +153,22 @@ class UserController extends Controller
      */
     public function edit($encryptedId)
     {
-        $user = User::findOrFail(Crypt::decrypt($encryptedId));
+        try {
+            $id = Crypt::decrypt($encryptedId);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            \Illuminate\Support\Facades\Log::warning('UserController edit decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+            $id = $encryptedId;
+        }
+$user = User::findOrFail($id);
 
         $roles = Role::all();
         $departments = Department::where('status', 'active')->get();
         $designations = Designation::where('status', 'active')->get();
         $businessUnits = BusinessUnit::where('status', 'active')->get();
         $locations = Location::where('status', 'active')->get();
+        $managers = User::where('is_active', true)->orderBy('name')->get();
 
-        return view('Admin.users.edit', compact('user', 'roles', 'departments', 'designations', 'businessUnits', 'locations'));
+        return view('Admin.users.edit', compact('user', 'roles', 'departments', 'designations', 'businessUnits', 'locations', 'managers'));
     }
 
     /**
@@ -188,7 +177,13 @@ class UserController extends Controller
     public function update(Request $request, $encryptedId)
     {
         try {
-            $user = User::findOrFail(Crypt::decrypt($encryptedId));
+            try {
+                $id = Crypt::decrypt($encryptedId);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                \Illuminate\Support\Facades\Log::warning('UserController update decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+                $id = $encryptedId;
+            }
+            $user = User::findOrFail($id);
 
             // Validation
             $validated = $request->validate([
@@ -218,6 +213,7 @@ class UserController extends Controller
                 'current_address' => 'nullable|string|max:500',
                 'permanent_address' => 'nullable|string|max:500',
                 'employee_code' => 'nullable|string|max:50|unique:users,employee_code,' . $user->id,
+                'reporting_manager_id' => 'nullable|exists:users,id',
                 'date_of_joining' => 'nullable|date|before_or_equal:today',
                 'job_title' => 'nullable|string|max:255',
 
@@ -249,7 +245,13 @@ class UserController extends Controller
     public function updateStatus(Request $request, $encryptedId)
     {
         try {
-            $user = User::findOrFail(Crypt::decrypt($encryptedId));
+            try {
+                $id = Crypt::decrypt($encryptedId);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                \Illuminate\Support\Facades\Log::warning('UserController updateStatus decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+                $id = $encryptedId;
+            }
+            $user = User::findOrFail($id);
 
             $validated = $request->validate([
                 'status' => 'required|in:active,inactive',
@@ -286,7 +288,13 @@ class UserController extends Controller
     public function destroy($encryptedId)
     {
         try {
-            $user = User::findOrFail(Crypt::decrypt($encryptedId));
+            try {
+                $id = Crypt::decrypt($encryptedId);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                \Illuminate\Support\Facades\Log::warning('UserController destroy decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+                $id = $encryptedId;
+            }
+            $user = User::findOrFail($id);
             $user->delete();
 
             Log::channel('custom')->info('User deleted successfully: ' . $user->name);
@@ -303,7 +311,13 @@ class UserController extends Controller
      */
     public function editPayroll($encryptedId)
     {
-        $user = User::with(['role', 'department'])->findOrFail(Crypt::decrypt($encryptedId));
+        try {
+            $id = Crypt::decrypt($encryptedId);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            \Illuminate\Support\Facades\Log::warning('UserController editPayroll decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+            $id = $encryptedId;
+        }
+        $user = User::with(['role', 'department'])->findOrFail($id);
 
         // For now, using sample payroll data - in real implementation, this would come from a payroll table
         $payrollHistory = [
@@ -345,7 +359,13 @@ class UserController extends Controller
     public function updatePayroll(Request $request, $encryptedId)
     {
         try {
-            $user = User::findOrFail(Crypt::decrypt($encryptedId));
+            try {
+                $id = Crypt::decrypt($encryptedId);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                \Illuminate\Support\Facades\Log::warning('UserController updatePayroll decrypt failed for ID: ' . $encryptedId . ', using raw ID');
+                $id = $encryptedId;
+            }
+            $user = User::findOrFail($id);
 
             $validated = $request->validate([
                 'basic_salary' => 'nullable|numeric|min:0',

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
         $this->call(MasterDataSeeder::class);
+        $this->call(ClientSeeder::class);
         $this->call(UserSeeder::class);
 
         // Sample Timesheets

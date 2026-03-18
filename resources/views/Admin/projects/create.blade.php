@@ -36,9 +36,11 @@
                     <label for="client_id" class="block text-sm font-medium text-gray-700 mb-2">Client</label>
                     <select id="client_id" name="client_id" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                         <option value="">Select a client</option>
-                        @foreach($clients as $client)
-                            <option value="{{ $client['id'] }}">{{ $client['name'] }}</option>
-                        @endforeach
+                        @forelse($clients as $client)
+                            <option value="{{ $client->id }}">{{ $client->name }}</option>
+                        @empty
+                            <option value="">No clients available</option>
+                        @endforelse
                     </select>
                     <p class="text-xs text-gray-500 mt-1">The client this project belongs to</p>
                 </div>
@@ -161,6 +163,24 @@
                     </div>
                     <input type="hidden" name="features" id="features-hidden">
                     <p class="text-xs text-gray-500 mt-1">Key features of the project</p>
+                </div>
+
+                <!-- Tasks -->
+                <div>
+                    <label for="tasks" class="block text-sm font-medium text-gray-700 mb-2">Tasks</label>
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap gap-2" id="tasks-container">
+                            <!-- Tasks will be added here -->
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="task-input" placeholder="Enter task name" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                            <button type="button" id="add-task" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="tasks" id="tasks-hidden">
+                    <p class="text-xs text-gray-500 mt-1">Add tasks for this project</p>
                 </div>
             </div>
         </div>
@@ -402,6 +422,52 @@ document.addEventListener('DOMContentLoaded', function() {
     window.removeFeature = function(index) {
         features.splice(index, 1);
         updateFeaturesDisplay();
+    };
+
+    // Tasks management
+    const tasks = [];
+    const tasksContainer = document.getElementById('tasks-container');
+    const taskInput = document.getElementById('task-input');
+    const addTaskBtn = document.getElementById('add-task');
+    const tasksHidden = document.getElementById('tasks-hidden');
+
+    addTaskBtn.addEventListener('click', function() {
+        const value = taskInput.value.trim();
+        if (value && !tasks.includes(value)) {
+            tasks.push(value);
+            updateTasksDisplay();
+            taskInput.value = '';
+        }
+    });
+
+    taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTaskBtn.click();
+        }
+    });
+
+    function updateTasksDisplay() {
+        tasksContainer.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const tag = document.createElement('span');
+            tag.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800';
+            tag.innerHTML = `
+                ${task}
+                <button type="button" class="ml-2 text-green-600 hover:text-green-800" onclick="removeTask(${index})">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            tasksContainer.appendChild(tag);
+        });
+        tasksHidden.value = JSON.stringify(tasks);
+    }
+
+    window.removeTask = function(index) {
+        tasks.splice(index, 1);
+        updateTasksDisplay();
     };
 
     // Team Members management

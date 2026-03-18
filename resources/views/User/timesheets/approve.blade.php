@@ -47,11 +47,11 @@
                                             <input type="hidden" name="status" value="approved">
                                             <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">Approve</button>
                                         </form>
-                                        <form action="{{ route('manager.timesheets.approve.update', $entry->id) }}" method="POST" class="inline">
-                                            @csrf @method('PUT')
-                                            <input type="hidden" name="status" value="rejected">
-                                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">Reject</button>
-                                        </form>
+                                        <button type="button" 
+                                                class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                                                onclick="showRejectModal('{{ route('manager.timesheets.approve.update', $entry->id) }}')">
+                                            Reject
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -62,5 +62,51 @@
         </div>
     </div>
 </div>
-@endsection
 
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Reject Timesheet</h3>
+            <form id="rejectForm" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="rejected">
+                
+                <div class="mb-4">
+                    <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason *</label>
+                    <textarea name="rejection_reason" 
+                              id="rejection_reason" 
+                              rows="3" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              required></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" 
+                            onclick="hideRejectModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                        Reject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showRejectModal(action) {
+    document.getElementById('rejectForm').action = action;
+    document.getElementById('rejectModal').classList.remove('hidden');
+}
+
+function hideRejectModal() {
+    document.getElementById('rejectModal').classList.add('hidden');
+    document.getElementById('rejection_reason').value = '';
+}
+</script>
+@endsection
