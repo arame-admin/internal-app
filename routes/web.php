@@ -69,6 +69,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     Route::resource('clients', ClientController::class);
     Route::get('/clients/{id}/status', [ClientController::class, 'showStatus'])->name('clients.status');
+    Route::get('/clients/search', [ClientController::class, 'search'])->name('clients.search');
 
     Route::resource('projects', ProjectController::class);
     Route::get('/projects/{id}/status', [ProjectController::class, 'showStatus'])->name('projects.status');
