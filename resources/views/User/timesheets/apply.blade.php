@@ -1,14 +1,58 @@
 @extends('layouts.app')
 
-@section('title', 'Log Timesheet')
+@section('title', 'Log Timesheet - ' . date('F Y', mktime(0, 0, 0, $month, 1, $year)))
 
 @section('content')
 @php
     $userRole = auth()->user()->role_id ?? 0;
     $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
+    $selectedMonthName = date('F Y', mktime(0, 0, 0, $month, 1, $year));
+    
+    // Calculate previous and next month links
+    $prevMonth = $month == 1 ? 12 : $month - 1;
+    $prevYear = $month == 1 ? $year - 1 : $year;
+    $nextMonth = $month == 12 ? 1 : $month + 1;
+    $nextYear = $month == 12 ? $year + 1 : $year;
+    
+    // Check if next month is in the future (don't allow future months)
+    $now = now();
+    $isNextMonthAllowed = ($nextYear < $now->year) || ($nextYear == $now->year && $nextMonth <= $now->month);
 @endphp
 <div class="p-6 mt-16">
     <div class="max-w-2xl mx-auto">
+        <!-- Month Navigation -->
+        <div class="flex justify-between items-center mb-6">
+            <a href="{{ route($timesheetRoutePrefix . 'timesheets.apply', ['year' => $prevYear, 'month' => $prevMonth]) }}" 
+               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                {{ date('M Y', mktime(0, 0, 0, $prevMonth, 1, $prevYear)) }}
+            </a>
+            <h2 class="text-xl font-bold text-gray-800">{{ $selectedMonthName }}</h2>
+            @if($isNextMonthAllowed)
+            <a href="{{ route($timesheetRoutePrefix . 'timesheets.apply', ['year' => $nextYear, 'month' => $nextMonth]) }}" 
+               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-1">
+                {{ date('M Y', mktime(0, 0, 0, $nextMonth, 1, $nextYear)) }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+            @else
+            <span class="px-4 py-2 text-gray-400">Current</span>
+            @endif
+        </div>
+        
+        <!-- Back to list link -->
+        <div class="mb-4">
+            <a href="{{ route($timesheetRoutePrefix . 'timesheets.index', ['year' => $year, 'month' => $month]) }}" 
+               class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to {{ $selectedMonthName }} Timesheets
+            </a>
+        </div>
         <!-- Monthly & Weekly Total -->
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -37,6 +81,8 @@
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Log Hours</h2>
             <form action="{{ route($timesheetRoutePrefix . 'timesheets.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="year" value="{{ $year }}">
+                <input type="hidden" name="month" value="{{ $month }}">
                 <div class="space-y-4">
                     <div>
                         <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date <span class="text-red-500">*</span></label>

@@ -116,7 +116,7 @@ class TimesheetController extends Controller
             ->where('missed_date', $request->date)
             ->update(['status' => TimesheetReminder::STATUS_DISMISSED]);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
+        return redirect()->route('employee.timesheets.apply', ['year' => $request->input('year', now()->year), 'month' => $request->input('month', now()->month)])->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
     }
 
     /**
@@ -131,7 +131,7 @@ class TimesheetController extends Controller
 
         $timesheet->update(['status' => 'pending']);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet submitted for approval.');
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet submitted for approval.');
     }
 
     /**
@@ -178,7 +178,7 @@ class TimesheetController extends Controller
             'status' => 'draft', // Reset to draft for resubmission
         ]);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry updated successfully. Hours: ' . number_format($hours, 2));
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet entry updated successfully. Hours: ' . number_format($hours, 2));
     }
     
     /**
@@ -193,6 +193,6 @@ class TimesheetController extends Controller
 
         $timesheet->delete();
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry deleted successfully.');
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet entry deleted successfully.');
     }
 }
