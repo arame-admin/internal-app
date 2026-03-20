@@ -27,7 +27,7 @@ class TimesheetController extends Controller
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         
-        return view('timesheets.index-employee', compact('timesheets', 'year', 'month', 'monthlyTotal'));
+        return view('User.timesheets.index-employee', compact('timesheets', 'year', 'month', 'monthlyTotal'));
     }
 
     /**
@@ -48,7 +48,7 @@ class TimesheetController extends Controller
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         
-        return view('timesheets.apply', compact('year', 'month', 'monthlyTotal', 'existing'));
+        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'existing'));
     }
 
     /**
@@ -82,7 +82,7 @@ class TimesheetController extends Controller
         $user = auth()->user();
         $pending = Timesheet::pendingForUser($user);
 
-        return view('timesheets.approve', compact('pending'));
+        return view('User.timesheets.approve', compact('pending'));
     }
 
     /**
@@ -133,6 +133,84 @@ class TimesheetController extends Controller
         }
 
         return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet updated and submitted for approval.');
+    }
+    
+    // ========== Admin-specific Methods ==========
+    
+    /**
+     * Display all timesheets across the organization (Admin).
+     */
+    public function adminIndex(Request $request)
+    {
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+        $status = $request->status ?? 'all';
+        $userId = $request->user_id ?? null;
+        
+        $query = Timesheet::with('user.department')
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month);
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        
+        $timesheets = $query->orderBy('date', 'desc')->get();
+        
+        // Get all users for filter
+        $users = User::orderBy('name')->get();
+        
+        // Calculate totals
+        $totalHours = $timesheets->sum('hours');
+        $approvedHours = $timesheets->where('status', 'approved')->sum('hours');
+        $pendingHours = $timesheets->where('status', 'pending')->sum('hours');
+        
+        return view('Admin.timesheets.index', compact('timesheets', 'year', 'month', 'status', 'userId', 'users', 'totalHours', 'approvedHours', 'pendingHours'));
+    }
+    
+    /**
+     * Show approval page for admin.
+     */
+    public function adminApprove(Request $request)
+    {
+        $status = $request->status ?? 'pending';
+        
+        $query = Timesheet::with('user.department');
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        
+        $timesheets = $query->orderBy('date', 'desc')->paginate(20);
+        
+        return view('Admin.timesheets.approve', compact('timesheets', 'status'));
+    }
+    
+    /**
+     * Update timesheet status (approve/reject) for admin.
+     */
+    public function adminApproveUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
+        ]);
+
+        $timesheet = Timesheet::findOrFail($id);
+        $approver = auth()->user();
+
+        $timesheet->update([
+            'status' => $request->status,
+            'approved_by' => $request->status === 'approved' ? $approver->id : null,
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        $statusMsg = $request->status === 'approved' ? 'approved' : 'rejected';
+        return redirect()->route('admin.timesheets.approve')->with('success', "Timesheet {$statusMsg}.");
     }
 }
 ?>

@@ -97,6 +97,8 @@ class User extends Authenticatable
         'work_email',
         'work_number',
         'residence_number',
+        'emergency_contact_number',
+        'concern_person',
         'current_address',
         'permanent_address',
         'employee_code',

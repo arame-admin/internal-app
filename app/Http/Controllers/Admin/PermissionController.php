@@ -63,7 +63,7 @@ class PermissionController extends Controller
         // Paginate
         $permissions = $query->paginate(10);
 
-        return view('permissions.index', compact('permissions', 'groups'));
+        return view('Admin.permissions.index', compact('permissions', 'groups'));
     }
 
     /**
@@ -72,7 +72,7 @@ class PermissionController extends Controller
     public function create()
     {
         $groups = ['Dashboard', 'Timesheet', 'Leave', 'Users', 'Roles', 'Permissions', 'Payroll', 'Reports'];
-        return view('permissions.create', compact('groups'));
+        return view('Admin.permissions.create', compact('groups'));
     }
 
     /**
@@ -101,7 +101,7 @@ class PermissionController extends Controller
     {
         $permission = Permission::findOrFail($id);
         $groups = Permission::distinct()->pluck('group')->sort();
-        return view('permissions.edit', compact('permission', 'groups'));
+        return view('Admin.permissions.edit', compact('permission', 'groups'));
     }
 
     /**
@@ -130,7 +130,7 @@ class PermissionController extends Controller
     public function showStatus($id)
     {
         $permission = Permission::findOrFail($id);
-        return view('permissions.status', compact('permission'));
+        return view('Admin.permissions.status', compact('permission'));
     }
 
     /**
