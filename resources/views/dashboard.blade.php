@@ -29,6 +29,23 @@
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <div class="flex items-center justify-between">
             <div>
+                <p class="text-sm text-gray-500">Pending Approvals</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ App\Models\ApplyLeave::pending()->count() }}</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <a href="{{ route('admin.leaves.applications') }}" class="text-sm font-medium text-blue-600 hover:text-blue-500 mt-2 inline-block">
+            View all applications →
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
                 <p class="text-sm text-gray-500">Leave Balance</p>
                 <p class="text-2xl font-bold text-gray-800">12 days</p>
             </div>
@@ -40,6 +57,7 @@
         </div>
         <p class="text-sm text-gray-500 mt-2">3 used this year</p>
     </div>
+
 
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <div class="flex items-center justify-between">

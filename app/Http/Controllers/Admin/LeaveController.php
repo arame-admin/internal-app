@@ -207,6 +207,8 @@ class LeaveController extends Controller
     {
         $request->validate([
             'leave_type' => 'required|in:sick_leave,casual_leave,earned_leave',
+            'duration_type' => 'required|in:full_day,half_day',
+            'half_period' => 'required_if:duration_type,half_day|in:first_half,second_half',
             'year' => 'required|integer|min:2025',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -229,7 +231,18 @@ class LeaveController extends Controller
 
         $user = auth()->user();
         $year = $request->year;
-        $totalDays = $this->calculateLeaveDays($request->start_date, $request->end_date);
+        $durationType = $request->duration_type;
+        $halfPeriod = $request->half_period ?? null;
+
+        // Calculate total days
+        if ($durationType === 'half_day') {
+            if ($request->start_date !== $request->end_date) {
+                return redirect()->back()->with('error', 'Half day leave must have the same start and end date.')->withInput();
+            }
+            $totalDays = 0.5;
+        } else {
+            $totalDays = $this->calculateLeaveDays($request->start_date, $request->end_date);
+        }
         
         // Get leave balance
         $leaveBalance = ApplyLeave::getLeaveBalance($user->id, $year);
@@ -244,9 +257,9 @@ class LeaveController extends Controller
         $balanceKey = $leaveTypeMap[$request->leave_type];
         $availableBalance = $leaveBalance[$balanceKey] ?? 0;
         
-        // Check if user has sufficient leave balance
-        if ($totalDays > $availableBalance) {
-            return redirect()->back()->with('error', 'Insufficient leave balance. You have ' . $availableBalance . ' days available.');
+        // Check if user has sufficient leave balance (use >= for float comparison)
+        if ($totalDays > $availableBalance + 0.001) { // tolerance for float precision
+            return redirect()->back()->with('error', 'Insufficient leave balance. You have ' . number_format($availableBalance, 1) . ' days available.')->withInput();
         }
 
         // Create leave application
@@ -259,6 +272,8 @@ class LeaveController extends Controller
             'total_days' => $totalDays,
             'reason' => $request->reason,
             'status' => 'pending',
+            'duration_type' => $durationType,
+            'half_period' => $halfPeriod,
         ]);
 
         // Send email notification to reporting manager
@@ -277,26 +292,78 @@ class LeaveController extends Controller
     }
 
     /**
-     * Show the leave approval page for managers.
+     * Show the leave approval page for managers/admins.
      */
     public function approve()
     {
         $user = auth()->user();
-        
-        // Get all leave applications from subordinates
-        $subordinateIds = $user->subordinates()->pluck('users.id');
-        
-        $pendingLeaves = ApplyLeave::with(['user', 'user.department'])
-            ->whereIn('user_id', $subordinateIds)
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $isAdmin = $user->role === 'admin'; // Assume user has role attribute
 
-        return view('leaves.approve', compact('pendingLeaves'));
+        if ($isAdmin) {
+            $pendingLeaves = ApplyLeave::with(['user', 'user.department'])
+                ->pending()
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        } else {
+            // Manager: subordinates only
+            $subordinateIds = $user->subordinates()->pluck('users.id');
+            
+            $pendingLeaves = ApplyLeave::with(['user', 'user.department'])
+                ->whereIn('user_id', $subordinateIds)
+                ->pending()
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('leaves.approve', compact('pendingLeaves', 'isAdmin'));
     }
 
     /**
-     * Update the status of a leave application (approve/reject).
+     * Show admin list of all leave applications.
+     */
+    public function indexApplications(Request $request)
+    {
+        // Overall counts
+        $totalRequests = ApplyLeave::count();
+        $pendingCount = ApplyLeave::where('status', 'pending')->count();
+        $approvedCount = ApplyLeave::where('status', 'approved')->count();
+        $canceledCount = ApplyLeave::where('status', 'canceled')->count();
+
+        $query = ApplyLeave::with(['user', 'user.department', 'approver'])
+            ->filter($request->all());
+
+        $applications = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('leaves.applications-index', compact('applications', 'totalRequests', 'pendingCount', 'approvedCount', 'canceledCount'));
+    }
+
+    /**
+     * Update leave application status for admin.
+     */
+    public function adminApproveUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
+        ]);
+
+        $applyLeave = ApplyLeave::findOrFail($id);
+        $approver = auth()->user();
+
+        $applyLeave->update([
+            'status' => $request->status,
+            'approved_by' => $approver->id,
+            'approved_at' => now(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        $statusMessage = $request->status === 'approved' ? 'approved' : 'rejected';
+        
+        return redirect()->route('admin.leaves.applications')->with('success', "Leave application {$statusMessage} successfully.");
+    }
+
+    /**
+     * Update the status of a leave application (manager).
      */
     public function approveUpdate(Request $request, $id)
     {
@@ -320,3 +387,4 @@ class LeaveController extends Controller
         return redirect()->route('manager.leaves.approve')->with('success', "Leave application {$statusMessage} successfully.");
     }
 }
+
