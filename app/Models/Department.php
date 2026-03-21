@@ -40,6 +40,7 @@ class Department extends Model
         'code',
         'description',
         'status',
+        'available_tasks',
     ];
 
     /**
@@ -49,6 +50,7 @@ class Department extends Model
      */
     protected $casts = [
         'status' => 'string',
+        'available_tasks' => 'array',
     ];
 
     /**

@@ -37,6 +37,69 @@ class MasterDataSeeder extends Seeder
             $departmentMap[$department['name']] = $dept->id;
         }
 
+        // Seed department tasks
+        $taskDepts = [
+            [
+                'name' => 'AraMe Operations',
+                'code' => 'AROPS',
+                'status' => 'active',
+                'available_tasks' => json_encode([
+                    'Internal Meeting',
+                    'Client Meeting',
+                    'On Duty Task',
+                    'Operational Task'
+                ])
+            ],
+            [
+                'name' => 'Service Projects',
+                'code' => 'SRVPJ',
+                'status' => 'active',
+                'available_tasks' => json_encode([
+                    'UI/UX',
+                    'Coding',
+                    'Testing',
+                    'DevOps',
+                    'Client Meeting',
+                    'Project Meeting'
+                ])
+            ],
+            [
+                'name' => 'AraMe Product',
+                'code' => 'ARPROD',
+                'status' => 'active',
+                'available_tasks' => json_encode([
+                    'UI/UX',
+                    'Coding',
+                    'Testing',
+                    'DevOps',
+                    'Project Meeting'
+                ])
+            ],
+            [
+                'name' => 'Digital Marketing',
+                'code' => 'DGMKT',
+                'status' => 'active',
+                'available_tasks' => json_encode([
+                    'Client Meeting',
+                    'Project Meeting',
+                    'Creatives',
+                    'Project Task'
+                ])
+            ]
+        ];
+
+        foreach ($taskDepts as $deptData) {
+            $dept = Department::updateOrCreate(
+                ['name' => $deptData['name']],
+                [
+                    'code' => $deptData['code'],
+                    'status' => $deptData['status'],
+                    'available_tasks' => $deptData['available_tasks']
+                ]
+            );
+            $departmentMap[$deptData['name']] = $dept->id;
+        }
+
         // Seed Designations
         $designations = [
             // Software Engineers
@@ -143,5 +206,59 @@ class MasterDataSeeder extends Seeder
             ['name' => 'DotSpaces Trivandrum'],
             ['code' => 'LOC001', 'status' => 'active']
         );
+
+        // Seed sample projects for testing timesheet task selection
+        $clients = \App\Models\Client::take(5)->get();
+        $depts = Department::whereIn('name', ['Engineering', 'Service Projects', 'AraMe Operations'])->get();
+        
+        $sampleProjects = [
+            [
+                'name' => 'Internal App Development',
+                'client_id' => $clients[0]->id ?? 1,
+                'department_id' => $depts->where('name', 'Engineering')->first()?->id ?? 2,
+                'description' => 'Internal management app',
+                'status' => 'active',
+                'tasks' => ['Frontend Development', 'Backend API', 'Testing', 'Deployment', 'Bug Fix'],
+                'start_date' => now()->subMonths(2),
+                'end_date' => now()->addMonths(3),
+            ],
+            [
+                'name' => 'Client Portal v2',
+                'client_id' => $clients[1]->id ?? 2,
+                'department_id' => $depts->where('name', 'Service Projects')->first()?->id ?? 8,
+                'description' => 'New client portal features',
+                'status' => 'active',
+                'tasks' => ['UI/UX Design', 'Coding', 'Client Meeting', 'Project Meeting', 'DevOps'],
+                'start_date' => now()->subMonth(),
+                'end_date' => now()->addMonth(),
+            ],
+            [
+                'name' => 'Mobile App Update',
+                'client_id' => $clients[2]->id ?? 3,
+                'department_id' => $depts->where('name', 'Engineering')->first()?->id ?? 2,
+                'description' => 'Bug fixes and new features',
+                'status' => 'active',
+                'tasks' => ['Coding', 'Testing', 'DevOps', 'Internal Meeting'],
+                'start_date' => now()->subWeeks(2),
+                'end_date' => now()->addWeeks(4),
+            ],
+            [
+                'name' => 'Ops Dashboard',
+                'client_id' => $clients[0]->id ?? 1,
+                'department_id' => $depts->where('name', 'AraMe Operations')->first()?->id ?? 9,
+                'description' => 'Operations dashboard',
+                'status' => 'active',
+                'tasks' => ['Internal Meeting', 'Client Meeting', 'On Duty Task', 'Operational Task'],
+                'start_date' => now(),
+                'end_date' => now()->addMonth(),
+            ],
+        ];
+
+        foreach ($sampleProjects as $projData) {
+            \App\Models\Project::firstOrCreate(
+                ['name' => $projData['name']],
+                $projData
+            );
+        }
     }
 }

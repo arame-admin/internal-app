@@ -108,6 +108,27 @@
                             placeholder="e.g., 1 for 1 hour break">
                         <p class="text-xs text-gray-500 mt-1">Break time will be excluded from total hours</p>
                     </div>
+
+                    <!-- Project and Task Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="project_id" class="block text-sm font-medium text-gray-700 mb-2">Project <span class="text-red-500">*</span></label>
+                            <select id="project_id" name="project_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Select project</option>
+                                @foreach($projects as $project)
+                                    <option value="{{ $project->id }}" data-dept-id="{{ $project->department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+<div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Task <span class="text-red-500">*</span></label>
+                            <select id="task" name="task" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="display:none;" disabled>
+                                <option value="">Select predefined task</option>
+                            </select>
+                            <input type="text" id="task_text" name="task_text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="display:block;" required placeholder="Enter task (or select from predefined)">
+                            <input type="hidden" id="task_hidden" name="task" value="">
+                        </div>
+                    </div>
                     <div class="p-3 bg-blue-50 rounded-lg">
                         <p class="text-sm text-blue-700">
                             <strong>Note:</strong> Minimum 6.5 hours required per day (excluding break). 
@@ -130,6 +151,52 @@
                     </button>
                 </div>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Project/Task filtering JS
+                    const projectSelect = document.getElementById('project_id');
+                    const taskSelect = document.getElementById('task');
+                    const taskText = document.getElementById('task_text');
+                    const taskHidden = document.getElementById('task_hidden');
+                    
+                    projectSelect.addEventListener('change', function() {
+                        const projectId = this.value;
+                        const option = this.selectedOptions[0];
+                        const projectTasks = JSON.parse(option.dataset.tasks || '[]');
+                        
+                        taskSelect.innerHTML = '<option value="">Select predefined task</option>';
+                        taskSelect.disabled = false;
+                        
+                        if (projectTasks.length > 0) {
+                            projectTasks.forEach(task => {
+                                const opt = document.createElement('option');
+                                opt.value = task;
+                                opt.textContent = task;
+                                taskSelect.appendChild(opt);
+                            });
+                            taskSelect.style.display = 'block';
+                            taskText.style.display = 'none';
+                            taskSelect.required = true;
+                            taskText.required = false;
+                            taskHidden.value = '';
+                        } else {
+                            taskSelect.style.display = 'none';
+                            taskText.style.display = 'block';
+                            taskSelect.required = false;
+                            taskText.required = true;
+                        }
+                    });
+                    
+                    taskSelect.addEventListener('change', function() {
+                        taskHidden.value = this.value;
+                    });
+                    
+                    // Initial state
+                    taskText.style.display = 'block';
+                    taskSelect.style.display = 'none';
+                });
+            </script>
         </div>
 
         <!-- Existing Entries -->
@@ -169,13 +236,20 @@
                                 <p class="text-sm text-gray-600 mb-4">{{ Str::limit($entry->description, 100) }}</p>
                             @endif
                             @if($entry->status == 'draft' || $entry->status == 'rejected')
-                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2">
+                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2 flex-wrap">
                                     @csrf @method('PATCH')
                                     <input type="time" name="start_time" value="{{ $entry->start_time }}" class="px-2 py-1 border rounded text-sm" required>
                                     <span class="text-gray-500">to</span>
                                     <input type="time" name="end_time" value="{{ $entry->end_time }}" class="px-2 py-1 border rounded text-sm" required>
                                     <input type="number" name="break_duration" value="{{ $entry->break_duration ?? 1 }}" step="0.25" min="0" max="4" 
                                         class="w-16 px-2 py-1 border rounded text-sm" title="Break (hours)">
+                                    <select name="project_id" class="px-2 py-1 border rounded text-sm" required>
+                                        <option value="">Project</option>
+                                        @foreach($projects as $project)
+                                            <option value="{{ $project->id }}" {{ $entry->project_id == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="task" value="{{ $entry->task }}" class="px-2 py-1 border rounded text-sm w-24" required placeholder="Task">
                                     <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Update</button>
                                 </form>
                                 @if($entry->status == 'draft')

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\Timesheet;
 use App\Models\TimesheetReminder;
 
@@ -47,8 +48,18 @@ class TimesheetController extends Controller
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         $weeklyTotal = Timesheet::weeklyTotal($user->id);
+        $projects = Project::with('department')
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('name')
+            ->get();
         
-        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing'));
+        foreach ($projects as $project) {
+            if (empty($project->tasks)) {
+                $project->tasks = $project->department->available_tasks ?? ['General Work', 'Meeting', 'Documentation'];
+            }
+        }
+        
+        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects'));
     }
 
     /**
@@ -57,10 +68,12 @@ class TimesheetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date' => 'required|date|unique:timesheets,date,NULL,id,user_id,' . auth()->id(),
+'date' => 'required|date|unique:timesheets,date,NULL,id,user_id,' . auth()->id(),
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
+            'project_id' => 'required|exists:projects,id',
+            'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -107,6 +120,8 @@ class TimesheetController extends Controller
             'end_time' => $request->end_time,
             'break_duration' => $request->break_duration ?? 0,
             'hours' => $hours,
+            'project_id' => $request->project_id,
+            'task' => $request->task,
             'description' => $request->description,
             'status' => 'draft',
         ]);
@@ -148,6 +163,8 @@ class TimesheetController extends Controller
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
+            'project_id' => 'required|exists:projects,id',
+            'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -175,6 +192,8 @@ class TimesheetController extends Controller
             'break_duration' => $request->break_duration ?? 0,
             'hours' => $hours,
             'description' => $request->description,
+            'project_id' => $project_id,
+            'task' => $task,
             'status' => 'draft', // Reset to draft for resubmission
         ]);
 

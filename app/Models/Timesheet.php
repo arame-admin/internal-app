@@ -41,6 +41,8 @@ class Timesheet extends Model
         'is_timer_active',
         'hours',
         'description',
+        'project_id',
+        'task',
         'status',
         'approved_by',
         'rejection_reason',
@@ -57,6 +59,16 @@ class Timesheet extends Model
         'approved_by' => 'integer',
         'is_timer_active' => 'boolean',
     ];
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'project_id', 'id')->where('projects.department_id');
+    }
 
     public function user(): BelongsTo
     {
