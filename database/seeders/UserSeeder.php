@@ -35,6 +35,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
+                'reporting_manager_id' => null,
             ],
             [
                 'name' => 'Susan Jacob',
@@ -50,6 +51,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
+                'reporting_manager_id' => null, // CEO - top level
             ],
             [
                 'name' => 'Hari Krishnan',
@@ -65,6 +67,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
+                'reporting_manager_id' => 2, // Reports to Susan Jacob (CEO)
             ],
             [
                 'name' => 'Roshni',
@@ -80,6 +83,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
+                'reporting_manager_id' => 5, // Reports to Sheril
             ],
             [
                 'name' => 'Sheril',
@@ -95,6 +99,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
+                'reporting_manager_id' => 2, // Reports to Susan Jacob (CEO)
             ],
         ];
 

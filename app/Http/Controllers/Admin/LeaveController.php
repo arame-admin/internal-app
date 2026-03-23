@@ -189,7 +189,7 @@ class LeaveController extends Controller
         $user = auth()->user();
         
         if ($user->role === 'admin') {
-            return redirect()->route('admin.leaves.applications');
+            return redirect()->route('admin.leave.applications');
         }
         
         $year = $request->year ?? date('Y');
