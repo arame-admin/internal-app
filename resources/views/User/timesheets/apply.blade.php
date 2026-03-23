@@ -79,7 +79,33 @@
         <!-- Log New Entry Form -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Log Hours</h2>
-            <form action="{{ route($timesheetRoutePrefix . 'timesheets.store') }}" method="POST">
+            
+            <!-- Validation Errors -->
+            @if ($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <ul class="list-disc list-inside text-sm text-red-600">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            <!-- Success Message -->
+            @if(session('success'))
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-sm text-green-600">{{ session('success') }}</p>
+                </div>
+            @endif
+            
+            <!-- Error Message -->
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p class="text-sm text-red-600">{{ session('error') }}</p>
+                </div>
+            @endif
+            
+            <form action="{{ route($timesheetRoutePrefix . 'timesheets.store') }}" method="POST" id="timesheetForm">
                 @csrf
                 <input type="hidden" name="year" value="{{ $year }}">
                 <input type="hidden" name="month" value="{{ $month }}">
@@ -126,8 +152,8 @@
                                 <option value="">Select project first to load predefined tasks</option>
                             </select>
                             <input type="text" id="task_text" name="task_text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hidden" placeholder="Enter custom task">
-                            <input type="hidden" id="task_hidden" name="task" value="">
-                            <button type="button" id="toggle-task-mode" class="mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Use predefined tasks</button>
+                            <input type="hidden" id="task_hidden" name="task_value" value="">
+                            <button type="button" id="toggle-task-mode" class="mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Enter custom task instead</button>
                         </div>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg">
@@ -154,6 +180,16 @@
             </form>
 
             <script>
+                // Debug form submission - log what's being submitted
+                document.getElementById('timesheetForm').addEventListener('submit', function(e) {
+                    const formData = new FormData(this);
+                    console.log('Form submission data:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(key + ': ' + value);
+                    }
+                    // Let Laravel handle validation server-side
+                });
+                
                 // User's department tasks from available_tasks
                 let userDepartmentTasks = [];
                 try {
@@ -218,6 +254,48 @@
                     });
                     
                     taskSelect.addEventListener('change', function() {
+                        taskHidden.value = this.value;
+                    });
+                    
+                    // Toggle between predefined tasks dropdown and custom task text input
+                    const toggleBtn = document.getElementById('toggle-task-mode');
+                    let isUsingPredefined = true;
+                    
+                    toggleBtn.addEventListener('click', function() {
+                        isUsingPredefined = !isUsingPredefined;
+                        
+                        if (isUsingPredefined) {
+                            // Show dropdown, hide text input
+                            taskSelect.classList.remove('hidden');
+                            taskSelect.style.display = 'block';
+                            taskSelect.style.visibility = 'visible';
+                            taskSelect.style.height = 'auto';
+                            taskSelect.style.minHeight = '42px';
+                            taskText.classList.add('hidden');
+                            taskText.style.display = 'none';
+                            taskText.required = false;
+                            taskText.name = 'task_text'; // Reset name
+                            taskSelect.required = true;
+                            taskSelect.name = 'task';
+                            taskHidden.value = taskSelect.value;
+                            toggleBtn.textContent = 'Enter custom task instead';
+                        } else {
+                            // Show text input, hide dropdown
+                            taskSelect.classList.add('hidden');
+                            taskSelect.style.display = 'none';
+                            taskText.classList.remove('hidden');
+                            taskText.style.display = 'block';
+                            taskText.required = true;
+                            taskText.name = 'task'; // Change name to 'task' so controller receives it
+                            taskSelect.required = false;
+                            taskSelect.name = 'task_disabled'; // Disable by changing name
+                            taskHidden.value = taskText.value;
+                            toggleBtn.textContent = 'Use predefined tasks';
+                        }
+                    });
+                    
+                    // Update hidden field when typing in custom task
+                    taskText.addEventListener('input', function() {
                         taskHidden.value = this.value;
                     });
                     

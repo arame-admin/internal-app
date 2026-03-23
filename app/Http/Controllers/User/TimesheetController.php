@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Timesheet;
 use App\Models\TimesheetReminder;
+use Illuminate\Validation\Rule;
 
 class TimesheetController extends Controller
 {
@@ -55,15 +56,33 @@ class TimesheetController extends Controller
         
         // Get user's department's available_tasks for fallback (already array from model cast)
         $userDepartmentTasks = [];
-        if ($user->department && !empty($user->department->available_tasks)) {
-            $userDepartmentTasks = $user->department->available_tasks;
+        if ($user->department) {
+            $deptTasks = $user->department->available_tasks;
+            // Handle both array (from cast) and string (raw DB) cases
+            if (is_array($deptTasks) && !empty($deptTasks)) {
+                $userDepartmentTasks = $deptTasks;
+            } elseif (is_string($deptTasks) && !empty($deptTasks)) {
+                $decoded = json_decode($deptTasks, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    $userDepartmentTasks = $decoded;
+                }
+            }
         }
         
         foreach ($projects as $project) {
             // Prioritize project department (non-empty), then user dept, then defaults
             $projectTasks = [];
-            if ($project->projectDepartment && !empty($project->projectDepartment->available_tasks)) {
-                $projectTasks = $project->projectDepartment->available_tasks;
+            if ($project->projectDepartment) {
+                $pdTasks = $project->projectDepartment->available_tasks;
+                // Handle both array (from cast) and string (raw DB) cases
+                if (is_array($pdTasks) && !empty($pdTasks)) {
+                    $projectTasks = $pdTasks;
+                } elseif (is_string($pdTasks) && !empty($pdTasks)) {
+                    $decoded = json_decode($pdTasks, true);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $projectTasks = $decoded;
+                    }
+                }
             }
             if (empty($projectTasks) && !empty($userDepartmentTasks)) {
                 $projectTasks = $userDepartmentTasks;
