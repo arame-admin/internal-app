@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\BusinessUnit;
 use App\Models\Location;
+use App\Models\ProjectDepartment;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -37,8 +38,8 @@ class MasterDataSeeder extends Seeder
             $departmentMap[$department['name']] = $dept->id;
         }
 
-        // Seed department tasks
-        $taskDepts = [
+        // Seed Project Departments
+        $projectDepartments = [
             [
                 'name' => 'AraMe Operations',
                 'code' => 'AROPS',
@@ -88,8 +89,9 @@ class MasterDataSeeder extends Seeder
             ]
         ];
 
-        foreach ($taskDepts as $deptData) {
-            $dept = Department::updateOrCreate(
+        $projectDeptMap = [];
+        foreach ($projectDepartments as $deptData) {
+            $dept = ProjectDepartment::firstOrCreate(
                 ['name' => $deptData['name']],
                 [
                     'code' => $deptData['code'],
@@ -97,7 +99,7 @@ class MasterDataSeeder extends Seeder
                     'available_tasks' => $deptData['available_tasks']
                 ]
             );
-            $departmentMap[$deptData['name']] = $dept->id;
+            $projectDeptMap[$deptData['name']] = $dept->id;
         }
 
         // Seed Designations
@@ -207,48 +209,87 @@ class MasterDataSeeder extends Seeder
             ['code' => 'LOC001', 'status' => 'active']
         );
 
+        // Seed Project Departments (separate from employee departments)
+        $projectDepartments = [
+            [
+                'name' => 'AraMe Operations',
+                'code' => 'AROPS',
+                'status' => 'active',
+                'description' => 'Internal operations and administrative tasks',
+                'available_tasks' => json_encode(['Internal Meeting', 'Client Meeting', 'On Duty Task', 'Operational Task'])
+            ],
+            [
+                'name' => 'Service Projects',
+                'code' => 'SRVPJ',
+                'status' => 'active',
+                'description' => 'Client-facing service projects',
+                'available_tasks' => json_encode(['UI/UX', 'Coding', 'Testing', 'DevOps', 'Client Meeting', 'Project Meeting'])
+            ],
+            [
+                'name' => 'AraMe Product',
+                'code' => 'ARPROD',
+                'status' => 'active',
+                'description' => 'Internal product development projects',
+                'available_tasks' => json_encode(['UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'])
+            ],
+            [
+                'name' => 'Digital Marketing',
+                'code' => 'DGMKT',
+                'status' => 'active',
+                'description' => 'Digital marketing and campaign projects',
+                'available_tasks' => json_encode(['Client Meeting', 'Project Meeting', 'Creatives', 'Project Task'])
+            ],
+        ];
+        $projectDeptMap = [];
+        foreach ($projectDepartments as $projDept) {
+            $dept = ProjectDepartment::firstOrCreate(
+                ['name' => $projDept['name']],
+                $projDept
+            );
+            $projectDeptMap[$projDept['name']] = $dept->id;
+        }
+
         // Seed sample projects for testing timesheet task selection
         $clients = \App\Models\Client::take(5)->get();
-        $depts = Department::whereIn('name', ['Engineering', 'Service Projects', 'AraMe Operations'])->get();
         
         $sampleProjects = [
             [
                 'name' => 'Internal App Development',
                 'client_id' => $clients[0]->id ?? 1,
-                'department_id' => $depts->where('name', 'Engineering')->first()?->id ?? 2,
+                'project_department_id' => $projectDeptMap['AraMe Product'] ?? 3,
                 'description' => 'Internal management app',
-                'status' => 'active',
-                'tasks' => ['Frontend Development', 'Backend API', 'Testing', 'Deployment', 'Bug Fix'],
+                'status' => 'in_progress',
+                'tasks' => json_encode(['Frontend Development', 'Backend API', 'Testing', 'Deployment', 'Bug Fix']),
                 'start_date' => now()->subMonths(2),
                 'end_date' => now()->addMonths(3),
             ],
             [
                 'name' => 'Client Portal v2',
                 'client_id' => $clients[1]->id ?? 2,
-                'department_id' => $depts->where('name', 'Service Projects')->first()?->id ?? 8,
+                'project_department_id' => $projectDeptMap['Service Projects'] ?? 2,
                 'description' => 'New client portal features',
-                'status' => 'active',
-                'tasks' => ['UI/UX Design', 'Coding', 'Client Meeting', 'Project Meeting', 'DevOps'],
+                'status' => 'in_progress',
+                'tasks' => json_encode(['UI/UX', 'Coding', 'Client Meeting', 'Project Meeting']),
                 'start_date' => now()->subMonth(),
                 'end_date' => now()->addMonth(),
             ],
             [
                 'name' => 'Mobile App Update',
                 'client_id' => $clients[2]->id ?? 3,
-                'department_id' => $depts->where('name', 'Engineering')->first()?->id ?? 2,
+                'project_department_id' => $projectDeptMap['AraMe Product'] ?? 3,
                 'description' => 'Bug fixes and new features',
-                'status' => 'active',
-                'tasks' => ['Coding', 'Testing', 'DevOps', 'Internal Meeting'],
+                'status' => 'testing',
+                'tasks' => json_encode(['Coding', 'Testing', 'DevOps']),
                 'start_date' => now()->subWeeks(2),
                 'end_date' => now()->addWeeks(4),
             ],
             [
                 'name' => 'Ops Dashboard',
                 'client_id' => $clients[0]->id ?? 1,
-                'department_id' => $depts->where('name', 'AraMe Operations')->first()?->id ?? 9,
+                'project_department_id' => $projectDeptMap['AraMe Operations'] ?? 1,
                 'description' => 'Operations dashboard',
-                'status' => 'active',
-                'tasks' => ['Internal Meeting', 'Client Meeting', 'On Duty Task', 'Operational Task'],
+                'status' => 'planning',
+                'tasks' => json_encode(['Internal Meeting', 'Client Meeting', 'On Duty Task']),
                 'start_date' => now(),
                 'end_date' => now()->addMonth(),
             ],

@@ -48,18 +48,33 @@ class TimesheetController extends Controller
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         $weeklyTotal = Timesheet::weeklyTotal($user->id);
-        $projects = Project::with('department')
+        $projects = Project::with('projectDepartment')
             ->where('status', '!=', 'cancelled')
             ->orderBy('name')
             ->get();
         
-        foreach ($projects as $project) {
-            if (empty($project->tasks)) {
-                $project->tasks = $project->department->available_tasks ?? ['General Work', 'Meeting', 'Documentation'];
-            }
+        // Get user's department's available_tasks for fallback (already array from model cast)
+        $userDepartmentTasks = [];
+        if ($user->department && !empty($user->department->available_tasks)) {
+            $userDepartmentTasks = $user->department->available_tasks;
         }
         
-        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects'));
+        foreach ($projects as $project) {
+            // Prioritize project department (non-empty), then user dept, then defaults
+            $projectTasks = [];
+            if ($project->projectDepartment && !empty($project->projectDepartment->available_tasks)) {
+                $projectTasks = $project->projectDepartment->available_tasks;
+            }
+            if (empty($projectTasks) && !empty($userDepartmentTasks)) {
+                $projectTasks = $userDepartmentTasks;
+            }
+            if (empty($projectTasks)) {
+                $projectTasks = ['General Work', 'Meeting', 'Documentation', 'UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'];
+            }
+            $project->tasks = $projectTasks;
+        }
+        
+        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects', 'userDepartmentTasks'));
     }
 
     /**
@@ -68,11 +83,11 @@ class TimesheetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-'date' => 'required|date|unique:timesheets,date,NULL,id,user_id,' . auth()->id(),
+            'date' => 'required|date|unique:timesheets,date,NULL,id,user_id,' . auth()->id(),
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
-            'project_id' => 'required|exists:projects,id',
+'project_id' => 'required|exists:projects,id',
             'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
@@ -163,7 +178,7 @@ class TimesheetController extends Controller
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
-            'project_id' => 'required|exists:projects,id',
+'project_id' => 'required|exists:projects,id',
             'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
@@ -185,6 +200,9 @@ class TimesheetController extends Controller
         if ($hours < 6.5) {
             return back()->with('error', 'Minimum 6.5 hours required per day (excluding break).');
         }
+
+        $project_id = $request->project_id;
+        $task = $request->task;
 
         $timesheet->update([
             'start_time' => $request->start_time,

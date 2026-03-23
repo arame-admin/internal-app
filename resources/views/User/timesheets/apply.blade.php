@@ -116,17 +116,18 @@
                             <select id="project_id" name="project_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                                 <option value="">Select project</option>
                                 @foreach($projects as $project)
-                                    <option value="{{ $project->id }}" data-dept-id="{{ $project->department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
+                                    <option value="{{ $project->id }}" data-project-dept-id="{{ $project->project_department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Task <span class="text-red-500">*</span></label>
-                            <select id="task" name="task" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="display:none;" disabled>
-                                <option value="">Select predefined task</option>
+                            <select id="task" name="task" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 block min-h-[42px]" required>
+                                <option value="">Select project first to load predefined tasks</option>
                             </select>
-                            <input type="text" id="task_text" name="task_text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" style="display:block;" required placeholder="Enter task (or select from predefined)">
+                            <input type="text" id="task_text" name="task_text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hidden" placeholder="Enter custom task">
                             <input type="hidden" id="task_hidden" name="task" value="">
+                            <button type="button" id="toggle-task-mode" class="mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Use predefined tasks</button>
                         </div>
                     </div>
                     <div class="p-3 bg-blue-50 rounded-lg">
@@ -153,6 +154,15 @@
             </form>
 
             <script>
+                // User's department tasks from available_tasks
+                let userDepartmentTasks = [];
+                try {
+                    const deptTasksRaw = '{!! addslashes(json_encode($userDepartmentTasks ?? [])) !!}';
+                    userDepartmentTasks = JSON.parse(deptTasksRaw);
+                } catch(e) {
+                    console.error('Error parsing department tasks:', e);
+                }
+                
                 document.addEventListener('DOMContentLoaded', function() {
                     // Project/Task filtering JS
                     const projectSelect = document.getElementById('project_id');
@@ -163,38 +173,62 @@
                     projectSelect.addEventListener('change', function() {
                         const projectId = this.value;
                         const option = this.selectedOptions[0];
-                        const projectTasks = JSON.parse(option.dataset.tasks || '[]');
+                        let projectTasks = JSON.parse(option.dataset.tasks || '[]');
+                        
+                        // Robust fallback if project tasks empty
+                        if (!projectTasks || projectTasks.length === 0) {
+                            console.log('Project tasks empty, using department fallback');
+                            if (userDepartmentTasks && userDepartmentTasks.length > 0) {
+                                projectTasks = userDepartmentTasks;
+                            } else {
+                                projectTasks = ['General Work', 'Meeting', 'Documentation', 'UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'];
+                            }
+                        }
+                        console.log('Loaded tasks for project:', projectTasks);
                         
                         taskSelect.innerHTML = '<option value="">Select predefined task</option>';
                         taskSelect.disabled = false;
+                        taskSelect.classList.remove('hidden');
+                        taskSelect.style.display = 'block !important';
+                        taskSelect.style.visibility = 'visible';
+                        taskSelect.style.height = 'auto';
+                        taskSelect.style.minHeight = '42px';
+                        taskText.classList.add('hidden');
+                        taskText.style.display = 'none';
+                        taskSelect.required = true;
+                        taskText.required = false;
+                        taskHidden.value = '';
                         
-                        if (projectTasks.length > 0) {
-                            projectTasks.forEach(task => {
-                                const opt = document.createElement('option');
-                                opt.value = task;
-                                opt.textContent = task;
-                                taskSelect.appendChild(opt);
-                            });
-                            taskSelect.style.display = 'block';
-                            taskText.style.display = 'none';
-                            taskSelect.required = true;
-                            taskText.required = false;
-                            taskHidden.value = '';
-                        } else {
-                            taskSelect.style.display = 'none';
-                            taskText.style.display = 'block';
-                            taskSelect.required = false;
-                            taskText.required = true;
-                        }
+                        console.log('Task dropdown forced visible:', {
+                            display: taskSelect.style.display,
+                            visibility: taskSelect.style.visibility,
+                            height: taskSelect.style.height,
+                            classList: taskSelect.className
+                        });
+                        
+                        projectTasks.forEach((task, index) => {
+                            const opt = document.createElement('option');
+                            opt.value = task;
+                            opt.textContent = task;
+                            taskSelect.appendChild(opt);
+                        });
+                        
+                        console.log('Task select populated:', taskSelect.innerHTML);
+                        console.log('Task select children:', taskSelect.children.length, 'options');
                     });
                     
                     taskSelect.addEventListener('change', function() {
                         taskHidden.value = this.value;
                     });
                     
-                    // Initial state
-                    taskText.style.display = 'block';
-                    taskSelect.style.display = 'none';
+                    // Initial state - task dropdown visible, text hidden
+                    taskText.classList.add('hidden');
+                    taskText.style.display = 'none';
+                    taskSelect.classList.remove('hidden');
+                    taskSelect.style.display = 'block';
+                    taskSelect.style.visibility = 'visible';
+                    taskSelect.style.height = 'auto';
+                    taskSelect.style.minHeight = '42px';
                 });
             </script>
         </div>

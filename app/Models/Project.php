@@ -12,6 +12,7 @@ class Project extends Model
         'name',
         'client_id',
         'department_id',
+        'project_department_id',
         'description',
         'project_type',
         'status',
@@ -53,6 +54,11 @@ class Project extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function projectDepartment()
+    {
+        return $this->belongsTo(ProjectDepartment::class);
     }
 
     public function client()

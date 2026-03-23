@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Client;
 use App\Models\Department;
+use App\Models\ProjectDepartment;
 
 class ProjectController extends Controller
 {
@@ -79,9 +80,9 @@ class ProjectController extends Controller
     {
         // Get clients from database
         $clients = Client::where('status', 'active')->orderBy('name')->get();
-        $departments = Department::where('status', 'active')->orderBy('name')->get();
+        $projectDepartments = ProjectDepartment::where('status', 'active')->orderBy('name')->get();
 
-        return view('Admin.projects.create', compact('clients', 'departments'));
+        return view('Admin.projects.create', compact('clients', 'projectDepartments'));
     }
 
     /**
@@ -93,7 +94,7 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
 'client_id' => 'nullable|integer|exists:clients,id',
-            'department_id' => 'required|exists:departments,id',
+            'project_department_id' => 'required|exists:project_departments,id',
             'description' => 'nullable|string|max:1000',
             'project_type' => 'nullable|array',
             'project_type.*' => 'in:web_application,mobile_application,desktop_application,api_integration,other',
@@ -136,9 +137,9 @@ class ProjectController extends Controller
 
         // Get clients for dropdown
         $clients = Client::where('status', 'active')->orderBy('name')->get();
-        $departments = Department::where('status', 'active')->orderBy('name')->get();
+        $projectDepartments = ProjectDepartment::where('status', 'active')->orderBy('name')->get();
 
-        return view('Admin.projects.edit', compact('project', 'clients', 'departments'));
+        return view('Admin.projects.edit', compact('project', 'clients', 'projectDepartments'));
     }
 
     /**
@@ -150,7 +151,7 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
 'client_id' => 'required|integer|exists:clients,id',
-            'department_id' => 'required|exists:departments,id',
+            'project_department_id' => 'required|exists:project_departments,id',
             'description' => 'nullable|string|max:1000',
             'project_type' => 'required|in:web_application,mobile_application,desktop_application,api_integration,other',
             'start_date' => 'required|date',

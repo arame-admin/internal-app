@@ -1,14 +1,13 @@
-# Reporting Manager Edit Fix - TODO
+# Timesheet Apply Fix - TODO
+Current working directory: c:/xampp/htdocs/Internal-app/internal-app
 
-Status: 🔄 In Progress
+## Steps (from approved plan):
 
-## Steps:
-- [x] 1. Plan created and approved
-- [✓] 2. Update UserController.php validation to include reporting_manager_id
-- [✓] 3. Fix duplicate @csrf/@method in edit.blade.php
-- [✓] 4. Update TODO-ReportingManagerEdit.md (mark complete)
-- [ ] 5. Test the fix on http://127.0.0.1:8000/admin/users/{id}/edit
-- [ ] 6. Complete task
+- [x] **Step 1**: Start XAMPP MySQL, run `php artisan migrate` + seeders (All migrations ran, MasterDataSeeder completed)
+- [x] **Step 2**: Fix app/Http/Controllers/User/TimesheetController.php (store/updateDraft now save project/task correctly)
+- [ ] **Step 3**: Fix resources/views/User/timesheets/apply.blade.php (add JS to inline edit forms)
+- [ ] **Step 4**: Test form submission at http://127.0.0.1:8000/employee/timesheets/apply?month=3&year=2026
+- [ ] **Step 5**: Verify DB entries + no log errors
+- [ ] **Step 6**: Update main TODO.md, delete timesheet TODO files + this file
 
-**Root Cause**: Missing validation rule in controller update() + duplicate form directives in view.
-
+**Progress: 2/6**

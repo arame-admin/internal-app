@@ -46,14 +46,14 @@
 
                 <!-- Department -->
                 <div>
-                    <label for="department_id" class="block text-sm font-medium text-gray-700 mb-2">Department <span class="text-red-500">*</span></label>
-                    <select id="department_id" name="department_id" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required data-tasks="@json($departments->pluck('available_tasks', 'id')->toArray())">
-                        <option value="">Select department</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}" data-tasks="{{ json_encode($dept->available_tasks) }}" {{ old('department_id', $project->department_id ?? '') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                    <label for="project_department_id" class="block text-sm font-medium text-gray-700 mb-2">Project Department <span class="text-red-500">*</span></label>
+                    <select id="project_department_id" name="project_department_id" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
+                        <option value="">Select project department</option>
+                        @foreach($projectDepartments as $dept)
+                            <option value="{{ $dept->id }}" {{ old('project_department_id', $project->project_department_id ?? '') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Select department to auto-populate tasks</p>
+                    <p class="text-xs text-gray-500 mt-1">Select project department</p>
                 </div>
 
                 <!-- Project Type -->
@@ -319,22 +319,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Department task population
-    const deptSelect = document.getElementById('department_id');
+    // Project Department task population - simplified as project departments don't have pre-defined tasks
+    const deptSelect = document.getElementById('project_department_id');
     const tasksContainer = document.getElementById('tasks-container');
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task');
     const tasksHidden = document.getElementById('tasks-hidden');
     let tasks = @json(old('tasks', $project->tasks ?? []));
 
-    deptSelect.addEventListener('change', function() {
-        const deptId = this.value;
-        const option = this.selectedOptions[0];
-        const deptTasks = JSON.parse(option.dataset.tasks || '[]');
-        tasks = deptTasks.slice(); // Copy array, preserve existing if editing
-        updateTasksDisplay();
-    });
-
+    // Keep existing tasks when editing
+    // Project departments don't auto-populate tasks
     function updateTasksDisplay() {
         tasksContainer.innerHTML = '';
         tasks.forEach((task, index) => {
