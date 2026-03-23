@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleSeeder::class);
-        $this->call(MasterDataSeeder::class);
         $this->call(ClientSeeder::class);
+        $this->call(MasterDataSeeder::class);
         $this->call(UserSeeder::class);
 
         // Sample Timesheets

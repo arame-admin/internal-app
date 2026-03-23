@@ -39,7 +39,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('select');
+            const selects = document.querySelectorAll('select:not([id="task"])');
             selects.forEach(function(select) {
                 if (select.options.length > 0 && typeof Choices !== 'undefined') {
                     try {

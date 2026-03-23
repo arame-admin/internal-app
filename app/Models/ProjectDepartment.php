@@ -3,13 +3,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Department Model
+ * ProjectDepartment Model
  *
- * Represents a department in the organization.
- * Handles department data including name, code, description, and status.
+ * Represents a department/category specific to projects.
+ * This is separate from employee departments stored in the Department model.
  *
  * @property int $id Primary key
  * @property string $name Department name
@@ -19,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \Carbon\Carbon $created_at Creation timestamp
  * @property \Carbon\Carbon $updated_at Update timestamp
  */
-class Department extends Model
+class ProjectDepartment extends Model
 {
     use HasFactory;
 
@@ -28,7 +27,7 @@ class Department extends Model
      *
      * @var string
      */
-    protected $table = 'departments';
+    protected $table = 'project_departments';
 
     /**
      * The attributes that are mass assignable.
@@ -54,10 +53,10 @@ class Department extends Model
     ];
 
     /**
-     * Get the designations for the department.
+     * Get the projects for this project department.
      */
-    public function designations()
+    public function projects()
     {
-        return $this->hasMany(Designation::class);
+        return $this->hasMany(Project::class);
     }
 }

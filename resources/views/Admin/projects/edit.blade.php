@@ -44,6 +44,18 @@
                     <p class="text-xs text-gray-500 mt-1">The client this project belongs to</p>
                 </div>
 
+                <!-- Department -->
+                <div>
+                    <label for="project_department_id" class="block text-sm font-medium text-gray-700 mb-2">Project Department <span class="text-red-500">*</span></label>
+                    <select id="project_department_id" name="project_department_id" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
+                        <option value="">Select project department</option>
+                        @foreach($projectDepartments as $dept)
+                            <option value="{{ $dept->id }}" {{ old('project_department_id', $project->project_department_id ?? '') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Select project department</p>
+                </div>
+
                 <!-- Project Type -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">Project Type</label>
@@ -307,6 +319,57 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Project Department task population - simplified as project departments don't have pre-defined tasks
+    const deptSelect = document.getElementById('project_department_id');
+    const tasksContainer = document.getElementById('tasks-container');
+    const taskInput = document.getElementById('task-input');
+    const addTaskBtn = document.getElementById('add-task');
+    const tasksHidden = document.getElementById('tasks-hidden');
+    let tasks = @json(old('tasks', $project->tasks ?? []));
+
+    // Keep existing tasks when editing
+    // Project departments don't auto-populate tasks
+    function updateTasksDisplay() {
+        tasksContainer.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const tag = document.createElement('span');
+            tag.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800';
+            tag.innerHTML = `
+                ${task}
+                <button type="button" class="ml-2 text-green-600 hover:text-green-800" onclick="removeTask(${index})">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            tasksContainer.appendChild(tag);
+        });
+        tasksHidden.value = JSON.stringify(tasks);
+    }
+
+    window.removeTask = function(index) {
+        tasks.splice(index, 1);
+        updateTasksDisplay();
+    };
+
+    addTaskBtn.addEventListener('click', function() {
+        const value = taskInput.value.trim();
+        if (value && !tasks.includes(value)) {
+            tasks.push(value);
+            updateTasksDisplay();
+            taskInput.value = '';
+        }
+    });
+
+    taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addTaskBtn.click();
+        }
+    });
+
+    updateTasksDisplay(); // Initial load
+
     // Technologies management
     let technologies = @json(old('technologies', $project->technologies ?? []));
     const techContainer = document.getElementById('technologies-container');
