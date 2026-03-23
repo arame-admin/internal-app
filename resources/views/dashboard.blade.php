@@ -38,7 +38,7 @@
                 </svg>
             </div>
         </div>
-        <a href="{{ route('admin.leaves.applications') }}" class="text-sm font-medium text-blue-600 hover:text-blue-500 mt-2 inline-block">
+        <a href="{{ route('admin.leave.applications') }}" class="text-sm font-medium text-blue-600 hover:text-blue-500 mt-2 inline-block">
             View all applications →
         </a>
     </div>

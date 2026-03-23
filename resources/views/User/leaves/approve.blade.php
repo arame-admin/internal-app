@@ -108,7 +108,7 @@
                                         </td>
                                         <td class="py-3 px-4">
                                             <div class="flex items-center justify-center gap-2">
-                                                <form action="{{ isset($isAdmin) && $isAdmin ? route('admin.leaves.applications.approve', $leave->id) : route('manager.leaves.update', $leave->id) }}" method="POST" class="inline">
+                                                <form action="{{ isset($isAdmin) && $isAdmin ? route('admin.leave.applications.approve', $leave->id) : route('manager.leaves.update', $leave->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="status" value="approved">
@@ -216,7 +216,7 @@
 <script>
     function showRejectModal(leaveId) {
         const form = document.getElementById('rejectForm');
-        form.action = '{{ isset($isAdmin) && $isAdmin ? route("admin.leaves.applications.approve", ":id") : route("manager.leaves.update", ":id") }}'.replace(':id', leaveId);
+        form.action = '{{ isset($isAdmin) && $isAdmin ? route("admin.leave.applications.approve", ":id") : route("manager.leaves.update", ":id") }}'.replace(':id', leaveId);
 
         document.getElementById('rejectModal').classList.remove('hidden');
     }

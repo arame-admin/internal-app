@@ -4,8 +4,10 @@ namespace App\Http\Controllers\User;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\Timesheet;
 use App\Models\TimesheetReminder;
+use Illuminate\Validation\Rule;
 
 class TimesheetController extends Controller
 {
@@ -47,8 +49,51 @@ class TimesheetController extends Controller
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         $weeklyTotal = Timesheet::weeklyTotal($user->id);
+        $projects = Project::with('projectDepartment')
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('name')
+            ->get();
         
-        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing'));
+        // Get user's department's available_tasks for fallback (already array from model cast)
+        $userDepartmentTasks = [];
+        if ($user->department) {
+            $deptTasks = $user->department->available_tasks;
+            // Handle both array (from cast) and string (raw DB) cases
+            if (is_array($deptTasks) && !empty($deptTasks)) {
+                $userDepartmentTasks = $deptTasks;
+            } elseif (is_string($deptTasks) && !empty($deptTasks)) {
+                $decoded = json_decode($deptTasks, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    $userDepartmentTasks = $decoded;
+                }
+            }
+        }
+        
+        foreach ($projects as $project) {
+            // Prioritize project department (non-empty), then user dept, then defaults
+            $projectTasks = [];
+            if ($project->projectDepartment) {
+                $pdTasks = $project->projectDepartment->available_tasks;
+                // Handle both array (from cast) and string (raw DB) cases
+                if (is_array($pdTasks) && !empty($pdTasks)) {
+                    $projectTasks = $pdTasks;
+                } elseif (is_string($pdTasks) && !empty($pdTasks)) {
+                    $decoded = json_decode($pdTasks, true);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $projectTasks = $decoded;
+                    }
+                }
+            }
+            if (empty($projectTasks) && !empty($userDepartmentTasks)) {
+                $projectTasks = $userDepartmentTasks;
+            }
+            if (empty($projectTasks)) {
+                $projectTasks = ['General Work', 'Meeting', 'Documentation', 'UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'];
+            }
+            $project->tasks = $projectTasks;
+        }
+        
+        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects', 'userDepartmentTasks'));
     }
 
     /**
@@ -61,6 +106,8 @@ class TimesheetController extends Controller
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
+'project_id' => 'required|exists:projects,id',
+            'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -107,6 +154,8 @@ class TimesheetController extends Controller
             'end_time' => $request->end_time,
             'break_duration' => $request->break_duration ?? 0,
             'hours' => $hours,
+            'project_id' => $request->project_id,
+            'task' => $request->task,
             'description' => $request->description,
             'status' => 'draft',
         ]);
@@ -116,7 +165,7 @@ class TimesheetController extends Controller
             ->where('missed_date', $request->date)
             ->update(['status' => TimesheetReminder::STATUS_DISMISSED]);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
+        return redirect()->route('employee.timesheets.apply', ['year' => $request->input('year', now()->year), 'month' => $request->input('month', now()->month)])->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
     }
 
     /**
@@ -131,7 +180,7 @@ class TimesheetController extends Controller
 
         $timesheet->update(['status' => 'pending']);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet submitted for approval.');
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet submitted for approval.');
     }
 
     /**
@@ -148,6 +197,8 @@ class TimesheetController extends Controller
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'break_duration' => 'nullable|numeric|min:0|max:4',
+'project_id' => 'required|exists:projects,id',
+            'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -169,16 +220,21 @@ class TimesheetController extends Controller
             return back()->with('error', 'Minimum 6.5 hours required per day (excluding break).');
         }
 
+        $project_id = $request->project_id;
+        $task = $request->task;
+
         $timesheet->update([
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'break_duration' => $request->break_duration ?? 0,
             'hours' => $hours,
             'description' => $request->description,
+            'project_id' => $project_id,
+            'task' => $task,
             'status' => 'draft', // Reset to draft for resubmission
         ]);
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry updated successfully. Hours: ' . number_format($hours, 2));
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet entry updated successfully. Hours: ' . number_format($hours, 2));
     }
     
     /**
@@ -193,6 +249,6 @@ class TimesheetController extends Controller
 
         $timesheet->delete();
 
-        return redirect()->route('employee.timesheets.apply')->with('success', 'Timesheet entry deleted successfully.');
+        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet entry deleted successfully.');
     }
 }

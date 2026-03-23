@@ -10,10 +10,12 @@ use App\Http\Controllers\Admin\BusinessUnitController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LeaveController;
+use App\Http\Controllers\Admin\LeaveApplicationsController;
 use App\Http\Controllers\Admin\CompanyHolidayController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\MeetingController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\User\LeaveController as UserLeaveController;
 use App\Http\Controllers\User\TimesheetController as UserTimesheetController;
 use App\Http\Controllers\Admin\TimesheetController as AdminTimesheetController;
@@ -86,8 +88,8 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::post('meetings/{meetingId}/send', [MeetingController::class, 'send'])->name('meetings.send');
     });
 
-    Route::get('/leaves/applications', [LeaveController::class, 'indexApplications'])->name('leaves.applications');
-    Route::put('/leaves/applications/{id}/approve', [LeaveController::class, 'adminApproveUpdate'])->name('leaves.applications.approve');
+    Route::get('/leaves/applications', [LeaveApplicationsController::class, 'index'])->name('leave.applications');
+    Route::put('/leaves/applications/{id}/approve', [LeaveApplicationsController::class, 'update'])->name('leave.applications.approve');
     Route::resource('leaves', LeaveController::class)->except(['show']);
     Route::put('/leaves/{id}/status', [LeaveController::class, 'updateStatus'])->name('leaves.status.update');
     
@@ -95,6 +97,9 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/timesheets', [AdminTimesheetController::class, 'adminIndex'])->name('timesheets.index');
     Route::get('/timesheets/approve', [AdminTimesheetController::class, 'adminApprove'])->name('timesheets.approve');
     Route::put('/timesheets/{id}/approve', [AdminTimesheetController::class, 'adminApproveUpdate'])->name('timesheets.approve.update');
+    
+    // Team Management
+    Route::get('/team', [TeamController::class, 'index'])->name('team.index');
 });
 
 

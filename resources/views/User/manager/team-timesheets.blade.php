@@ -19,25 +19,25 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
         <!-- Filters -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <form method="GET" class="flex flex-wrap gap-4 items-end">
-                <div>
+                <div class="w-40">
                     <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                    <select name="year" id="year" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="year" id="year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         @for($y = now()->year; $y >= now()->year - 2; $y--)
                             <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
                     </select>
                 </div>
-                <div>
+                <div class="w-40">
                     <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Month</label>
-                    <select name="month" id="month" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="month" id="month" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         @for($m = 1; $m <= 12; $m++)
                             <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
                         @endfor
                     </select>
                 </div>
-                <div>
+                <div class="w-48">
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="status" id="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select name="status" id="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All Status</option>
                         <option value="draft" {{ $status == 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending</option>
