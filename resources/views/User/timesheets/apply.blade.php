@@ -19,7 +19,7 @@
     $isNextMonthAllowed = ($nextYear < $now->year) || ($nextYear == $now->year && $nextMonth <= $now->month);
 @endphp
 <div class="p-6 mt-16">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <!-- Month Navigation -->
         <div class="flex justify-between items-center mb-6">
             <a href="{{ route($timesheetRoutePrefix . 'timesheets.apply', ['year' => $prevYear, 'month' => $prevMonth]) }}" 
@@ -115,56 +115,57 @@
                         <input type="date" id="date" name="date" required max="{{ now()->format('Y-m-d') }}"
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">Start Time <span class="text-red-500">*</span></label>
-                            <input type="time" id="start_time" name="start_time" required
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+
+                    <!-- Time Entries Container -->
+                    <div id="time-entries-container" class="space-y-4">
+                        <!-- Initial time entry -->
+                        <div class="time-entry p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm font-medium text-gray-700">Entry #1</span>
+                                <button type="button" class="remove-entry text-red-500 hover:text-red-700 text-sm hidden">Remove</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time <span class="text-red-500">*</span></label>
+                                    <input type="time" name="entries[0][start_time]" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time <span class="text-red-500">*</span></label>
+                                    <input type="time" name="entries[0][end_time]" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Project <span class="text-red-500">*</span></label>
+                                    <select name="entries[0][project_id]" class="project-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Select project</option>
+                                        @foreach($projects as $project)
+                                            <option value="{{ $project->id }}" data-project-dept-id="{{ $project->project_department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Task <span class="text-red-500">*</span></label>
+                                    <select id="task-0" name="entries[0][task]" class="task-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select project first</option>
+                                    </select>
+                                    <input type="text" name="entries[0][task_text]" class="task-text-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hidden" placeholder="Enter custom task">
+                                    <button type="button" class="toggle-task-mode mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Enter custom task instead</button>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">End Time <span class="text-red-500">*</span></label>
-                            <input type="time" id="end_time" name="end_time" required
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="break_duration" class="block text-sm font-medium text-gray-700 mb-2">Break Duration (hours)</label>
-                        <input type="number" id="break_duration" name="break_duration" step="0.25" min="0" max="4" value="1"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., 1 for 1 hour break">
-                        <p class="text-xs text-gray-500 mt-1">Break time will be excluded from total hours</p>
                     </div>
 
-                    <!-- Project and Task Selection -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="project_id" class="block text-sm font-medium text-gray-700 mb-2">Project <span class="text-red-500">*</span></label>
-                            <select id="project_id" name="project_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
-                                <option value="">Select project</option>
-                                @foreach($projects as $project)
-                                    <option value="{{ $project->id }}" data-project-dept-id="{{ $project->project_department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-<div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Task <span class="text-red-500">*</span></label>
-                            <select id="task" name="task" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 block min-h-[42px]" required>
-                                <option value="">Select project first to load predefined tasks</option>
-                            </select>
-                            <input type="text" id="task_text" name="task_text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hidden" placeholder="Enter custom task">
-                            <input type="hidden" id="task_hidden" name="task_value" value="">
-                            <button type="button" id="toggle-task-mode" class="mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Enter custom task instead</button>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-blue-50 rounded-lg">
-                        <p class="text-sm text-blue-700">
-                            <strong>Note:</strong> Minimum 6.5 hours required per day (excluding break). 
-                            Weekly target is 40 hours.
-                        </p>
-                    </div>
+                    <!-- Add Another Entry Button -->
+                    <button type="button" id="add-entry" class="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors">
+                        + Add Another Entry
+                    </button>
+
                     <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea id="description" name="description" rows="3" 
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                        <textarea id="description" name="description" rows="2" 
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="What did you work on today? (optional)"></textarea>
                     </div>
@@ -180,16 +181,6 @@
             </form>
 
             <script>
-                // Debug form submission - log what's being submitted
-                document.getElementById('timesheetForm').addEventListener('submit', function(e) {
-                    const formData = new FormData(this);
-                    console.log('Form submission data:');
-                    for (let [key, value] of formData.entries()) {
-                        console.log(key + ': ' + value);
-                    }
-                    // Let Laravel handle validation server-side
-                });
-                
                 // User's department tasks from available_tasks
                 let userDepartmentTasks = [];
                 try {
@@ -198,115 +189,174 @@
                 } catch(e) {
                     console.error('Error parsing department tasks:', e);
                 }
-                
+
+                let entryCounter = 0;
+
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Project/Task filtering JS
-                    const projectSelect = document.getElementById('project_id');
-                    const taskSelect = document.getElementById('task');
-                    const taskText = document.getElementById('task_text');
-                    const taskHidden = document.getElementById('task_hidden');
-                    
-                    projectSelect.addEventListener('change', function() {
-                        const projectId = this.value;
-                        const option = this.selectedOptions[0];
-                        let projectTasks = JSON.parse(option.dataset.tasks || '[]');
+                    const container = document.getElementById('time-entries-container');
+                    const addButton = document.getElementById('add-entry');
+
+                    // Initialize first entry's project/task handlers
+                    initProjectTaskHandlers(container.querySelector('.time-entry'));
+
+                    addButton.addEventListener('click', function() {
+                        entryCounter++;
+                        const entryHtml = createTimeEntry(entryCounter);
+                        container.insertAdjacentHTML('beforeend', entryHtml);
                         
-                        // Robust fallback if project tasks empty
-                        if (!projectTasks || projectTasks.length === 0) {
-                            console.log('Project tasks empty, using department fallback');
-                            if (userDepartmentTasks && userDepartmentTasks.length > 0) {
-                                projectTasks = userDepartmentTasks;
-                            } else {
-                                projectTasks = ['General Work', 'Meeting', 'Documentation', 'UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'];
-                            }
+                        // Initialize handlers for new entry
+                        const newEntry = container.lastElementChild;
+                        initProjectTaskHandlers(newEntry);
+                        
+                        updateRemoveButtons();
+                    });
+
+                    function createTimeEntry(index) {
+                        const projectsOptions = `@foreach($projects as $project)
+                            <option value="{{ $project->id }}" data-project-dept-id="{{ $project->project_department_id }}" data-tasks="{{ json_encode($project->tasks ?? []) }}">{{ $project->name }}</option>
+                        @endforeach`;
+                        
+                        return `
+                            <div class="time-entry p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-sm font-medium text-gray-700">Entry #${index + 1}</span>
+                                    <button type="button" class="remove-entry text-red-500 hover:text-red-700 text-sm">Remove</button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Time <span class="text-red-500">*</span></label>
+                                        <input type="time" name="entries[${index}][start_time]" required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">End Time <span class="text-red-500">*</span></label>
+                                        <input type="time" name="entries[${index}][end_time]" required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Project <span class="text-red-500">*</span></label>
+                                        <select name="entries[${index}][project_id]" class="project-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                            <option value="">Select project</option>
+                                            ${projectsOptions}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Task <span class="text-red-500">*</span></label>
+                                        <select name="entries[${index}][task]" class="task-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                            <option value="">Select project first</option>
+                                        </select>
+                                        <input type="text" name="entries[${index}][task_text]" class="task-text-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hidden" placeholder="Enter custom task">
+                                        <button type="button" class="toggle-task-mode mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium">Enter custom task instead</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    function initProjectTaskHandlers(entry) {
+                        const projectSelect = entry.querySelector('.project-select');
+                        const taskSelect = entry.querySelector('.task-select');
+                        const taskText = entry.querySelector('.task-text-input');
+                        const toggleBtn = entry.querySelector('.toggle-task-mode');
+                        const removeBtn = entry.querySelector('.remove-entry');
+
+                        // Initialize task select as disabled until project is selected
+                        if (taskSelect) {
+                            taskSelect.disabled = true;
                         }
-                        console.log('Loaded tasks for project:', projectTasks);
-                        
-                        taskSelect.innerHTML = '<option value="">Select predefined task</option>';
-                        taskSelect.disabled = false;
-                        taskSelect.classList.remove('hidden');
-                        taskSelect.style.display = 'block !important';
-                        taskSelect.style.visibility = 'visible';
-                        taskSelect.style.height = 'auto';
-                        taskSelect.style.minHeight = '42px';
-                        taskText.classList.add('hidden');
-                        taskText.style.display = 'none';
-                        taskSelect.required = true;
-                        taskText.required = false;
-                        taskHidden.value = '';
-                        
-                        console.log('Task dropdown forced visible:', {
-                            display: taskSelect.style.display,
-                            visibility: taskSelect.style.visibility,
-                            height: taskSelect.style.height,
-                            classList: taskSelect.className
-                        });
-                        
-                        projectTasks.forEach((task, index) => {
-                            const opt = document.createElement('option');
-                            opt.value = task;
-                            opt.textContent = task;
-                            taskSelect.appendChild(opt);
-                        });
-                        
-                        console.log('Task select populated:', taskSelect.innerHTML);
-                        console.log('Task select children:', taskSelect.children.length, 'options');
-                    });
-                    
-                    taskSelect.addEventListener('change', function() {
-                        taskHidden.value = this.value;
-                    });
-                    
-                    // Toggle between predefined tasks dropdown and custom task text input
-                    const toggleBtn = document.getElementById('toggle-task-mode');
-                    let isUsingPredefined = true;
-                    
-                    toggleBtn.addEventListener('click', function() {
-                        isUsingPredefined = !isUsingPredefined;
-                        
-                        if (isUsingPredefined) {
-                            // Show dropdown, hide text input
-                            taskSelect.classList.remove('hidden');
-                            taskSelect.style.display = 'block';
-                            taskSelect.style.visibility = 'visible';
-                            taskSelect.style.height = 'auto';
-                            taskSelect.style.minHeight = '42px';
-                            taskText.classList.add('hidden');
-                            taskText.style.display = 'none';
-                            taskText.required = false;
-                            taskText.name = 'task_text'; // Reset name
-                            taskSelect.required = true;
-                            taskSelect.name = 'task';
-                            taskHidden.value = taskSelect.value;
-                            toggleBtn.textContent = 'Enter custom task instead';
-                        } else {
-                            // Show text input, hide dropdown
-                            taskSelect.classList.add('hidden');
-                            taskSelect.style.display = 'none';
-                            taskText.classList.remove('hidden');
-                            taskText.style.display = 'block';
-                            taskText.required = true;
-                            taskText.name = 'task'; // Change name to 'task' so controller receives it
-                            taskSelect.required = false;
-                            taskSelect.name = 'task_disabled'; // Disable by changing name
-                            taskHidden.value = taskText.value;
-                            toggleBtn.textContent = 'Use predefined tasks';
+
+                        if (projectSelect) {
+                            projectSelect.addEventListener('change', function() {
+                                const option = this.selectedOptions[0];
+                                let projectTasks = JSON.parse(option?.dataset?.tasks || '[]');
+                                
+                                if (!projectTasks || projectTasks.length === 0) {
+                                    if (userDepartmentTasks && userDepartmentTasks.length > 0) {
+                                        projectTasks = userDepartmentTasks;
+                                    } else {
+                                        projectTasks = ['General Work', 'Meeting', 'Documentation', 'UI/UX', 'Coding', 'Testing', 'DevOps', 'Project Meeting'];
+                                    }
+                                }
+                                
+                                taskSelect.innerHTML = '<option value="">Select predefined task</option>';
+                                taskSelect.disabled = false;
+                                taskSelect.classList.remove('hidden');
+                                taskText.classList.add('hidden');
+                                taskText.value = '';
+                                taskSelect.required = true;
+                                taskText.required = false;
+                                taskSelect.name = `entries[${getEntryIndex(entry)}][task]`;
+                                taskText.name = `entries[${getEntryIndex(entry)}][task_text]`;
+                                
+                                projectTasks.forEach((task) => {
+                                    const opt = document.createElement('option');
+                                    opt.value = task;
+                                    opt.textContent = task;
+                                    taskSelect.appendChild(opt);
+                                });
+                            });
                         }
-                    });
-                    
-                    // Update hidden field when typing in custom task
-                    taskText.addEventListener('input', function() {
-                        taskHidden.value = this.value;
-                    });
-                    
-                    // Initial state - task dropdown visible, text hidden
-                    taskText.classList.add('hidden');
-                    taskText.style.display = 'none';
-                    taskSelect.classList.remove('hidden');
-                    taskSelect.style.display = 'block';
-                    taskSelect.style.visibility = 'visible';
-                    taskSelect.style.height = 'auto';
-                    taskSelect.style.minHeight = '42px';
+
+                        if (toggleBtn) {
+                            let isUsingPredefined = true;
+                            toggleBtn.addEventListener('click', function() {
+                                isUsingPredefined = !isUsingPredefined;
+                                const idx = getEntryIndex(entry);
+                                
+                                if (isUsingPredefined) {
+                                    taskSelect.classList.remove('hidden');
+                                    taskText.classList.add('hidden');
+                                    taskText.required = false;
+                                    taskText.name = `entries[${idx}][task_text]`;
+                                    taskSelect.required = true;
+                                    taskSelect.name = `entries[${idx}][task]`;
+                                    toggleBtn.textContent = 'Enter custom task instead';
+                                } else {
+                                    taskSelect.classList.add('hidden');
+                                    taskText.classList.remove('hidden');
+                                    taskText.required = true;
+                                    taskText.name = `entries[${idx}][task]`;
+                                    taskSelect.required = false;
+                                    taskSelect.name = `entries[${idx}][task_disabled]`;
+                                    toggleBtn.textContent = 'Use predefined tasks';
+                                }
+                            });
+                        }
+
+                        if (removeBtn) {
+                            removeBtn.addEventListener('click', function() {
+                                entry.remove();
+                                updateEntryNumbers();
+                                updateRemoveButtons();
+                            });
+                        }
+                    }
+
+                    function getEntryIndex(entry) {
+                        const entries = document.querySelectorAll('.time-entry');
+                        for (let i = 0; i < entries.length; i++) {
+                            if (entries[i] === entry) return i;
+                        }
+                        return 0;
+                    }
+
+                    function updateEntryNumbers() {
+                        const entries = document.querySelectorAll('.time-entry');
+                        entries.forEach((entry, index) => {
+                            const label = entry.querySelector('.text-sm.font-medium');
+                            if (label) label.textContent = `Entry #${index + 1}`;
+                        });
+                    }
+
+                    function updateRemoveButtons() {
+                        const entries = document.querySelectorAll('.time-entry');
+                        const removeButtons = document.querySelectorAll('.remove-entry');
+                        removeButtons.forEach(btn => {
+                            btn.classList.toggle('hidden', entries.length <= 1);
+                        });
+                    }
                 });
             </script>
         </div>
@@ -320,62 +370,78 @@
                 <div class="p-8 text-center text-gray-500">No editable entries. All approved entries shown in list.</div>
             @else
                 <div class="divide-y divide-gray-100">
-                    @foreach($existing as $entry)
+                    @foreach($groupedExisting as $groupKey => $entries)
+                        @php
+                            $firstEntry = $entries->first();
+                            $batchId = $firstEntry->batch_id;
+                            $totalHours = $entries->sum('hours');
+                            $allDraft = $entries->every(function($e) { return $e->status == 'draft'; });
+                            $allRejected = $entries->every(function($e) { return $e->status == 'rejected'; });
+                            $allPending = $entries->every(function($e) { return $e->status == 'pending'; });
+                            $mixedStatus = !$allDraft && !$allRejected && !$allPending;
+                        @endphp
                         <div class="p-6 hover:bg-gray-50">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <p class="font-semibold text-gray-900">{{ $entry->date->format('M d, Y') }}</p>
+                                    <p class="font-semibold text-gray-900">{{ $firstEntry->date->format('M d, Y') }}</p>
                                     <p class="text-sm text-gray-500">
-                                        @if($entry->start_time && $entry->end_time)
-                                            {{ $entry->start_time }} - {{ $entry->end_time }} 
-                                            @if($entry->break_duration > 0)
-                                                (Break: {{ $entry->break_duration }} hrs)
+                                        @foreach($entries as $entry)
+                                            @if($entry->start_time && $entry->end_time)
+                                                <span class="inline-block bg-gray-100 rounded px-2 py-1 mr-1 mb-1">
+                                                    {{ $entry->start_time }} - {{ $entry->end_time }} ({{ $entry->task ?? 'N/A' }})
+                                                </span>
                                             @endif
-                                        @endif
-                                        = {{ number_format($entry->hours, 2) }} hrs
+                                        @endforeach
+                                        = {{ number_format($totalHours, 2) }} hrs total
                                     </p>
                                 </div>
-                                <span class="px-2 py-1 rounded-full text-xs {{ match($entry->status) { 'draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-yellow-100 text-yellow-700', 'rejected' => 'bg-red-100 text-red-700' } }}">
-                                    {{ ucfirst($entry->status) }}
+                                <span class="px-2 py-1 rounded-full text-xs {{ match($firstEntry->status) { 'draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-yellow-100 text-yellow-700', 'rejected' => 'bg-red-100 text-red-700' } }}">
+                                    {{ ucfirst($firstEntry->status) }} ({{ $entries->count() }} entries)
                                 </span>
                             </div>
-                            @if($entry->rejection_reason)
+                            @if($firstEntry->rejection_reason)
                                 <div class="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
-                                    <p class="text-sm text-red-700"><strong>Rejection Reason:</strong> {{ $entry->rejection_reason }}</p>
+                                    <p class="text-sm text-red-700"><strong>Rejection Reason:</strong> {{ $firstEntry->rejection_reason }}</p>
                                 </div>
                             @endif
-                            @if($entry->description)
-                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($entry->description, 100) }}</p>
+                            @if($firstEntry->description)
+                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($firstEntry->description, 100) }}</p>
                             @endif
-                            @if($entry->status == 'draft' || $entry->status == 'rejected')
-                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2 flex-wrap">
-                                    @csrf @method('PATCH')
-                                    <input type="time" name="start_time" value="{{ $entry->start_time }}" class="px-2 py-1 border rounded text-sm" required>
-                                    <span class="text-gray-500">to</span>
-                                    <input type="time" name="end_time" value="{{ $entry->end_time }}" class="px-2 py-1 border rounded text-sm" required>
-                                    <input type="number" name="break_duration" value="{{ $entry->break_duration ?? 1 }}" step="0.25" min="0" max="4" 
-                                        class="w-16 px-2 py-1 border rounded text-sm" title="Break (hours)">
-                                    <select name="project_id" class="px-2 py-1 border rounded text-sm" required>
-                                        <option value="">Project</option>
-                                        @foreach($projects as $project)
-                                            <option value="{{ $project->id }}" {{ $entry->project_id == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="text" name="task" value="{{ $entry->task }}" class="px-2 py-1 border rounded text-sm w-24" required placeholder="Task">
-                                    <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Update</button>
-                                </form>
-                                @if($entry->status == 'draft')
-                                    <form action="{{ route($timesheetRoutePrefix . 'timesheets.submit', $entry->id) }}" method="POST" class="inline">
+                            
+                            <!-- Show individual entries for editing (only for draft/rejected) -->
+                            @if($firstEntry->status == 'draft' || $firstEntry->status == 'rejected')
+                                <div class="mb-3 space-y-2">
+                                    @foreach($entries as $entry)
+                                        <form action="{{ route($timesheetRoutePrefix . 'timesheets.updateDraft', $entry->id) }}" method="POST" class="inline-flex flex-wrap items-center gap-2">
+                                            @csrf @method('PATCH')
+                                            <input type="time" name="start_time" value="{{ $entry->start_time }}" class="px-2 py-1 border rounded text-sm" required>
+                                            <span class="text-gray-500">to</span>
+                                            <input type="time" name="end_time" value="{{ $entry->end_time }}" class="px-2 py-1 border rounded text-sm" required>
+                                            <select name="project_id" class="px-2 py-1 border rounded text-sm" required>
+                                                <option value="">Project</option>
+                                                @foreach($projects as $project)
+                                                    <option value="{{ $project->id }}" {{ $entry->project_id == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <input type="text" name="task" value="{{ $entry->task }}" class="px-2 py-1 border rounded text-sm w-24" required placeholder="Task">
+                                            <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Update</button>
+                                        </form>
+                                    @endforeach
+                                </div>
+                                
+                                <!-- Batch actions: Submit all or Delete all -->
+                                @if($firstEntry->status == 'draft')
+                                    <form action="{{ route($timesheetRoutePrefix . 'timesheets.submit', $firstEntry->id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">Submit for Approval</button>
+                                        <button type="submit" class="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">Submit All for Approval</button>
                                     </form>
                                 @endif
-                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.destroy', $entry->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this entry?')">
+                                <form action="{{ route($timesheetRoutePrefix . 'timesheets.destroy', $firstEntry->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete all {{ $entries->count() }} entries for this date?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="px-4 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200">Delete</button>
+                                    <button type="submit" class="px-4 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200">Delete All</button>
                                 </form>
-                            @elseif($entry->status == 'pending')
-                                <p class="text-sm text-yellow-600">This entry is pending approval.</p>
+                            @elseif($firstEntry->status == 'pending')
+                                <p class="text-sm text-yellow-600">This batch ({{ $entries->count() }} entries) is pending approval.</p>
                             @endif
                         </div>
                     @endforeach
@@ -385,4 +451,3 @@
     </div>
 </div>
 @endsection
-

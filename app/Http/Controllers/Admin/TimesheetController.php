@@ -139,6 +139,7 @@ class TimesheetController extends Controller
     
     /**
      * Display all timesheets across the organization (Admin).
+     * Grouped by date and employee.
      */
     public function adminIndex(Request $request)
     {
@@ -147,11 +148,12 @@ class TimesheetController extends Controller
         $status = $request->status ?? 'all';
         $userId = $request->user_id ?? null;
         
-        $query = Timesheet::with('user.department')
+        $query = Timesheet::with('user.department', 'project')
             ->whereYear('date', $year)
-            ->whereMonth('date', $month);
+            ->whereMonth('date', $month)
+            ->where('status', '!=', 'draft');
         
-        if ($status !== 'all') {
+        if ($status !== 'all' && $status !== 'draft') {
             $query->where('status', $status);
         }
         
@@ -159,7 +161,17 @@ class TimesheetController extends Controller
             $query->where('user_id', $userId);
         }
         
-        $timesheets = $query->orderBy('date', 'desc')->get();
+        $timesheets = $query->orderBy('date', 'desc')->orderBy('user_id')->get();
+        
+        // Group by user for summary
+        $userSummary = $timesheets->groupBy('user_id')->map(function ($userTimesheets) {
+            return [
+                'total_hours' => $userTimesheets->sum('hours'),
+                'approved_hours' => $userTimesheets->where('status', 'approved')->sum('hours'),
+                'pending_hours' => $userTimesheets->where('status', 'pending')->sum('hours'),
+                'count' => $userTimesheets->count(),
+            ];
+        });
         
         // Get all users for filter
         $users = User::orderBy('name')->get();
@@ -169,34 +181,124 @@ class TimesheetController extends Controller
         $approvedHours = $timesheets->where('status', 'approved')->sum('hours');
         $pendingHours = $timesheets->where('status', 'pending')->sum('hours');
         
-        return view('Admin.timesheets.index', compact('timesheets', 'year', 'month', 'status', 'userId', 'users', 'totalHours', 'approvedHours', 'pendingHours'));
+        return view('Admin.timesheets.index', compact('timesheets', 'userSummary', 'year', 'month', 'status', 'userId', 'users', 'totalHours', 'approvedHours', 'pendingHours'));
+    }
+
+    /**
+     * Show detailed timesheets for a specific employee.
+     */
+    public function adminDetail(Request $request)
+    {
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+        $userId = $request->user_id;
+        
+        $user = User::with('department')->findOrFail($userId);
+        
+        $timesheets = Timesheet::with('project')
+            ->where('user_id', $userId)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->where('status', '!=', 'draft')
+            ->orderBy('date', 'desc')
+            ->get();
+        
+        // Group by date
+        $groupedTimesheets = $timesheets->groupBy(function($item) {
+            return $item->date->format('Y-m-d');
+        });
+        
+        $totalHours = $timesheets->sum('hours');
+        $approvedHours = $timesheets->where('status', 'approved')->sum('hours');
+        $pendingHours = $timesheets->where('status', 'pending')->sum('hours');
+        
+        return view('Admin.timesheets.detail', compact('user', 'timesheets', 'groupedTimesheets', 'year', 'month', 'totalHours', 'approvedHours', 'pendingHours'));
     }
     
     /**
      * Show approval page for admin.
+     * Shows timesheets grouped by date with entries for that date.
      */
     public function adminApprove(Request $request)
     {
         $status = $request->status ?? 'pending';
         
-        $query = Timesheet::with('user.department');
+        // Get timesheets with user and department (exclude draft for admin view)
+        $query = Timesheet::with('user.department', 'project')
+            ->where('status', '!=', 'draft');
         
         if ($status !== 'all') {
             $query->where('status', $status);
         }
         
-        $timesheets = $query->orderBy('date', 'desc')->paginate(20);
+        $timesheets = $query->orderBy('date', 'desc')->orderBy('user_id')->get();
         
-        return view('Admin.timesheets.approve', compact('timesheets', 'status'));
+        // Group by date and user (single submission per date per user)
+        $groupedTimesheets = $timesheets->groupBy(function($item) {
+            return $item->date->format('Y-m-d') . '-' . $item->user_id;
+        });
+        
+        return view('Admin.timesheets.approve', compact('groupedTimesheets', 'timesheets', 'status'));
+    }
+
+    /**
+     * Show single timesheet for approval.
+     * Displays details of a single timesheet entry for a specific date.
+     */
+    public function showForApproval($id)
+    {
+        $timesheet = Timesheet::with('user.department', 'project', 'approver')->findOrFail($id);
+        
+        return view('Admin.timesheets.approve-show', compact('timesheet'));
+    }
+
+    /**
+     * Approve all timesheets for a specific date and user (single submission).
+     * Only updates pending timesheets - previously approved ones are left unchanged.
+     */
+    public function approveByDate(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'user_id' => 'required|integer',
+            'status' => 'required|in:approved,rejected,pending',
+            'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
+        ]);
+
+        $approver = auth()->user();
+        
+        // Get only pending timesheets for this date and user
+        // Previously approved timesheets are left unchanged
+        $timesheets = Timesheet::where('date', $request->date)
+            ->where('user_id', $request->user_id)
+            ->where('status', 'pending')
+            ->get();
+
+        if ($timesheets->isEmpty()) {
+            return redirect()->route('admin.timesheets.approve')->with('error', 'No pending timesheets found for this date.');
+        }
+
+        foreach ($timesheets as $timesheet) {
+            $timesheet->update([
+                'status' => $request->status,
+                'approved_by' => $request->status === 'approved' ? $approver->id : null,
+                'rejection_reason' => $request->rejection_reason,
+            ]);
+        }
+
+        $count = $timesheets->count();
+        $statusMsg = $request->status === 'approved' ? 'approved' : ($request->status === 'pending' ? 'reset to pending' : 'rejected');
+        return redirect()->route('admin.timesheets.approve')->with('success', "{$count} timesheet(s) for {$request->date} {$statusMsg}.");
     }
     
     /**
      * Update timesheet status (approve/reject) for admin.
+     * Handles single timesheet entry approval.
      */
     public function adminApproveUpdate(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:approved,rejected',
+            'status' => 'required|in:approved,rejected,pending',
             'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
         ]);
 
@@ -209,7 +311,7 @@ class TimesheetController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
-        $statusMsg = $request->status === 'approved' ? 'approved' : 'rejected';
+        $statusMsg = $request->status === 'approved' ? 'approved' : ($request->status === 'pending' ? 'reset to pending' : 'rejected');
         return redirect()->route('admin.timesheets.approve')->with('success', "Timesheet {$statusMsg}.");
     }
 }
