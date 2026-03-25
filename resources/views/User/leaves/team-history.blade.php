@@ -10,24 +10,9 @@
             <p class="text-gray-500 mt-1">View approved and rejected leave requests from your team</p>
         </div>
 
-        <!-- Tabs -->
-        <div class="flex gap-1 mb-6 border-b border-gray-200">
-            <a href="{{ route('manager.leaves.approve') }}" 
-                class="px-6 py-3 text-sm font-medium border-b-2 -mb-px transition-colors border-blue-600 text-blue-600">
-                History
-                <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">{{ ($approvedCount ?? 0) + ($rejectedCount ?? 0) }}</span>
-            </a>
-            <a href="{{ route('manager.leaves.pending') }}" 
-                class="px-6 py-3 text-sm font-medium border-b-2 -mb-px transition-colors
-                {{ request()->is('*leaves/pending*') ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
-                Pending
-                <span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full">{{ $pendingCount ?? 0 }}</span>
-            </a>
-        </div>
-
         <!-- Filters -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <form method="GET" action="{{ route('manager.leaves.approve') }}" class="flex flex-wrap gap-4 items-end">
+            <form method="GET" action="{{ route('manager.leaves.team.history') }}" class="flex flex-wrap gap-4 items-end">
                 <div class="flex-1 min-w-[150px]">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -79,7 +64,7 @@
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         Filter
                     </button>
-                    <a href="{{ route('manager.leaves.approve') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    <a href="{{ route('manager.leaves.team.history') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                         Clear
                     </a>
                 </div>
@@ -92,7 +77,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-500">Approved</p>
-                        <p class="text-2xl font-bold text-green-600 mt-1">{{ $approvedCount ?? 0 }}</p>
+                        <p class="text-2xl font-bold text-green-600 mt-1">{{ $approvedCount }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +91,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-500">Rejected</p>
-                        <p class="text-2xl font-bold text-red-600 mt-1">{{ $rejectedCount ?? 0 }}</p>
+                        <p class="text-2xl font-bold text-red-600 mt-1">{{ $rejectedCount }}</p>
                     </div>
                     <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +105,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-500">Total Processed</p>
-                        <p class="text-2xl font-bold text-blue-600 mt-1">{{ ($approvedCount ?? 0) + ($rejectedCount ?? 0) }}</p>
+                        <p class="text-2xl font-bold text-blue-600 mt-1">{{ $approvedCount + $rejectedCount }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

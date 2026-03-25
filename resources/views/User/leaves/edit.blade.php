@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Apply Leave')
+@section('title', 'Edit Leave')
 
 @section('content')
 <div class="p-6 mt-16">
@@ -58,12 +58,13 @@
         
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
-                <h2 class="text-xl font-semibold text-gray-800">Apply for Leave</h2>
-                <p class="text-sm text-gray-500 mt-1">Submit a new leave request</p>
+                <h2 class="text-xl font-semibold text-gray-800">Edit Leave Application</h2>
+                <p class="text-sm text-gray-500 mt-1">Update your leave request</p>
             </div>
             
-            <form action="{{ auth()->user()->role_id == 2 ? route('manager.leaves.store') : route('employee.leaves.store') }}" method="POST" class="p-6">
+            <form action="{{ auth()->user()->role_id == 2 ? route('manager.leaves.update', $leave->id) : route('employee.leaves.update', $leave->id) }}" method="POST" class="p-6">
                 @csrf
+                @method('PUT')
                 
                 <div class="space-y-6">
                     <!-- Year Selection -->
@@ -91,9 +92,9 @@
                         <select id="leave_type" name="leave_type" required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Select Leave Type</option>
-                            <option value="sick_leave">Sick Leave</option>
-                            <option value="casual_leave">Casual Leave</option>
-                            <option value="earned_leave">Earned Leave</option>
+                            <option value="sick_leave" {{ $leave->leave_type == 'sick_leave' ? 'selected' : '' }}>Sick Leave</option>
+                            <option value="casual_leave" {{ $leave->leave_type == 'casual_leave' ? 'selected' : '' }}>Casual Leave</option>
+                            <option value="earned_leave" {{ $leave->leave_type == 'earned_leave' ? 'selected' : '' }}>Earned Leave</option>
                         </select>
                         @error('leave_type')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -107,11 +108,11 @@
                         </label>
                         <div class="flex gap-4">
                             <label class="flex items-center">
-                                <input type="radio" name="duration_type" value="full_day" id="full_day" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <input type="radio" name="duration_type" value="full_day" id="full_day" {{ $leave->duration_type == 'full_day' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
                                 <span class="ml-2 text-sm font-medium">Full Day</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="duration_type" value="half_day" id="half_day" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
+                                <input type="radio" name="duration_type" value="half_day" id="half_day" {{ $leave->duration_type == 'half_day' ? 'checked' : '' }} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
                                 <span class="ml-2 text-sm font-medium">Half Day</span>
                             </label>
                         </div>
@@ -121,14 +122,14 @@
                     </div>
 
                     <!-- Half Period (hidden by default) -->
-                    <div id="half_period_container" style="display: none;">
+                    <div id="half_period_container" style="display: {{ $leave->duration_type == 'half_day' ? 'block' : 'none' }};">
                         <label for="half_period" class="block text-sm font-medium text-gray-700 mb-2">
                             Half Day Period <span class="text-red-500">*</span>
                         </label>
                         <select id="half_period" name="half_period" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Select Period</option>
-                            <option value="first_half">First Half (Morning)</option>
-                            <option value="second_half">Second Half (Afternoon)</option>
+                            <option value="first_half" {{ $leave->half_period == 'first_half' ? 'selected' : '' }}>First Half (Morning)</option>
+                            <option value="second_half" {{ $leave->half_period == 'second_half' ? 'selected' : '' }}>Second Half (Afternoon)</option>
                         </select>
                         @error('half_period')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -144,6 +145,7 @@
                                 Start Date <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="start_date" name="start_date" required
+                                value="{{ $leave->start_date->format('Y-m-d') }}"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 placeholder="Select start date" autocomplete="off">
                             @error('start_date')
@@ -156,6 +158,7 @@
                                 End Date <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="end_date" name="end_date" required
+                                value="{{ $leave->end_date->format('Y-m-d') }}"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 placeholder="Select end date" autocomplete="off">
                             @error('end_date')
@@ -168,7 +171,7 @@
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-blue-700">Number of Days:</span>
-                            <span id="total_days" class="text-2xl font-bold text-blue-700">0</span>
+                            <span id="total_days" class="text-2xl font-bold text-blue-700">{{ $leave->total_days }}</span>
                         </div>
                     </div>
                     
@@ -179,7 +182,7 @@
                         </label>
                         <textarea id="reason" name="reason" rows="4" required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            placeholder="Enter reason for leave..."></textarea>
+                            placeholder="Enter reason for leave...">{{ $leave->reason }}</textarea>
                         @error('reason')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -188,13 +191,13 @@
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end mt-8 pt-6 border-t border-gray-100 gap-3">
-                    <a href="{{ url()->previous() }}" 
+                    <a href="{{ auth()->user()->role_id == 2 ? route('manager.leaves.index') : route('employee.leaves.index') }}" 
                         class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                         Cancel
                     </a>
                     <button type="submit" 
                         class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                        Submit Leave Request
+                        Update Leave Request
                     </button>
                 </div>
             </form>
@@ -350,12 +353,12 @@ $(document).ready(function() {
     
     // Calculate days excluding weekends or handle half day
     function calculateDays() {
-        var durationType = $('input[name=\"duration_type\"]:checked').val();
+        var durationType = $('input[name="duration_type"]:checked').val();
         var startDate = $('#start_date').datepicker('getDate');
         var endDate = $('#end_date').datepicker('getDate');
         
         if (durationType === 'half_day') {
-            $('#total_days').html('<span class=\"text-lg\">0.5</span><span class=\"text-sm ml-1\">Half Day</span>');
+            $('#total_days').html('<span class="text-lg">0.5</span><span class="text-sm ml-1">Half Day</span>');
             return;
         }
         

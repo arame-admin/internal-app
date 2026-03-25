@@ -32,7 +32,7 @@ class ManagerController extends Controller
     }
 
     /**
-     * Show leave approval page for manager.
+     * Show leave approval page for manager (pending leaves).
      */
     public function approveLeave()
     {
@@ -41,11 +41,98 @@ class ManagerController extends Controller
         $pendingLeaves = ApplyLeave::whereHas('user', function ($query) use ($user) {
             $query->where('reporting_manager_id', $user->id);
         })->where('status', 'pending')
-            ->with('user')
+            ->with('user', 'user.department')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('User.leaves.approve', compact('pendingLeaves'));
+        // Get counts for history tab
+        $approvedCount = ApplyLeave::whereHas('user', function ($q) use ($user) {
+            $q->where('reporting_manager_id', $user->id);
+        })->where('status', 'approved')->count();
+        
+        $rejectedCount = ApplyLeave::whereHas('user', function ($q) use ($user) {
+            $q->where('reporting_manager_id', $user->id);
+        })->where('status', 'rejected')->count();
+
+        return view('User.leaves.pending', compact('pendingLeaves', 'approvedCount', 'rejectedCount'));
+    }
+
+    /**
+     * Show team leave history with filters and sorting.
+     */
+    public function teamLeaveHistory(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Get subordinates
+        $subordinates = $user->subordinates()->pluck('id');
+        
+        // Base query - get all non-pending leaves (approved, rejected)
+        $query = ApplyLeave::with(['user', 'user.department', 'approver'])
+            ->whereHas('user', function ($q) use ($user) {
+                $q->where('reporting_manager_id', $user->id);
+            })
+            ->where('status', '!=', 'pending');
+        
+        // Apply filters
+        if ($request->status && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->leave_type && $request->leave_type !== 'all') {
+            $query->where('leave_type', $request->leave_type);
+        }
+        
+        if ($request->employee && $request->employee !== 'all') {
+            $query->where('user_id', $request->employee);
+        }
+        
+        if ($request->year) {
+            $query->where('year', $request->year);
+        }
+        
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('reason', 'like', '%' . $request->search . '%')
+                  ->orWhereHas('user', function ($u) use ($request) {
+                      $u->where('name', 'like', '%' . $request->search . '%');
+                  });
+            });
+        }
+        
+        // Sorting
+        $sortBy = $request->sort_by ?? 'created_at';
+        $sortOrder = $request->sort_order ?? 'desc';
+        
+        $allowedSorts = ['created_at', 'start_date', 'end_date', 'total_days', 'status'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
+        $historyLeaves = $query->paginate(15)->appends($request->query());
+        
+        // Get subordinates list for filter
+        $subordinatesList = $user->subordinates()->with('department')->get();
+        
+        // Get counts
+        $approvedCount = ApplyLeave::whereHas('user', function ($q) use ($user) {
+            $q->where('reporting_manager_id', $user->id);
+        })->where('status', 'approved')->count();
+        
+        $rejectedCount = ApplyLeave::whereHas('user', function ($q) use ($user) {
+            $q->where('reporting_manager_id', $user->id);
+        })->where('status', 'rejected')->count();
+        
+        // Get pending count for tab
+        $pendingCount = ApplyLeave::whereHas('user', function ($q) use ($user) {
+            $q->where('reporting_manager_id', $user->id);
+        })->where('status', 'pending')->count();
+        
+        return view('User.leaves.approve', compact(
+            'historyLeaves', 'subordinatesList', 'approvedCount', 'rejectedCount', 'pendingCount'
+        ));
     }
 
     /**
@@ -58,16 +145,23 @@ class ManagerController extends Controller
             'rejection_reason' => 'required_if:status,rejected|string|max:500|nullable',
         ]);
 
-        $leaveApplication = ApplyLeave::findOrFail($id);
+        $leaveApplication = ApplyLeave::with('user')->findOrFail($id);
+        
+        // Check if the current user is the reporting manager
+        $user = auth()->user();
+        if ($leaveApplication->user->reporting_manager_id != $user->id) {
+            return back()->with('error', 'You are not authorized to approve/reject this leave application.');
+        }
         
         $leaveApplication->update([
             'status' => $request->status,
             'approved_by' => $request->status === 'approved' ? auth()->id() : null,
+            'approved_at' => $request->status === 'approved' ? now() : null,
             'rejection_reason' => $request->status === 'rejected' ? $request->rejection_reason : null,
         ]);
 
         $statusMsg = $request->status === 'approved' ? 'approved' : 'rejected';
-        return redirect()->route('manager.leaves.approve')->with('success', "Leave application {$statusMsg}.");
+        return redirect()->route('manager.leaves.pending')->with('success', "Leave application {$statusMsg}.");
     }
 
     /**
