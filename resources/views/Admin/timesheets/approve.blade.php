@@ -37,81 +37,120 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="space-y-6">
             @if($timesheets->isEmpty())
-                <div class="p-12 text-center">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
                     <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4"></path>
                     </svg>
                     <p class="text-gray-500 text-lg">No timesheets found</p>
                 </div>
             @else
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Approved By</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($timesheets as $entry)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <div class="font-medium text-gray-900">{{ $entry->user->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $entry->user->department?->name ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 font-bold text-blue-600 text-lg">{{ number_format($entry->hours, 2) }} hrs</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">{{ Str::limit($entry->description ?? 'No description', 60) }}</td>
-                                    <td class="px-6 py-4">
-                                        @php 
-                                            $statusClass = match($entry->status) {
-                                                'draft' => 'bg-gray-100 text-gray-700',
-                                                'pending' => 'bg-yellow-100 text-yellow-700',
-                                                'approved' => 'bg-green-100 text-green-700',
-                                                'rejected' => 'bg-red-100 text-red-700',
-                                            }; 
-                                        @endphp
-                                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
-                                            {{ ucfirst($entry->status) }}
-                                        </span>
-                                        @if($entry->rejection_reason)
-                                            <div class="text-xs text-red-600 mt-1" title="{{ $entry->rejection_reason }}">
-                                                Reason: {{ Str::limit($entry->rejection_reason, 30) }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $entry->approver?->name ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right space-x-2">
-                                        @if($entry->status == 'pending')
-                                            <form action="{{ route('admin.timesheets.approve.update', $entry->id) }}" method="POST" class="inline">
-                                                @csrf @method('PUT')
-                                                <input type="hidden" name="status" value="approved">
-                                                <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">Approve</button>
-                                            </form>
-                                            <button type="button" onclick="showRejectModal({{ $entry->id }})" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">Reject</button>
-                                        @elseif($entry->status == 'rejected')
-                                            <button type="button" onclick="resetToPending({{ $entry->id }})" class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700">Reset</button>
-                                        @else
-                                            <span class="text-gray-400 text-sm">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-6 py-4 border-t border-gray-100">
-                    {{ $timesheets->links() }}
-                </div>
+                @foreach($groupedTimesheets as $key => $group)
+                    @php
+                        $firstEntry = $group->first();
+                        $date = $firstEntry->date;
+                        $user = $firstEntry->user;
+                        $totalHours = $group->sum('hours');
+                        $allPending = $group->every(function($entry) { return $entry->status == 'pending'; });
+                        $allApproved = $group->every(function($entry) { return $entry->status == 'approved'; });
+                        $allRejected = $group->every(function($entry) { return $entry->status == 'rejected'; });
+                    @endphp
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <!-- Submission Header -->
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-blue-600 font-bold">{{ substr($user->name, 0, 1) }}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ $user->name }}</h3>
+                                    <p class="text-sm text-gray-500">{{ $date->format('l, F d, Y') }} • {{ $user->department?->name ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xl font-bold text-blue-600">{{ number_format($totalHours, 2) }} hrs</span>
+                                @php 
+                                    $statusClass = match($firstEntry->status) {
+                                        'draft' => 'bg-gray-100 text-gray-700',
+                                        'pending' => 'bg-yellow-100 text-yellow-700',
+                                        'approved' => 'bg-green-100 text-green-700',
+                                        'rejected' => 'bg-red-100 text-red-700',
+                                    }; 
+                                @endphp
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ $statusClass }}">
+                                    {{ ucfirst($firstEntry->status) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Timesheet Entries for this date -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Task</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach($group as $entry)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 text-sm text-gray-900">{{ $entry->project?->name ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600">{{ $entry->task ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600">{{ $entry->start_time ?? '-' }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600">{{ $entry->end_time ?? '-' }}</td>
+                                            <td class="px-6 py-4 font-bold text-blue-600">{{ number_format($entry->hours, 2) }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">{{ Str::limit($entry->description ?? 'No description', 50) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Approval Actions for the whole date -->
+                        @if($allPending)
+                            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                                <form action="{{ route('admin.timesheets.approve.byDate') }}" method="POST" class="flex items-center gap-4">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="date" value="{{ $date->format('Y-m-d') }}">
+                                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                    <input type="hidden" name="status" value="approved" id="status-{{ $key }}">
+                                    <input type="hidden" name="rejection_reason" id="reason-{{ $key }}">
+                                    
+                                    <button type="button" onclick="approveDate('{{ $key }}')" 
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                                        Approve All ({{ $group->count() }} entries)
+                                    </button>
+                                    <button type="button" onclick="showRejectForDate('{{ $key }}')" 
+                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                                        Reject All
+                                    </button>
+                                </form>
+                            </div>
+                        @elseif($allRejected)
+                            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                                <form action="{{ route('admin.timesheets.approve.byDate') }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="date" value="{{ $date->format('Y-m-d') }}">
+                                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                    <input type="hidden" name="status" value="pending">
+                                    <button type="submit" 
+                                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium">
+                                        Reset to Pending
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
             @endif
         </div>
     </div>
@@ -120,10 +159,13 @@
 <!-- Reject Modal -->
 <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
     <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Reject Timesheet</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Reject All Timesheets</h3>
+        <p class="text-sm text-gray-600 mb-4">This will reject all timesheet entries for this date.</p>
         <form id="rejectForm" method="POST">
             @csrf
             @method('PUT')
+            <input type="hidden" name="date" id="modalDate">
+            <input type="hidden" name="user_id" id="modalUserId">
             <input type="hidden" name="status" value="rejected">
             <div class="mb-4">
                 <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason <span class="text-red-500">*</span></label>
@@ -135,7 +177,7 @@
                     Cancel
                 </button>
                 <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    Reject
+                    Reject All
                 </button>
             </div>
         </form>
@@ -143,27 +185,26 @@
 </div>
 
 <script>
-function showRejectModal(id) {
-    const form = document.getElementById('rejectForm');
-    form.action = '{{ route("admin.timesheets.approve.update", ":id") }}'.replace(':id', id);
+function approveDate(key) {
+    document.getElementById('status-' + key).value = 'approved';
+    const form = document.querySelector(`#status-${key}`).closest('form');
+    form.submit();
+}
+
+function showRejectForDate(key) {
+    // Get the form for this group
+    const form = document.querySelector(`#status-${key}`).closest('form');
+    const dateInput = form.querySelector('input[name="date"]');
+    const userIdInput = form.querySelector('input[name="user_id"]');
+    
+    document.getElementById('modalDate').value = dateInput.value;
+    document.getElementById('modalUserId').value = userIdInput.value;
+    document.getElementById('rejectForm').action = '{{ route("admin.timesheets.approve.byDate") }}';
     document.getElementById('rejectModal').classList.remove('hidden');
 }
 
 function hideRejectModal() {
     document.getElementById('rejectModal').classList.add('hidden');
-}
-
-function resetToPending(id) {
-    if (confirm('Are you sure you want to reset this timesheet to pending?')) {
-        fetch('{{ route("admin.timesheets.approve.update", ":id") }}'.replace(':id', id), {
-            method: 'PUT',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status: 'pending' })
-        }).then(() => window.location.reload());
-    }
 }
 </script>
 @endsection

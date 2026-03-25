@@ -54,7 +54,7 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -94,26 +94,18 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500">Draft/Rejected</p>
-                        <p class="text-2xl font-bold text-red-600">{{ number_format($draftHours, 2) }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Team Members Summary -->
         @if($subordinates->isNotEmpty())
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-lg font-semibold text-gray-800">Team Members Summary</h3>
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    Team Members Summary- {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
+                </h3>
+                <a href="{{ route('manager.timesheets.approve') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    Pending Approvals ({{ $pendingHours > 0 ? $timesheets->where('status', 'pending')->count() : 0 }})
+                </a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -129,7 +121,7 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($subordinates as $subordinate)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('manager.timesheets.team.detail', ['user_id' => $subordinate->id, 'year' => $year, 'month' => $month]) }}'">
                             <td class="px-6 py-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -161,118 +153,7 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
             </div>
         </div>
         @endif
-
-        <!-- Timesheet Entries -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="text-lg font-semibold text-gray-800">
-                    Timesheet Entries - {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
-                </h3>
-                <a href="{{ route('manager.timesheets.approve') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                    Pending Approvals ({{ $pendingHours > 0 ? $timesheets->where('status', 'pending')->count() : 0 }})
-                </a>
-            </div>
-            
-            @if($timesheets->isEmpty())
-                <div class="p-12 text-center text-gray-500">
-                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    <p class="text-lg">No timesheet entries found</p>
-                    <p class="text-sm mt-1">No team members have submitted timesheets for this period</p>
-                </div>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Break</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hours</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($timesheets as $entry)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <span class="text-blue-600 font-bold text-xs">{{ substr($entry->user->name, 0, 2) }}</span>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $entry->user->name }}</p>
-                                                <p class="text-sm text-gray-500">{{ $entry->user->department?->name ?? 'N/A' }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        @if($entry->start_time && $entry->end_time)
-                                            {{ $entry->start_time }} - {{ $entry->end_time }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $entry->break_duration ? $entry->break_duration . ' hrs' : '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-right font-bold text-blue-600">{{ number_format($entry->hours, 2) }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{ Str::limit($entry->description, 50) }}</td>
-                                    <td class="px-6 py-4">
-                                        @php 
-                                            $statusClass = match($entry->status) { 
-                                                'draft' => 'bg-gray-100 text-gray-700', 
-                                                'pending' => 'bg-yellow-100 text-yellow-700', 
-                                                'approved' => 'bg-green-100 text-green-700', 
-                                                'rejected' => 'bg-red-100 text-red-700', 
-                                            }; 
-                                        @endphp
-                                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
-                                            {{ ucfirst($entry->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($entry->status == 'pending')
-                                            <div class="flex items-center gap-2">
-                                                <form action="{{ route('manager.timesheets.approve.update', $entry->id) }}" method="POST">
-                                                    @csrf @method('PUT')
-                                                    <input type="hidden" name="status" value="approved">
-                                                    <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700">
-                                                        Approve
-                                                    </button>
-                                                </form>
-                                                <button type="button" 
-                                                        class="inline-flex items-center px-2.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700"
-                                                        onclick="showRejectModal('{{ route('manager.timesheets.approve.update', $entry->id) }}')">
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        @elseif($entry->status == 'rejected' && $entry->rejection_reason)
-                                            <button type="button" 
-                                                    class="text-xs text-red-600 hover:text-red-800"
-                                                    title="{{ $entry->rejection_reason }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            </button>
-                                        @else
-                                            <span class="text-gray-400">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
+       
 
 <!-- Reject Modal -->
 <div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">

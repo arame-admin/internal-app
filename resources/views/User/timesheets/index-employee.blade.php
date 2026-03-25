@@ -50,7 +50,7 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
             </div>
         </div>
         
-        <!-- Timesheet Table -->
+        <!-- Timesheet Table - Grouped by Date -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                 <h3 class="text-lg font-semibold text-gray-800">
@@ -71,48 +71,80 @@ $timesheetRoutePrefix = $userRole == 2 ? 'manager.' : 'employee.';
                     <p class="text-sm mt-1">Log your first entry to get started</p>
                 </div>
             @else
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Time</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Break</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Hours</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($timesheets as $entry)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        @if($entry->start_time && $entry->end_time)
-                                            {{ $entry->start_time }} - {{ $entry->end_time }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $entry->break_duration ? $entry->break_duration . ' hrs' : '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm font-bold text-blue-600">{{ number_format($entry->hours, 2) }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 max-w-md truncate">{{ Str::limit($entry->description, 80) }}</td>
-                                    <td class="px-6 py-4">
-                                        @php $statusClass = match($entry->status) { 'draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-yellow-100 text-yellow-700', 'approved' => 'bg-green-100 text-green-700', 'rejected' => 'bg-red-100 text-red-700', }; @endphp
-                                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
-                                            {{ ucfirst($entry->status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="space-y-6 p-6">
+                    @foreach($groupedTimesheets as $dateKey => $dayEntries)
+                        @php
+                            $firstEntry = $dayEntries->first();
+                            $date = $firstEntry->date;
+                            $dayTotalHours = $dayEntries->sum('hours');
+                            $hasPending = $dayEntries->contains('status', 'pending');
+                            $hasRejected = $dayEntries->contains('status', 'rejected');
+                        @endphp
+                        
+                        <!-- Date Card Header -->
+                        <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                            <div class="px-4 py-3 bg-gray-100 border-b border-gray-200 flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg font-semibold text-gray-800">{{ $date->format('l, F d, Y') }}</span>
+                                    <span class="text-sm text-gray-500">{{ $dayEntries->count() }} {{ $dayEntries->count() == 1 ? 'entry' : 'entries' }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg font-bold text-blue-600">{{ number_format($dayTotalHours, 2) }} hrs</span>
+                                    @if($hasPending)
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">Pending</span>
+                                    @elseif($hasRejected)
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Rejected</span>
+                                    @elseif($dayEntries->every->status === 'approved')
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Approved</span>
+                                    @elseif($dayEntries->every->status === 'draft')
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Draft</span>
+                                    @endif
+                                </div>
+                            </div>
+                            
+                            <!-- Entries Table for this day -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-white">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Time</th>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Project</th>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Task</th>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Hours</th>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
+                                            <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                        @foreach($dayEntries as $entry)
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-4 py-3 text-sm text-gray-600">
+                                                    @if($entry->start_time && $entry->end_time)
+                                                        {{ $entry->start_time }} - {{ $entry->end_time }}
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-3 text-sm text-gray-600">{{ $entry->project?->name ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-600">{{ $entry->task ?? '-' }}</td>
+                                                <td class="px-4 py-3 text-sm font-bold text-blue-600">{{ number_format($entry->hours, 2) }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-600 max-w-md truncate">{{ Str::limit($entry->description, 80) }}</td>
+                                                <td class="px-4 py-3">
+                                                    @php $statusClass = match($entry->status) { 'draft' => 'bg-gray-100 text-gray-700', 'pending' => 'bg-yellow-100 text-yellow-700', 'approved' => 'bg-green-100 text-green-700', 'rejected' => 'bg-red-100 text-red-700', }; @endphp
+                                                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
+                                                        {{ ucfirst($entry->status) }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>
     </div>
 </div>
 @endsection
-

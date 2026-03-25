@@ -95,8 +95,11 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
     // Timesheet Management (Admin)
     Route::get('/timesheets', [AdminTimesheetController::class, 'adminIndex'])->name('timesheets.index');
+    Route::get('/timesheets/detail', [AdminTimesheetController::class, 'adminDetail'])->name('timesheets.detail');
     Route::get('/timesheets/approve', [AdminTimesheetController::class, 'adminApprove'])->name('timesheets.approve');
+    Route::get('/timesheets/approve/{id}', [AdminTimesheetController::class, 'showForApproval'])->name('timesheets.approve.show');
     Route::put('/timesheets/{id}/approve', [AdminTimesheetController::class, 'adminApproveUpdate'])->name('timesheets.approve.update');
+    Route::put('/timesheets/approve/by-date', [AdminTimesheetController::class, 'approveByDate'])->name('timesheets.approve.byDate');
     
     // Team Management
     Route::get('/team', [TeamController::class, 'index'])->name('team.index');
@@ -124,8 +127,10 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
     
     // Timesheet Management (subordinates timesheets)
     Route::get('/timesheets/team', [ManagerController::class, 'teamTimesheets'])->name('timesheets.team');
+    Route::get('/timesheets/team/detail', [ManagerController::class, 'teamTimesheetDetail'])->name('timesheets.team.detail');
     Route::get('/timesheets/approve', [ManagerController::class, 'approveTimesheet'])->name('timesheets.approve');
     Route::put('/timesheets/{id}/approve', [ManagerController::class, 'updateTimesheet'])->name('timesheets.approve.update');
+    Route::put('/timesheets/approve/by-date', [ManagerController::class, 'approveByDate'])->name('timesheets.approve.byDate');
 });
 
 // Employee Routes (also accessible for reporting managers to view their own timesheets)

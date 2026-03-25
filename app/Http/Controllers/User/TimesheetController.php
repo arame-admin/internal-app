@@ -20,15 +20,22 @@ class TimesheetController extends Controller
         $year = $request->year ?? now()->year;
         $month = $request->month ?? now()->month;
         
-        $timesheets = Timesheet::where('user_id', $user->id)
+        $timesheets = Timesheet::with('project')
+            ->where('user_id', $user->id)
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->orderBy('date', 'desc')
+            ->orderBy('start_time', 'asc')
             ->get();
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         
-        return view('User.timesheets.index-employee', compact('timesheets', 'year', 'month', 'monthlyTotal'));
+        // Group timesheets by date for organized display
+        $groupedTimesheets = $timesheets->groupBy(function($entry) {
+            return $entry->date->format('Y-m-d');
+        });
+        
+        return view('User.timesheets.index-employee', compact('timesheets', 'groupedTimesheets', 'year', 'month', 'monthlyTotal'));
     }
 
     /**
@@ -46,6 +53,11 @@ class TimesheetController extends Controller
             ->whereIn('status', ['draft', 'pending', 'rejected'])
             ->orderBy('date', 'desc')
             ->get();
+        
+        // Group entries by batch_id to display them together
+        $groupedExisting = $existing->groupBy(function($entry) {
+            return $entry->date->format('Y-m-d') . '_' . ($entry->batch_id ?? 'no-batch_' . $entry->id);
+        });
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         $weeklyTotal = Timesheet::weeklyTotal($user->id);
@@ -93,7 +105,7 @@ class TimesheetController extends Controller
             $project->tasks = $projectTasks;
         }
         
-        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects', 'userDepartmentTasks'));
+        return view('User.timesheets.apply', compact('year', 'month', 'monthlyTotal', 'weeklyTotal', 'existing', 'projects', 'userDepartmentTasks', 'groupedExisting'));
     }
 
     /**
@@ -102,12 +114,12 @@ class TimesheetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'date' => 'required|date|unique:timesheets,date,NULL,id,user_id,' . auth()->id(),
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-            'break_duration' => 'nullable|numeric|min:0|max:4',
-'project_id' => 'required|exists:projects,id',
-            'task' => 'required|string|max:255',
+            'date' => 'required|date',
+            'entries' => 'required|array|min:1',
+            'entries.*.start_time' => 'required',
+            'entries.*.end_time' => 'required|after:entries.*.start_time',
+            'entries.*.project_id' => 'required|exists:projects,id',
+            'entries.*.task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -120,56 +132,67 @@ class TimesheetController extends Controller
         if ($timesheetDate->lt($cutoffDate)) {
             return back()->with('error', 'Timesheet cannot be applied for dates older than 48 hours. Please contact your manager or HR for assistance.');
         }
+
+        $entriesCount = 0;
         
-        // Calculate hours from times
-        $start = \Carbon\Carbon::createFromFormat('H:i', $request->start_time);
-        $end = \Carbon\Carbon::createFromFormat('H:i', $request->end_time);
+        // Generate a unique batch_id for this submission
+        $batchId = 'batch_' . time() . '_' . $user->id;
         
-        if ($end < $start) {
-            $end->addDay();
-        }
-        
-        $totalMinutes = $start->diffInMinutes($end);
-        $breakMinutes = ($request->break_duration ?? 0) * 60;
-        $workingMinutes = $totalMinutes - $breakMinutes;
-        $hours = round($workingMinutes / 60, 2);
-        
-        // Validate minimum daily hours
-        if ($hours < 6.5) {
-            return back()->with('error', 'Minimum 6.5 hours required per day (excluding break).');
-        }
-        
-        // Validate weekly hours
-        $weeklyTotal = Timesheet::weeklyTotal($user->id);
-        $newWeeklyTotal = $weeklyTotal + $hours;
-        if ($newWeeklyTotal < 40 && $weeklyTotal > 0) {
-            // Warning only, allow submission
-            session()->flash('warning', 'Warning: Weekly total will be ' . number_format($newWeeklyTotal, 2) . ' hours. Minimum 40 hours per week required.');
+        // Process each time entry
+        foreach ($request->entries as $entry) {
+            // Skip if start_time or end_time is empty
+            if (empty($entry['start_time']) || empty($entry['end_time'])) {
+                continue;
+            }
+            
+            // Calculate hours from times
+            $start = \Carbon\Carbon::createFromFormat('H:i', $entry['start_time']);
+            $end = \Carbon\Carbon::createFromFormat('H:i', $entry['end_time']);
+            
+            if ($end < $start) {
+                $end->addDay();
+            }
+            
+            // Calculate hours (no break time deduction)
+            $hours = round($start->diffInMinutes($end) / 60, 2);
+            
+            // Skip if no hours
+            if ($hours <= 0) {
+                continue;
+            }
+
+            Timesheet::create([
+                'user_id' => $user->id,
+                'batch_id' => $batchId,
+                'date' => $request->date,
+                'start_time' => $entry['start_time'],
+                'end_time' => $entry['end_time'],
+                'break_duration' => 0,
+                'hours' => $hours,
+                'project_id' => $entry['project_id'],
+                'task' => $entry['task'],
+                'description' => $request->description,
+                'status' => 'draft',
+            ]);
+            
+            $entriesCount++;
         }
 
-        Timesheet::create([
-            'user_id' => $user->id,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'break_duration' => $request->break_duration ?? 0,
-            'hours' => $hours,
-            'project_id' => $request->project_id,
-            'task' => $request->task,
-            'description' => $request->description,
-            'status' => 'draft',
-        ]);
+        if ($entriesCount == 0) {
+            return back()->with('error', 'No valid time entries to submit.');
+        }
 
         // Dismiss any reminder for this date if it exists
         TimesheetReminder::where('user_id', $user->id)
             ->where('missed_date', $request->date)
             ->update(['status' => TimesheetReminder::STATUS_DISMISSED]);
 
-        return redirect()->route('employee.timesheets.apply', ['year' => $request->input('year', now()->year), 'month' => $request->input('month', now()->month)])->with('success', 'Timesheet entry created successfully. Hours: ' . number_format($hours, 2));
+        return redirect()->route('employee.timesheets.apply', ['year' => $request->input('year', now()->year), 'month' => $request->input('month', now()->month)])->with('success', 'Timesheet entries created successfully.');
     }
 
     /**
      * Submit timesheet for approval (draft -> pending).
+     * Submits all entries in the same batch together.
      */
     public function submit(Request $request, $id)
     {
@@ -178,7 +201,15 @@ class TimesheetController extends Controller
             ->where('status', 'draft')
             ->firstOrFail();
 
-        $timesheet->update(['status' => 'pending']);
+        // If this entry has a batch_id, submit all entries in the batch
+        if ($timesheet->batch_id) {
+            Timesheet::where('batch_id', $timesheet->batch_id)
+                ->where('user_id', auth()->id())
+                ->where('status', 'draft')
+                ->update(['status' => 'pending']);
+        } else {
+            $timesheet->update(['status' => 'pending']);
+        }
 
         return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet submitted for approval.');
     }
@@ -196,13 +227,12 @@ class TimesheetController extends Controller
         $request->validate([
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
-            'break_duration' => 'nullable|numeric|min:0|max:4',
-'project_id' => 'required|exists:projects,id',
+            'project_id' => 'required|exists:projects,id',
             'task' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
         ]);
 
-        // Calculate hours from times
+        // Calculate hours from times (no break time)
         $start = \Carbon\Carbon::createFromFormat('H:i', $request->start_time);
         $end = \Carbon\Carbon::createFromFormat('H:i', $request->end_time);
         
@@ -210,27 +240,16 @@ class TimesheetController extends Controller
             $end->addDay();
         }
         
-        $totalMinutes = $start->diffInMinutes($end);
-        $breakMinutes = ($request->break_duration ?? 0) * 60;
-        $workingMinutes = $totalMinutes - $breakMinutes;
-        $hours = round($workingMinutes / 60, 2);
-        
-        // Validate minimum daily hours
-        if ($hours < 6.5) {
-            return back()->with('error', 'Minimum 6.5 hours required per day (excluding break).');
-        }
-
-        $project_id = $request->project_id;
-        $task = $request->task;
+        $hours = round($start->diffInMinutes($end) / 60, 2);
 
         $timesheet->update([
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'break_duration' => $request->break_duration ?? 0,
+            'break_duration' => 0,
             'hours' => $hours,
             'description' => $request->description,
-            'project_id' => $project_id,
-            'task' => $task,
+            'project_id' => $request->project_id,
+            'task' => $request->task,
             'status' => 'draft', // Reset to draft for resubmission
         ]);
 
@@ -239,6 +258,7 @@ class TimesheetController extends Controller
     
     /**
      * Delete timesheet entry (only drafts).
+     * Deletes all entries in the same batch together.
      */
     public function destroy($id)
     {
@@ -247,8 +267,19 @@ class TimesheetController extends Controller
             ->where('status', 'draft')
             ->firstOrFail();
 
-        $timesheet->delete();
+        $batchId = $timesheet->batch_id;
+        $date = $timesheet->date;
 
-        return redirect()->route('employee.timesheets.apply', ['year' => $timesheet->date->year, 'month' => $timesheet->date->month])->with('success', 'Timesheet entry deleted successfully.');
+        // If this entry has a batch_id, delete all entries in the batch
+        if ($batchId) {
+            Timesheet::where('batch_id', $batchId)
+                ->where('user_id', auth()->id())
+                ->where('status', 'draft')
+                ->delete();
+        } else {
+            $timesheet->delete();
+        }
+
+        return redirect()->route('employee.timesheets.apply', ['year' => $date->year, 'month' => $date->month])->with('success', 'Timesheet entry deleted successfully.');
     }
 }

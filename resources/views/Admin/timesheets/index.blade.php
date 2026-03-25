@@ -75,11 +75,11 @@
             </div>
         </div>
         
-        <!-- Timesheet Table -->
+        <!-- Employees Summary Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-800">
-                    {{ $timesheets->count() }} entries for {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
+                    Employees Summary - {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
                 </h3>
             </div>
             
@@ -92,39 +92,53 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Employee</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Hours</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Approved By</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Hours</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Approved</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Pending</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Entries</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            @foreach($timesheets as $entry)
-                                <tr class="hover:bg-gray-50">
+                            @php
+                                $userSummary = $timesheets->groupBy('user_id')->map(function ($userTimesheets) {
+                                    return [
+                                        'total_hours' => $userTimesheets->sum('hours'),
+                                        'approved_hours' => $userTimesheets->where('status', 'approved')->sum('hours'),
+                                        'pending_hours' => $userTimesheets->where('status', 'pending')->sum('hours'),
+                                        'count' => $userTimesheets->count(),
+                                    ];
+                                });
+                            @endphp
+                            @foreach($userSummary as $userId => $summary)
+                                @php
+                                    $user = $timesheets->firstWhere('user_id', $userId)->user;
+                                @endphp
+                                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('admin.timesheets.detail', ['user_id' => $userId, 'year' => $year, 'month' => $month]) }}'">
                                     <td class="px-6 py-4">
-                                        <div class="font-medium text-gray-900">{{ $entry->user->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $entry->user->department?->name ?? 'N/A' }}</div>
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <span class="text-blue-600 font-bold text-xs">{{ substr($user->name, 0, 2) }}</span>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $user->name }}</p>
+                                                <p class="text-sm text-gray-500">{{ $user->email }}</p>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ $entry->date->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 font-bold text-blue-600">{{ number_format($entry->hours, 2) }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 max-w-md truncate">{{ Str::limit($entry->description, 60) }}</td>
-                                    <td class="px-6 py-4">
-                                        @php 
-                                            $statusClass = match($entry->status) {
-                                                'draft' => 'bg-gray-100 text-gray-700',
-                                                'pending' => 'bg-yellow-100 text-yellow-700',
-                                                'approved' => 'bg-green-100 text-green-700',
-                                                'rejected' => 'bg-red-100 text-red-700',
-                                            }; 
-                                        @endphp
-                                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
-                                            {{ ucfirst($entry->status) }}
-                                        </span>
+                                    <td class="px-6 py-4 text-sm text-gray-600">{{ $user->department?->name ?? 'N/A' }}</td>
+                                    <td class="px-6 py-4 text-right font-bold text-gray-900">
+                                        {{ number_format($summary['total_hours'], 2) }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
-                                        {{ $entry->approver?->name ?? '-' }}
+                                    <td class="px-6 py-4 text-right font-bold text-green-600">
+                                        {{ number_format($summary['approved_hours'], 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-bold text-yellow-600">
+                                        {{ number_format($summary['pending_hours'], 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right text-sm text-gray-600">
+                                        {{ $summary['count'] }}
                                     </td>
                                 </tr>
                             @endforeach

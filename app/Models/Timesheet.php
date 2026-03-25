@@ -46,6 +46,7 @@ class Timesheet extends Model
         'status',
         'approved_by',
         'rejection_reason',
+        'batch_id',
     ];
 
     protected $casts = [
