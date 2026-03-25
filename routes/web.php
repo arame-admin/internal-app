@@ -111,11 +111,17 @@ Route::prefix('manager')->middleware('auth')->name('manager.')->group(function (
     Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
     
     // Leave Management
+    Route::get('/leaves', [UserLeaveController::class, 'index'])->name('leaves.index');
     Route::get('/leaves/apply', [UserLeaveController::class, 'apply'])->name('leaves.apply');
     Route::post('/leaves/apply', [UserLeaveController::class, 'store'])->name('leaves.store');
-    Route::get('/leaves/approve', [ManagerController::class, 'approveLeave'])->name('leaves.approve');
-    Route::put('/leaves/{id}/approve', [ManagerController::class, 'updateLeave'])->name('leaves.update');
+    Route::get('/leaves/{id}/edit', [UserLeaveController::class, 'edit'])->name('leaves.edit');
+    Route::put('/leaves/{id}/edit', [UserLeaveController::class, 'update'])->name('leaves.update');
+    Route::delete('/leaves/{id}/cancel', [UserLeaveController::class, 'cancel'])->name('leaves.cancel');
+    Route::get('/leaves/approve', [ManagerController::class, 'teamLeaveHistory'])->name('leaves.approve');
+    Route::get('/leaves/pending', [ManagerController::class, 'approveLeave'])->name('leaves.pending');
+    Route::put('/leaves/{id}/approve', [ManagerController::class, 'updateLeave'])->name('leaves.approve.update');
     Route::put('/leaves/{id}/status', [ManagerController::class, 'updateLeave'])->name('leaves.status.update');
+    Route::get('/leaves/team-history', [ManagerController::class, 'teamLeaveHistory'])->name('leaves.team.history');
     
     // Timesheet Management (own timesheet - accessible via /manager/timesheets)
     Route::get('/timesheets', [UserTimesheetController::class, 'index'])->name('timesheets.index');
@@ -144,6 +150,9 @@ Route::prefix('employee')->middleware('auth')->name('employee.')->group(function
     Route::get('/leaves', [UserLeaveController::class, 'index'])->name('leaves.index');
     Route::get('/leaves/apply', [UserLeaveController::class, 'apply'])->name('leaves.apply');
     Route::post('/leaves/apply', [UserLeaveController::class, 'store'])->name('leaves.store');
+    Route::get('/leaves/{id}/edit', [UserLeaveController::class, 'edit'])->name('leaves.edit');
+    Route::put('/leaves/{id}/edit', [UserLeaveController::class, 'update'])->name('leaves.update');
+    Route::delete('/leaves/{id}/cancel', [UserLeaveController::class, 'cancel'])->name('leaves.cancel');
     
     // Timesheet Management
     Route::get('/timesheets', [UserTimesheetController::class, 'index'])->name('timesheets.index');

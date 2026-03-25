@@ -84,6 +84,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied On</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -131,6 +132,25 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $leave->created_at->format('d M, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($leave->status === 'pending' || $leave->status === 'approved')
+                                            <a href="{{ route('employee.leaves.edit', $leave->id) }}" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium text-xs mr-3">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('employee.leaves.cancel', $leave->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                    class="text-red-600 hover:text-red-800 font-medium text-xs"
+                                                    onclick="return confirm('Are you sure you want to cancel this leave application?')">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
