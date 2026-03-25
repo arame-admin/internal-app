@@ -20,15 +20,22 @@ class TimesheetController extends Controller
         $year = $request->year ?? now()->year;
         $month = $request->month ?? now()->month;
         
-        $timesheets = Timesheet::where('user_id', $user->id)
+        $timesheets = Timesheet::with('project')
+            ->where('user_id', $user->id)
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->orderBy('date', 'desc')
+            ->orderBy('start_time', 'asc')
             ->get();
         
         $monthlyTotal = Timesheet::monthlyTotal($user->id, $year, $month);
         
-        return view('User.timesheets.index-employee', compact('timesheets', 'year', 'month', 'monthlyTotal'));
+        // Group timesheets by date for organized display
+        $groupedTimesheets = $timesheets->groupBy(function($entry) {
+            return $entry->date->format('Y-m-d');
+        });
+        
+        return view('User.timesheets.index-employee', compact('timesheets', 'groupedTimesheets', 'year', 'month', 'monthlyTotal'));
     }
 
     /**
