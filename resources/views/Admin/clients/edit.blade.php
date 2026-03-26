@@ -103,7 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let contactIndex = 0;
 
     // Populate existing contact persons
-    const existingContacts = @json(old('contact_persons', $client['contact_persons'] ?? []));
+    const existingContacts = @json(old('contact_persons', $client->contactPersons->map(function($cp) {
+        return ['name' => $cp->name, 'designation' => $cp->designation, 'email' => $cp->email, 'phone' => $cp->phone];
+    })->toArray()));
     const container = document.getElementById('contact-persons');
 
     if (existingContacts.length > 0) {

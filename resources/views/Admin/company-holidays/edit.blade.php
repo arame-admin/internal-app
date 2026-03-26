@@ -66,9 +66,14 @@
                             </thead>
                             <tbody id="holiday-rows">
                                 @php
-                                    $mandatoryHolidays = old('mandatory_holidays', $companyHoliday->mandatory_holidays ?? []);
+                                    $mandatoryHolidays = old('mandatory_holidays');
                                     if (empty($mandatoryHolidays)) {
-                                        $mandatoryHolidays = [['date' => '', 'name' => '']];
+                                        $mandatoryHolidays = $companyHoliday->mandatoryHolidays->map(function($h) {
+                                            return ['date' => $h->date, 'name' => $h->name];
+                                        })->toArray();
+                                        if (empty($mandatoryHolidays)) {
+                                            $mandatoryHolidays = [['date' => '', 'name' => '']];
+                                        }
                                     }
                                 @endphp
                                 @foreach($mandatoryHolidays as $index => $holidayData)
@@ -130,7 +135,15 @@
                             </thead>
                             <tbody id="optional-holiday-rows">
                                 @php
-                                    $optionalHolidays = old('optional_holidays', $companyHoliday->optional_holidays ?? []);
+                                    $optionalHolidays = old('optional_holidays');
+                                    if (empty($optionalHolidays)) {
+                                        $optionalHolidays = $companyHoliday->optionalHolidays->map(function($h) {
+                                            return ['date' => $h->date, 'name' => $h->name];
+                                        })->toArray();
+                                        if (empty($optionalHolidays)) {
+                                            $optionalHolidays = [['date' => '', 'name' => '']];
+                                        }
+                                    }
                                 @endphp
                                 @foreach($optionalHolidays as $index => $holidayData)
                                 <tr class="optional-holiday-row">

@@ -8,6 +8,11 @@ use App\Models\Project;
 use App\Models\Client;
 use App\Models\Department;
 use App\Models\ProjectDepartment;
+use App\Models\ProjectTechnology;
+use App\Models\ProjectFeature;
+use App\Models\ProjectTask;
+use App\Models\ProjectTeamMember;
+use App\Models\ProjectType;
 
 class ProjectController extends Controller
 {
@@ -93,7 +98,7 @@ class ProjectController extends Controller
         // Validation
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-'client_id' => 'nullable|integer|exists:clients,id',
+            'client_id' => 'nullable|integer|exists:clients,id',
             'project_department_id' => 'required|exists:project_departments,id',
             'description' => 'nullable|string|max:1000',
             'project_type' => 'nullable|array',
@@ -121,8 +126,62 @@ class ProjectController extends Controller
             'team_members.*.role' => 'string|in:project_manager,lead_developer,developer,designer,tester,business_analyst,devops,qa_lead',
             'status' => 'nullable|in:planning,in_progress,on_hold,testing,completed,cancelled',
         ]);
-        // Save to database
-        Project::create($validated);
+
+        // Save project data without JSON fields
+        $projectData = $validated;
+        unset($projectData['technologies'], $projectData['features'], $projectData['tasks'], $projectData['team_members'], $projectData['project_type']);
+        
+        $project = Project::create($projectData);
+
+        // Save technologies
+        if (!empty($validated['technologies'])) {
+            foreach ($validated['technologies'] as $technology) {
+                ProjectTechnology::create([
+                    'project_id' => $project->id,
+                    'name' => $technology,
+                ]);
+            }
+        }
+
+        // Save features
+        if (!empty($validated['features'])) {
+            foreach ($validated['features'] as $feature) {
+                ProjectFeature::create([
+                    'project_id' => $project->id,
+                    'name' => $feature,
+                ]);
+            }
+        }
+
+        // Save tasks
+        if (!empty($validated['tasks'])) {
+            foreach ($validated['tasks'] as $task) {
+                ProjectTask::create([
+                    'project_id' => $project->id,
+                    'name' => $task,
+                ]);
+            }
+        }
+
+        // Save team members
+        if (!empty($validated['team_members'])) {
+            foreach ($validated['team_members'] as $member) {
+                ProjectTeamMember::create([
+                    'project_id' => $project->id,
+                    'user_id' => $member['user_id'],
+                ]);
+            }
+        }
+
+        // Save project types
+        if (!empty($validated['project_type'])) {
+            foreach ($validated['project_type'] as $type) {
+                ProjectType::create([
+                    'project_id' => $project->id,
+                    'type' => $type,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.projects.index')->with('success', 'Project created successfully.');
     }
@@ -133,7 +192,7 @@ class ProjectController extends Controller
     public function edit($id)
     {
         // Get project from database
-        $project = Project::findOrFail($id);
+        $project = Project::with(['technologies', 'features', 'tasks', 'teamMembers', 'types'])->findOrFail($id);
 
         // Get clients for dropdown
         $clients = Client::where('status', 'active')->orderBy('name')->get();
@@ -150,10 +209,11 @@ class ProjectController extends Controller
         // Validation
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-'client_id' => 'required|integer|exists:clients,id',
+            'client_id' => 'required|integer|exists:clients,id',
             'project_department_id' => 'required|exists:project_departments,id',
             'description' => 'nullable|string|max:1000',
-            'project_type' => 'required|in:web_application,mobile_application,desktop_application,api_integration,other',
+            'project_type' => 'required|array',
+            'project_type.*' => 'in:web_application,mobile_application,desktop_application,api_integration,other',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after:start_date',
             'budget' => 'nullable|numeric|min:0',
@@ -175,8 +235,58 @@ class ProjectController extends Controller
             'status' => 'required|in:planning,in_progress,on_hold,testing,completed,cancelled',
         ]);
 
-        // Update in database
-        Project::where('id', $id)->update($validated);
+        // Get project
+        $project = Project::findOrFail($id);
+
+        // Update project data without JSON fields
+        $projectData = $validated;
+        unset($projectData['technologies'], $projectData['features'], $projectData['tasks'], $projectData['team_members'], $projectData['project_type']);
+        
+        $project->update($projectData);
+
+        // Update technologies - delete old and create new
+        ProjectTechnology::where('project_id', $project->id)->delete();
+        if (!empty($validated['technologies'])) {
+            foreach ($validated['technologies'] as $technology) {
+                ProjectTechnology::create([
+                    'project_id' => $project->id,
+                    'name' => $technology,
+                ]);
+            }
+        }
+
+        // Update features - delete old and create new
+        ProjectFeature::where('project_id', $project->id)->delete();
+        if (!empty($validated['features'])) {
+            foreach ($validated['features'] as $feature) {
+                ProjectFeature::create([
+                    'project_id' => $project->id,
+                    'name' => $feature,
+                ]);
+            }
+        }
+
+        // Update tasks - delete old and create new
+        ProjectTask::where('project_id', $project->id)->delete();
+        if (!empty($validated['tasks'])) {
+            foreach ($validated['tasks'] as $task) {
+                ProjectTask::create([
+                    'project_id' => $project->id,
+                    'name' => $task,
+                ]);
+            }
+        }
+
+        // Update project types - delete old and create new
+        ProjectType::where('project_id', $project->id)->delete();
+        if (!empty($validated['project_type'])) {
+            foreach ($validated['project_type'] as $type) {
+                ProjectType::create([
+                    'project_id' => $project->id,
+                    'type' => $type,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.projects.index')->with('success', 'Project updated successfully.');
     }
@@ -220,6 +330,13 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
+        // Delete related records first
+        ProjectTechnology::where('project_id', $id)->delete();
+        ProjectFeature::where('project_id', $id)->delete();
+        ProjectTask::where('project_id', $id)->delete();
+        ProjectTeamMember::where('project_id', $id)->delete();
+        ProjectType::where('project_id', $id)->delete();
+        
         // Delete from database
         Project::where('id', $id)->delete();
 

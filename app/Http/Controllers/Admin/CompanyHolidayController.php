@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CompanyHoliday;
+use App\Models\MandatoryHoliday;
+use App\Models\OptionalHoliday;
 use Illuminate\Http\Request;
 
 class CompanyHolidayController extends Controller
@@ -11,8 +13,10 @@ class CompanyHolidayController extends Controller
     public function index(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        $companyHolidays = CompanyHoliday::all();
-        return view('Admin.company-holidays.index', compact('companyHolidays', 'year'));
+        $companyHoliday = CompanyHoliday::with(['mandatoryHolidays', 'optionalHolidays'])
+            ->where('year', $year)
+            ->first();
+        return view('Admin.company-holidays.index', compact('companyHoliday', 'year'));
     }
 
     public function create(Request $request)
@@ -33,35 +37,49 @@ class CompanyHolidayController extends Controller
             'optional_holidays.*.name' => 'nullable|string|max:255',
         ]);
 
-        // Filter out empty optional holidays
-        $optionalHolidays = $request->optional_holidays;
-        if ($optionalHolidays) {
-            $optionalHolidays = array_filter($optionalHolidays, function ($holiday) {
-                return !empty($holiday['date']) && !empty($holiday['name']);
-            });
-            $optionalHolidays = array_values($optionalHolidays);
-        } else {
-            $optionalHolidays = [];
+        // Create company holiday
+        $companyHoliday = CompanyHoliday::create([
+            'year' => $request->year,
+        ]);
+
+        // Save mandatory holidays
+        foreach ($request->mandatory_holidays as $holiday) {
+            MandatoryHoliday::create([
+                'company_holiday_id' => $companyHoliday->id,
+                'date' => $holiday['date'],
+                'name' => $holiday['name'],
+                'day' => isset($holiday['day']) ? $holiday['day'] : null,
+            ]);
         }
 
-        CompanyHoliday::create([
-            'year' => $request->year,
-            'mandatory_holidays' => $request->mandatory_holidays,
-            'optional_holidays' => $optionalHolidays,
-        ]);
+        // Filter and save optional holidays
+        if ($request->optional_holidays) {
+            foreach ($request->optional_holidays as $holiday) {
+                if (!empty($holiday['date']) && !empty($holiday['name'])) {
+                    OptionalHoliday::create([
+                        'company_holiday_id' => $companyHoliday->id,
+                        'date' => $holiday['date'],
+                        'name' => $holiday['name'],
+                        'day' => isset($holiday['day']) ? $holiday['day'] : null,
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('company-holidays.index', ['year' => $request->year])
             ->with('success', 'Company holidays created successfully.');
     }
 
     public function edit($id)
     {
-        $companyHoliday = CompanyHoliday::findOrFail($id);
+        $companyHoliday = CompanyHoliday::with(['mandatoryHolidays', 'optionalHolidays'])->findOrFail($id);
         return view('Admin.company-holidays.edit', compact('companyHoliday'));
     }
 
     public function update(Request $request, $id)
     {
         $companyHoliday = CompanyHoliday::findOrFail($id);
+        
         $request->validate([
             'year' => 'required|integer|unique:company_holidays,year,' . $id,
             'mandatory_holidays' => 'required|array|min:1',
@@ -72,22 +90,39 @@ class CompanyHolidayController extends Controller
             'optional_holidays.*.name' => 'nullable|string|max:255',
         ]);
 
-        // Filter out empty optional holidays
-        $optionalHolidays = $request->optional_holidays;
-        if ($optionalHolidays) {
-            $optionalHolidays = array_filter($optionalHolidays, function ($holiday) {
-                return !empty($holiday['date']) && !empty($holiday['name']);
-            });
-            $optionalHolidays = array_values($optionalHolidays);
-        } else {
-            $optionalHolidays = [];
-        }
-
+        // Update company holiday
         $companyHoliday->update([
             'year' => $request->year,
-            'mandatory_holidays' => $request->mandatory_holidays,
-            'optional_holidays' => $optionalHolidays,
         ]);
+
+        // Delete old holidays and create new ones
+        MandatoryHoliday::where('company_holiday_id', $companyHoliday->id)->delete();
+        OptionalHoliday::where('company_holiday_id', $companyHoliday->id)->delete();
+
+        // Save mandatory holidays
+        foreach ($request->mandatory_holidays as $holiday) {
+            MandatoryHoliday::create([
+                'company_holiday_id' => $companyHoliday->id,
+                'date' => $holiday['date'],
+                'name' => $holiday['name'],
+                'day' => isset($holiday['day']) ? $holiday['day'] : null,
+            ]);
+        }
+
+        // Filter and save optional holidays
+        if ($request->optional_holidays) {
+            foreach ($request->optional_holidays as $holiday) {
+                if (!empty($holiday['date']) && !empty($holiday['name'])) {
+                    OptionalHoliday::create([
+                        'company_holiday_id' => $companyHoliday->id,
+                        'date' => $holiday['date'],
+                        'name' => $holiday['name'],
+                        'day' => isset($holiday['day']) ? $holiday['day'] : null,
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('company-holidays.index', ['year' => $request->year])
             ->with('success', 'Company holidays updated successfully.');
     }
@@ -95,6 +130,11 @@ class CompanyHolidayController extends Controller
     public function destroy($id)
     {
         $companyHoliday = CompanyHoliday::findOrFail($id);
+        
+        // Delete related holidays first
+        MandatoryHoliday::where('company_holiday_id', $id)->delete();
+        OptionalHoliday::where('company_holiday_id', $id)->delete();
+        
         $companyHoliday->delete();
         return redirect()->route('company-holidays.index')
             ->with('success', 'Company holidays deleted successfully.');

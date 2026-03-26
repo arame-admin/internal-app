@@ -23,7 +23,6 @@
 
         @php
             $selectedYear = request('year', date('Y'));
-            $holidayData = collect($companyHolidays)->firstWhere('year', (int)$selectedYear);
 
             $months = [
                 1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
@@ -60,8 +59,8 @@
                         </select>
                     </form>
                     <div class="flex items-center space-x-6">
-                        @if($holidayData)
-                            <a href="{{ route('company-holidays.edit', $holidayData['id']) }}"
+                        @if($companyHoliday)
+                            <a href="{{ route('company-holidays.edit', $companyHoliday->id) }}"
                                class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors">
                                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -101,21 +100,17 @@
                 $optionalHolidayDates = [];
                 $holidayNames = [];
 
-                if ($holidayData) {
-                    if (isset($holidayData['mandatory_holidays']) && is_array($holidayData['mandatory_holidays'])) {
-                        foreach ($holidayData['mandatory_holidays'] as $holiday) {
-                            $date = \Carbon\Carbon::parse($holiday['date']);
-                            $mandatoryHolidayDates[$date->format('Y-m-d')] = true;
-                            $holidayNames[$date->format('Y-m-d')] = $holiday['name'];
-                        }
+                if ($companyHoliday) {
+                    foreach ($companyHoliday->mandatoryHolidays as $holiday) {
+                        $date = \Carbon\Carbon::parse($holiday->date);
+                        $mandatoryHolidayDates[$date->format('Y-m-d')] = true;
+                        $holidayNames[$date->format('Y-m-d')] = $holiday->name;
                     }
 
-                    if (isset($holidayData['optional_holidays']) && is_array($holidayData['optional_holidays'])) {
-                        foreach ($holidayData['optional_holidays'] as $holiday) {
-                            $date = \Carbon\Carbon::parse($holiday['date']);
-                            $optionalHolidayDates[$date->format('Y-m-d')] = true;
-                            $holidayNames[$date->format('Y-m-d')] = $holiday['name'];
-                        }
+                    foreach ($companyHoliday->optionalHolidays as $holiday) {
+                        $date = \Carbon\Carbon::parse($holiday->date);
+                        $optionalHolidayDates[$date->format('Y-m-d')] = true;
+                        $holidayNames[$date->format('Y-m-d')] = $holiday->name;
                     }
                 }
             @endphp
@@ -182,7 +177,7 @@
                 @endforeach
             </div>
 
-            @if(!$holidayData)
+            @if(!$companyHoliday)
                 <div class="text-center py-12">
                     <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

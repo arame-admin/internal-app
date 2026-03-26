@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\ContactPerson;
 
 class ClientController extends Controller
 {
@@ -76,8 +77,24 @@ class ClientController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        // Save to database
-        Client::create($validated);
+        // Save client data without contact_persons
+        $clientData = $validated;
+        unset($clientData['contact_persons']);
+        
+        $client = Client::create($clientData);
+
+        // Save contact persons
+        if (!empty($validated['contact_persons'])) {
+            foreach ($validated['contact_persons'] as $contact) {
+                ContactPerson::create([
+                    'client_id' => $client->id,
+                    'name' => $contact['name'],
+                    'designation' => $contact['designation'] ?? null,
+                    'email' => $contact['email'],
+                    'phone' => $contact['phone'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.clients.index')->with('success', 'Client created successfully.');
     }
@@ -87,8 +104,8 @@ class ClientController extends Controller
      */
     public function edit($id)
     {
-        // Get client from database
-        $client = Client::findOrFail($id);
+        // Get client from database with contact persons
+        $client = Client::with('contactPersons')->findOrFail($id);
 
         return view('Admin.clients.edit', compact('client'));
     }
@@ -112,8 +129,28 @@ class ClientController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        // Update in database
-        Client::where('id', $id)->update($validated);
+        // Get client
+        $client = Client::findOrFail($id);
+
+        // Update client data without contact_persons
+        $clientData = $validated;
+        unset($clientData['contact_persons']);
+        
+        $client->update($clientData);
+
+        // Update contact persons - delete old and create new
+        ContactPerson::where('client_id', $client->id)->delete();
+        if (!empty($validated['contact_persons'])) {
+            foreach ($validated['contact_persons'] as $contact) {
+                ContactPerson::create([
+                    'client_id' => $client->id,
+                    'name' => $contact['name'],
+                    'designation' => $contact['designation'] ?? null,
+                    'email' => $contact['email'],
+                    'phone' => $contact['phone'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.clients.index')->with('success', 'Client updated successfully.');
     }
@@ -150,6 +187,9 @@ class ClientController extends Controller
      */
     public function destroy($id)
     {
+        // Delete contact persons first
+        ContactPerson::where('client_id', $id)->delete();
+        
         // Delete from database
         Client::where('id', $id)->delete();
 

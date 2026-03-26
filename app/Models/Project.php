@@ -3,6 +3,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -14,14 +15,10 @@ class Project extends Model
         'department_id',
         'project_department_id',
         'description',
-        'project_type',
         'status',
         'start_date',
         'end_date',
         'budget',
-        'technologies',
-        'features',
-        'tasks',
         'design_required',
         'mobile_app_required',
         'web_app_required',
@@ -29,20 +26,12 @@ class Project extends Model
         'testing_required',
         'maintenance_required',
         'priority',
-        'assigned_users',
-        'team_members',
         'progress_percentage',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'project_type' => 'array',
-        'technologies' => 'array',
-        'features' => 'array',
-        'tasks' => 'array',
-        'assigned_users' => 'array',
-        'team_members' => 'array',
         'design_required' => 'boolean',
         'mobile_app_required' => 'boolean',
         'web_app_required' => 'boolean',
@@ -50,6 +39,7 @@ class Project extends Model
         'testing_required' => 'boolean',
         'maintenance_required' => 'boolean',
     ];
+
 
     public function department()
     {
@@ -64,5 +54,45 @@ class Project extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Get the technologies for this project.
+     */
+    public function technologies(): HasMany
+    {
+        return $this->hasMany(ProjectTechnology::class);
+    }
+
+    /**
+     * Get the features for this project.
+     */
+    public function features(): HasMany
+    {
+        return $this->hasMany(ProjectFeature::class);
+    }
+
+    /**
+     * Get the tasks for this project.
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(ProjectTask::class);
+    }
+
+    /**
+     * Get the team members for this project.
+     */
+    public function teamMembers(): HasMany
+    {
+        return $this->hasMany(ProjectTeamMember::class);
+    }
+
+    /**
+     * Get the types for this project.
+     */
+    public function types(): HasMany
+    {
+        return $this->hasMany(ProjectType::class);
     }
 }

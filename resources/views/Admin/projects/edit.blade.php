@@ -161,7 +161,7 @@
                             </button>
                         </div>
                     </div>
-                    <input type="hidden" name="technologies" id="technologies-hidden" value="{{ old('technologies', json_encode($project->technologies ?? [])) }}">
+                    <input type="hidden" name="technologies" id="technologies-hidden" value="{{ old('technologies', json_encode($project->technologies->pluck('name')->toArray() ?? [])) }}">
                     <p class="text-xs text-gray-500 mt-1">Technologies used in the project</p>
                 </div>
 
@@ -179,7 +179,7 @@
                             </button>
                         </div>
                     </div>
-                    <input type="hidden" name="features" id="features-hidden" value="{{ old('features', json_encode($project->features ?? [])) }}">
+                    <input type="hidden" name="features" id="features-hidden" value="{{ old('features', json_encode($project->features->pluck('name')->toArray() ?? [])) }}">
                     <p class="text-xs text-gray-500 mt-1">Key features of the project</p>
                 </div>
 
@@ -197,7 +197,7 @@
                             </button>
                         </div>
                     </div>
-                    <input type="hidden" name="tasks" id="tasks-hidden" value="{{ old('tasks', json_encode($project->tasks ?? [])) }}">
+                    <input type="hidden" name="tasks" id="tasks-hidden" value="{{ old('tasks', json_encode($project->tasks->pluck('name')->toArray() ?? [])) }}">
                     <p class="text-xs text-gray-500 mt-1">Add tasks for this project</p>
                 </div>
             </div>
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task');
     const tasksHidden = document.getElementById('tasks-hidden');
-    let tasks = @json(old('tasks', $project->tasks ?? []));
+    let tasks = @json(old('tasks', $project->tasks->pluck('name')->toArray() ?? []));
 
     // Keep existing tasks when editing
     // Project departments don't auto-populate tasks
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTasksDisplay(); // Initial load
 
     // Technologies management
-    let technologies = @json(old('technologies', $project->technologies ?? []));
+    let technologies = @json(old('technologies', $project->technologies->pluck('name')->toArray() ?? []));
     const techContainer = document.getElementById('technologies-container');
     const techInput = document.getElementById('technology-input');
     const addTechBtn = document.getElementById('add-technology');
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Features management
-    let features = @json(old('features', $project->features ?? []));
+    let features = @json(old('features', $project->features->pluck('name')->toArray() ?? []));
     const featuresContainer = document.getElementById('features-container');
     const featureInput = document.getElementById('feature-input');
     const addFeatureBtn = document.getElementById('add-feature');
@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Tasks management
-    let projectTasks = @json(old('tasks', $project->tasks ?? []));
+    let projectTasks = @json(old('tasks', $project->tasks->pluck('name')->toArray() ?? []));
     if (typeof projectTasks === 'string') {
         projectTasks = JSON.parse(projectTasks);
     }

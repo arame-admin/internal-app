@@ -42,12 +42,13 @@ class Timesheet extends Model
         'hours',
         'description',
         'project_id',
-        'task',
+        'project_task_id',
         'status',
         'approved_by',
         'rejection_reason',
         'batch_id',
     ];
+
 
     protected $casts = [
         'date' => 'date',
@@ -64,6 +65,11 @@ class Timesheet extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function projectTask(): BelongsTo
+    {
+        return $this->belongsTo(ProjectTask::class);
     }
 
     public function department()
