@@ -39,6 +39,8 @@ return new class extends Migration
             $table->string('work_email')->unique()->nullable();
             $table->string('work_number')->nullable();
             $table->string('residence_number')->nullable();
+            $table->string('emergency_contact_number')->nullable();
+            $table->string('concern_person')->nullable();
             $table->text('current_address')->nullable();
             $table->text('permanent_address')->nullable();
             $table->string('employee_code')->unique()->nullable();
@@ -50,6 +52,7 @@ return new class extends Migration
             $table->foreignId('designation_id')->nullable()->constrained('designations')->onDelete('set null');
             $table->foreignId('bu_id')->nullable()->constrained('business_units')->onDelete('set null');
             $table->foreignId('location_id')->nullable()->constrained('locations')->onDelete('set null');
+            $table->foreignId('reporting_manager_id')->nullable()->constrained('users')->onDelete('set null');
 
             // Status
             $table->boolean('is_active')->default(true);
