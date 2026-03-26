@@ -17,7 +17,7 @@
         </nav>
 
         <!-- Project Form -->
-        <form action="{{ route('admin.projects.update', $id) }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-8">
+        <form action="{{ route('admin.projects.update', $project->id) }}" method="POST" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-8">
         @csrf
         @method('PUT')
 
@@ -257,9 +257,40 @@
             </div>
         </div>
 
-        <!-- Team Members -->
+<!-- Team Members -->
         <div>
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Team Members</h3>
+            
+            {{-- Static List of Current Team Members --}}
+            @if($project->teamMembers && $project->teamMembers->count() > 0)
+            <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-medium text-blue-900 mb-3">Current Team Members ({{ $project->teamMembers->count() }})</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-blue-200 text-sm">
+                        <thead class="bg-blue-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-medium text-blue-900">Name</th>
+                                <th class="px-4 py-2 text-left font-medium text-blue-900">Role</th>
+                                <th class="px-4 py-2 text-left font-medium text-blue-900">Designation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-blue-100">
+                            @foreach($project->teamMembers as $member)
+                                <tr>
+                                    <td class="px-4 py-3 font-medium text-gray-900">{{ $member->user->name ?? 'N/A' }}</td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                            {{ $member->role ? ucwords(str_replace('_', ' ', $member->role)) : 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-700">{{ $member->user->designation->name ?? 'N/A' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
             <div class="space-y-4">
                 <div class="flex items-center justify-between mb-4">
                     <label class="block text-sm font-medium text-gray-700">Assign Team Members</label>
@@ -271,7 +302,7 @@
                     </button>
                 </div>
                 <div id="team-members" class="space-y-4">
-                    <!-- Team members will be populated by JavaScript -->
+                    {{-- Initial empty template if no members --}}
                 </div>
             </div>
         </div>
@@ -513,33 +544,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    window.removeTask = function(index) {
-        tasks.splice(index, 1);
-        updateTasksDisplay();
-    };
+@php
+$teamMembersArray = [];
+foreach ($project->teamMembers as $tm) {
+    $userName = $tm->user ? $tm->user->name : null;
+    $userDesig = 'N/A';
+    if ($tm->user && $tm->user->designation) {
+        $userDesig = $tm->user->designation->name;
+    }
+    $teamMembersArray[] = [
+        'id' => $tm->id,
+        'user_id' => $tm->user_id,
+        'role' => $tm->role,
+        'user_name' => $userName,
+        'user_designation' => $userDesig
+    ];
+}
+$usersArray = [];
+foreach ($users as $u) {
+    $desig = $u->designation ? $u->designation->name : 'N/A';
+    $usersArray[] = ['id' => $u->id, 'name' => $u->name, 'designation' => $desig];
+}
+@endphp
 
-    // Team Members management
-    let memberIndex = 0;
-    let teamMembers = @json(old('team_members', $project->team_members ?? []));
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let memberIndex = {{ count($project->teamMembers ?? []) }};
+    let teamMembers = @json(old('team_members', $teamMembersArray ?? []));
+    let users = @json($usersArray);
 
     const teamContainer = document.getElementById('team-members');
 
-    function updateTeamMembersDisplay() {
-        teamContainer.innerHTML = '';
-        if (teamMembers.length > 0) {
-            teamMembers.forEach((member, index) => {
-                const memberDiv = createTeamMember(index, member);
-                teamContainer.appendChild(memberDiv);
-            });
-            memberIndex = teamMembers.length;
-        } else {
-            // Add default empty member if none exist
-            const memberDiv = createTeamMember(0, {});
-            teamContainer.appendChild(memberDiv);
-            memberIndex = 1;
-        }
-        updateRemoveButtons();
-    }
+    console.log('Team members loaded:', teamMembers);
+    console.log('Users:', users);
 
     function createTeamMember(index, data = {}) {
         const div = document.createElement('div');
@@ -547,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
         div.innerHTML = `
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-sm font-medium text-gray-700">Team Member ${index + 1}</h4>
-                <button type="button" class="remove-member text-red-600 hover:text-red-800">
+                <button type="button" class="remove-member text-red-600 hover:text-red-800" style="display: none;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -558,19 +595,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Team Member</label>
                     <select name="team_members[${index}][user_id]" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                         <option value="">Select team member</option>
-                        <option value="1" ${data.user_id == 1 ? 'selected' : ''}>John Doe (Developer)</option>
-                        <option value="2" ${data.user_id == 2 ? 'selected' : ''}>Jane Smith (Manager)</option>
-                        <option value="3" ${data.user_id == 3 ? 'selected' : ''}>Bob Johnson (Designer)</option>
-                        <option value="4" ${data.user_id == 4 ? 'selected' : ''}>Alice Brown (Tester)</option>
-                        <option value="5" ${data.user_id == 5 ? 'selected' : ''}>Charlie Wilson (Developer)</option>
-                        <option value="6" ${data.user_id == 6 ? 'selected' : ''}>Diana Davis (Manager)</option>
-                        <option value="7" ${data.user_id == 7 ? 'selected' : ''}>Edward Miller (Developer)</option>
-                        <option value="8" ${data.user_id == 8 ? 'selected' : ''}>Fiona Garcia (Designer)</option>
+                        \`\${users.map(u => `<option value="\${u.id}" \${data.user_id == u.id ? 'selected' : ''}>\${u.name} (\${u.designation})</option>`).join('')}\`
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Role in Project</label>
-                    <select name="team_members[${index}][role]" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
+                    <select name="team_members[${index}][role]" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white">
                         <option value="">Select role</option>
                         <option value="project_manager" ${data.role == 'project_manager' ? 'selected' : ''}>Project Manager</option>
                         <option value="lead_developer" ${data.role == 'lead_developer' ? 'selected' : ''}>Lead Developer</option>
@@ -585,19 +615,38 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        div.querySelector('.remove-member').addEventListener('click', function() {
-            const memberIndex = Array.from(teamContainer.children).indexOf(div);
-            teamMembers.splice(memberIndex, 1);
-            updateTeamMembersDisplay();
+        // Add event listener for remove
+        const removeBtn = div.querySelector('.remove-member');
+        removeBtn.addEventListener('click', () => {
+            const currentIndex = Array.from(teamContainer.children).indexOf(div);
+            teamMembers.splice(currentIndex, 1);
+            renumberMembers();
         });
 
         return div;
     }
 
+    function renumberMembers() {
+        const members = document.querySelectorAll('.team-member');
+        teamContainer.innerHTML = '';
+        members.forEach((memberDiv, index) => {
+            // Re-extract data from selects (simplified - recreate)
+            const userSelect = memberDiv.querySelector('select[name*="[user_id]"]');
+            const roleSelect = memberDiv.querySelector('select[name*="[role]"]');
+            const memberData = {
+                user_id: userSelect ? userSelect.value : '',
+                role: roleSelect ? roleSelect.value : ''
+            };
+            const newDiv = createTeamMember(index, memberData);
+            teamContainer.appendChild(newDiv);
+        });
+        memberIndex = members.length;
+        updateRemoveButtons();
+    }
+
     function updateRemoveButtons() {
         const members = document.querySelectorAll('.team-member');
         const removeButtons = document.querySelectorAll('.remove-member');
-
         if (members.length > 1) {
             removeButtons.forEach(btn => btn.style.display = 'block');
         } else {
@@ -606,12 +655,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('add-team-member').addEventListener('click', function() {
-        teamMembers.push({ user_id: '', role: '' });
-        updateTeamMembersDisplay();
+        teamMembers.push({});
+        const newDiv = createTeamMember(memberIndex, {});
+        teamContainer.appendChild(newDiv);
+        memberIndex++;
+        updateRemoveButtons();
     });
 
-    // Initialize team members display
-    updateTeamMembersDisplay();
+    // Initialize - populate existing + ensure at least one
+    teamContainer.innerHTML = '';
+    if (teamMembers.length === 0) {
+        const initialDiv = createTeamMember(0, {});
+        teamContainer.appendChild(initialDiv);
+    } else {
+        teamMembers.forEach((member, index) => {
+            const memberDiv = createTeamMember(index, member);
+            teamContainer.appendChild(memberDiv);
+        });
+    }
+    updateRemoveButtons();
 });
 </script>
 @endsection

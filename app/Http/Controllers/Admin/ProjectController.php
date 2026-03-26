@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Client;
+use App\Models\User;
 use App\Models\Department;
 use App\Models\ProjectDepartment;
 use App\Models\ProjectTechnology;
@@ -86,8 +87,9 @@ class ProjectController extends Controller
         // Get clients from database
         $clients = Client::where('status', 'active')->orderBy('name')->get();
         $projectDepartments = ProjectDepartment::where('status', 'active')->orderBy('name')->get();
+        $users = User::where('is_active', true)->orderBy('name')->get();
 
-        return view('Admin.projects.create', compact('clients', 'projectDepartments'));
+        return view('Admin.projects.create', compact('clients', 'projectDepartments', 'users'));
     }
 
     /**
@@ -119,8 +121,6 @@ class ProjectController extends Controller
             'testing_required' => 'boolean',
             'maintenance_required' => 'boolean',
             'priority' => 'nullable|in:low,medium,high,critical',
-            'assigned_users' => 'nullable|array',
-            'assigned_users.*' => 'integer',
             'team_members' => 'nullable|array',
             'team_members.*.user_id' => 'integer',
             'team_members.*.role' => 'string|in:project_manager,lead_developer,developer,designer,tester,business_analyst,devops,qa_lead',
@@ -169,6 +169,7 @@ class ProjectController extends Controller
                 ProjectTeamMember::create([
                     'project_id' => $project->id,
                     'user_id' => $member['user_id'],
+                    'role' => $member['role'] ?? null,
                 ]);
             }
         }
@@ -192,13 +193,14 @@ class ProjectController extends Controller
     public function edit($id)
     {
         // Get project from database
-        $project = Project::with(['technologies', 'features', 'tasks', 'teamMembers', 'types'])->findOrFail($id);
+        $project = Project::with(['technologies', 'features', 'tasks', 'teamMembers.user', 'types'])->findOrFail($id);
 
         // Get clients for dropdown
         $clients = Client::where('status', 'active')->orderBy('name')->get();
         $projectDepartments = ProjectDepartment::where('status', 'active')->orderBy('name')->get();
+        $users = User::with('designation')->where('is_active', true)->orderBy('name')->get();
 
-        return view('Admin.projects.edit', compact('project', 'clients', 'projectDepartments'));
+        return view('Admin.projects.edit', compact('project', 'clients', 'projectDepartments', 'users'));
     }
 
     /**
@@ -229,9 +231,10 @@ class ProjectController extends Controller
             'deployment_required' => 'boolean',
             'testing_required' => 'boolean',
             'maintenance_required' => 'boolean',
+            'team_members' => 'nullable|array',
+            'team_members.*.user_id' => 'integer|exists:users,id',
+            'team_members.*.role' => 'string|in:project_manager,lead_developer,developer,designer,tester,business_analyst,devops,qa_lead',
             'priority' => 'required|in:low,medium,high,critical',
-            'assigned_users' => 'nullable|array',
-            'assigned_users.*' => 'integer',
             'status' => 'required|in:planning,in_progress,on_hold,testing,completed,cancelled',
         ]);
 
@@ -273,6 +276,18 @@ class ProjectController extends Controller
                 ProjectTask::create([
                     'project_id' => $project->id,
                     'name' => $task,
+                ]);
+            }
+        }
+
+        // Update team members - delete old and create new
+        ProjectTeamMember::where('project_id', $project->id)->delete();
+        if (!empty($validated['team_members'])) {
+            foreach ($validated['team_members'] as $member) {
+                ProjectTeamMember::create([
+                    'project_id' => $project->id,
+                    'user_id' => $member['user_id'],
+                    'role' => $member['role'] ?? null,
                 ]);
             }
         }

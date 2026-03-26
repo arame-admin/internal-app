@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
-            $table->json('contact_persons')->nullable();
             $table->enum('status', ['active', 'inactive', 'archived'])->default('active');
             $table->timestamps();
         });

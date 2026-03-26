@@ -25,6 +25,8 @@ class ContactPerson extends Model
 {
     use HasFactory;
 
+    protected $table = 'contact_persons';
+
     protected $fillable = [
         'client_id',
         'name',

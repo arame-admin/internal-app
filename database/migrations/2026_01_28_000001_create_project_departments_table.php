@@ -19,6 +19,10 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
+
+        Schema::table('projects', function (Blueprint $table) {
+            $table->foreignId('project_department_id')->nullable()->constrained('project_departments')->onDelete('set null');
+        });
     }
 
     /**
@@ -26,6 +30,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('projects', function (Blueprint $table) {
+            $table->dropForeign(['project_department_id']);
+            $table->dropColumn('project_department_id');
+        });
+
         Schema::dropIfExists('project_departments');
     }
 };

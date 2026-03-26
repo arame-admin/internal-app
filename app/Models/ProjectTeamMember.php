@@ -23,9 +23,12 @@ class ProjectTeamMember extends Model
 {
     use HasFactory;
 
+    protected $table = 'project_team_members';
+
     protected $fillable = [
         'project_id',
         'user_id',
+        'role',
     ];
 
     protected $casts = [

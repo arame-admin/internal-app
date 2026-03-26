@@ -16,13 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
-            $table->foreignId('project_department_id')->nullable()->constrained('project_departments')->onDelete('set null');
             $table->text('description')->nullable();
             $table->enum('status', ['planning', 'in_progress', 'on_hold', 'testing', 'completed', 'cancelled'])->default('planning');
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->decimal('budget', 15, 2)->nullable();
-            $table->json('tasks')->nullable();
             $table->boolean('design_required')->default(false);
             $table->boolean('mobile_app_required')->default(false);
             $table->boolean('web_app_required')->default(false);
@@ -30,8 +28,6 @@ return new class extends Migration
             $table->boolean('testing_required')->default(false);
             $table->boolean('maintenance_required')->default(false);
             $table->enum('priority', ['low', 'medium', 'high', 'critical'])->default('medium');
-            $table->json('assigned_users')->nullable();
-            $table->json('team_members')->nullable();
             $table->integer('progress_percentage')->default(0);
             $table->timestamps();
         });

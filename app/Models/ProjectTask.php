@@ -22,6 +22,8 @@ class ProjectTask extends Model
 {
     use HasFactory;
 
+    protected $table = 'project_tasks';
+
     protected $fillable = [
         'project_id',
         'name',

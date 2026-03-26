@@ -13,8 +13,6 @@ return new class extends Migration
         Schema::create('company_holidays', function (Blueprint $table) {
             $table->id();
             $table->integer('year')->unique();
-            $table->json('mandatory_holidays')->nullable();
-            $table->json('optional_holidays')->nullable();
             $table->timestamps();
         });
     }

@@ -22,6 +22,8 @@ class ProjectFeature extends Model
 {
     use HasFactory;
 
+    protected $table = 'project_features';
+
     protected $fillable = [
         'project_id',
         'name',

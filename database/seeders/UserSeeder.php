@@ -54,6 +54,22 @@ class UserSeeder extends Seeder
                 'reporting_manager_id' => null, // CEO - top level
             ],
             [
+                'name' => 'Sheril',
+                'first_name' => 'Sheril',
+                'last_name' => '',
+                'email' => 'sheril@arameglobal.com',
+                'personal_email' => 'sheril@example.com',
+                'password' => Hash::make('sheril@arameglobal.com'),
+                'employee_code' => '1004',
+                'role_id' => 3, // Employee role
+                'department_id' => 6, // Finance
+                'designation_id' => $financeManagerId,
+                'bu_id' => 1,
+                'location_id' => 1,
+                'is_active' => true,
+                'reporting_manager_id' => null, // Will be updated after all users are created
+            ],
+            [
                 'name' => 'Hari Krishnan',
                 'first_name' => 'Hari',
                 'last_name' => 'Krishnan',
@@ -67,7 +83,7 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
-                'reporting_manager_id' => 2, // Reports to Susan Jacob (CEO)
+                'reporting_manager_id' => null, // Will be updated after all users are created
             ],
             [
                 'name' => 'Roshni',
@@ -83,28 +99,32 @@ class UserSeeder extends Seeder
                 'bu_id' => 1,
                 'location_id' => 1,
                 'is_active' => true,
-                'reporting_manager_id' => 5, // Reports to Sheril
-            ],
-            [
-                'name' => 'Sheril',
-                'first_name' => 'Sheril',
-                'last_name' => '',
-                'email' => 'sheril@arameglobal.com',
-                'personal_email' => 'sheril@example.com',
-                'password' => Hash::make('sheril@arameglobal.com'),
-                'employee_code' => '1004',
-                'role_id' => 3, // Employee role
-                'department_id' => 6, // Finance
-                'designation_id' => $financeManagerId,
-                'bu_id' => 1,
-                'location_id' => 1,
-                'is_active' => true,
-                'reporting_manager_id' => 2, // Reports to Susan Jacob (CEO)
+                'reporting_manager_id' => null, // Will be updated after all users are created
             ],
         ];
 
+        // First pass: Create all users without reporting_manager_id
+        $createdUsers = [];
         foreach ($users as $user) {
-            User::updateOrCreate(['email' => $user['email']], $user);
+            $created = User::updateOrCreate(['email' => $user['email']], $user);
+            $createdUsers[$created->employee_code] = $created;
+        }
+
+        // Second pass: Update reporting_manager_id after all users exist
+        // Susan Jacob (1001) - CEO, no manager
+        if (isset($createdUsers['1001'])) {
+            // Hari Krishnan (1002) reports to Susan Jacob
+            if (isset($createdUsers['1002'])) {
+                $createdUsers['1002']->update(['reporting_manager_id' => $createdUsers['1001']->id]);
+            }
+            // Sheril (1004) reports to Susan Jacob
+            if (isset($createdUsers['1004'])) {
+                $createdUsers['1004']->update(['reporting_manager_id' => $createdUsers['1001']->id]);
+            }
+        }
+        // Roshni (1003) reports to Sheril (1004)
+        if (isset($createdUsers['1003']) && isset($createdUsers['1004'])) {
+            $createdUsers['1003']->update(['reporting_manager_id' => $createdUsers['1004']->id]);
         }
     }
 }

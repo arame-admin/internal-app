@@ -66,34 +66,22 @@ class TimesheetController extends Controller
             ->orderBy('name')
             ->get();
         
-        // Get user's department's available_tasks for fallback (already array from model cast)
+        // Get user's department's tasks for fallback
         $userDepartmentTasks = [];
         if ($user->department) {
-            $deptTasks = $user->department->available_tasks;
-            // Handle both array (from cast) and string (raw DB) cases
-            if (is_array($deptTasks) && !empty($deptTasks)) {
-                $userDepartmentTasks = $deptTasks;
-            } elseif (is_string($deptTasks) && !empty($deptTasks)) {
-                $decoded = json_decode($deptTasks, true);
-                if (is_array($decoded) && !empty($decoded)) {
-                    $userDepartmentTasks = $decoded;
-                }
+            $deptTasks = $user->department->tasks;
+            if ($deptTasks->isNotEmpty()) {
+                $userDepartmentTasks = $deptTasks->pluck('name')->toArray();
             }
         }
         
         foreach ($projects as $project) {
-            // Prioritize project department (non-empty), then user dept, then defaults
+            // Prioritize project department tasks, then user dept, then defaults
             $projectTasks = [];
             if ($project->projectDepartment) {
-                $pdTasks = $project->projectDepartment->available_tasks;
-                // Handle both array (from cast) and string (raw DB) cases
-                if (is_array($pdTasks) && !empty($pdTasks)) {
-                    $projectTasks = $pdTasks;
-                } elseif (is_string($pdTasks) && !empty($pdTasks)) {
-                    $decoded = json_decode($pdTasks, true);
-                    if (is_array($decoded) && !empty($decoded)) {
-                        $projectTasks = $decoded;
-                    }
+                $pdTasks = $project->projectDepartment->tasks;
+                if ($pdTasks->isNotEmpty()) {
+                    $projectTasks = $pdTasks->pluck('name')->toArray();
                 }
             }
             if (empty($projectTasks) && !empty($userDepartmentTasks)) {

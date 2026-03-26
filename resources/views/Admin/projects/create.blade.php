@@ -280,14 +280,9 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Team Member</label>
                                 <select name="team_members[0][user_id]" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                                     <option value="">Select team member</option>
-                                    <option value="1">John Doe (Developer)</option>
-                                    <option value="2">Jane Smith (Manager)</option>
-                                    <option value="3">Bob Johnson (Designer)</option>
-                                    <option value="4">Alice Brown (Tester)</option>
-                                    <option value="5">Charlie Wilson (Developer)</option>
-                                    <option value="6">Diana Davis (Manager)</option>
-                                    <option value="7">Edward Miller (Developer)</option>
-                                    <option value="8">Fiona Garcia (Designer)</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->designation->name ?? 'N/A' }})</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div>
@@ -567,14 +562,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label class="block text-sm font-medium text-gray-700 mb-1">Team Member</label>
                     <select name="team_members[${index}][user_id]" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white" required>
                         <option value="">Select team member</option>
-                        <option value="1">John Doe (Developer)</option>
-                        <option value="2">Jane Smith (Manager)</option>
-                        <option value="3">Bob Johnson (Designer)</option>
-                        <option value="4">Alice Brown (Tester)</option>
-                        <option value="5">Charlie Wilson (Developer)</option>
-                        <option value="6">Diana Davis (Manager)</option>
-                        <option value="7">Edward Miller (Developer)</option>
-                        <option value="8">Fiona Garcia (Designer)</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->designation->name ?? 'N/A' }})</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>

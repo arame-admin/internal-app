@@ -24,6 +24,8 @@ class MandatoryHoliday extends Model
 {
     use HasFactory;
 
+    protected $table = 'mandatory_holidays';
+
     protected $fillable = [
         'company_holiday_id',
         'date',
