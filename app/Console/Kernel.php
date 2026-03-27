@@ -26,6 +26,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('birthday:send-emails')
             ->dailyAt('09:00')
             ->withoutOverlapping();
+
+        // Send timesheet reminders daily at 9 AM
+        $schedule->command('timesheet:send-reminders')
+            ->dailyAt('09:00')
+            ->withoutOverlapping();
     }
 
     /**
