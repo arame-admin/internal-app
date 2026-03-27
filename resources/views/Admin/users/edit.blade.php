@@ -77,6 +77,12 @@
 <input type="text" id="phone_number" name="phone_number" value="{{ $user->phone_number ?? '' }}" placeholder="Phone number" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
             </div>
             
+            <!-- Date of Birth -->
+            <div>
+                <label for="dob" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                <input type="date" id="dob" name="dob" value="{{ $user->dob ? $user->dob->format('Y-m-d') : '' }}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            </div>
+            
             <!-- Status -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>

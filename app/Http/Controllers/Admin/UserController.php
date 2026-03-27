@@ -129,6 +129,7 @@ class UserController extends Controller
                 'role_id' => 'required|exists:roles,id',
                 'department_id' => 'required|exists:departments,id',
                 'is_active' => 'boolean',
+                'dob' => 'nullable|date|before:today',
             ]);
 
             // Hash password
